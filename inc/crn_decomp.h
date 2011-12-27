@@ -1,4 +1,4 @@
-// File: crn_decomp.h - CRN texture decompressor v.96
+// File: crn_decomp.h - CRN texture decompressor v1.00
 // Copyright (c) 2010-2011 Tenacious Software LLC
 //
 // This single header file contains *all* of the code necessary to unpack .CRN files to raw DXTn bits.
