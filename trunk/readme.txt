@@ -6,6 +6,9 @@ For bugs or support contact Rich Geldreich <richgel99@gmail.com>.
 This software uses the ZLIB license, which is located in license.txt.
 http://opensource.org/licenses/Zlib
 
+Non-critical portions of this software make use of public domain code 
+originally written by Igor Pavlov (LZMA) and RYG (crn_ryg_dxt*).
+
 If you use this software in a product, an acknowledgment in the product 
 documentation would be highly appreciated but is not required.
 
