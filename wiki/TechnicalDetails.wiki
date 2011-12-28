@@ -20,7 +20,7 @@ To transcode a mipmap level to DXTn, the palettes must be first unpacked, either
 
 == Compression ==
 
-The compressor consists of two independent parts, called the "frontend" and "backend". The frontend adaptively subdivides the texture into tiled blocks, finds the endpoint and selector clusters, and then generates optimized palettes based off these clusters. The backend takes the palettes and indices supplied by the frontend and tries to efficiently code them.
+The compressor is complex, partially due to the weird constraints imposed by the non-linear DXTn block format. It consists of two independent parts, called the "frontend" and "backend". The frontend adaptively subdivides the texture into tiled blocks, finds the endpoint and selector clusters, and then generates optimized palettes based off these clusters. The backend takes the palettes and indices supplied by the frontend and tries to efficiently code them.
 
 The endpoint palettes are created from their source clusters using a very high quality, scalable DXTn endpoint optimizer. This custom optimizer is capable of processing any number of pixels, instead of the typical hard coded 16. crnlib's DXTn endpoint optimizer's quality (in a PSNR sense) is comparable to ATI's, NVidia's, or squish's. (This has been verified by randomly extracting millions of 4x4 pixel blocks for a large corpus of game textures and photos, compressing them using each compressor, and comparing the results.)
 
