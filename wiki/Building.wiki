@@ -1,4 +1,4 @@
-#summary Describes the examples included in the source distribution
+#summary Building the Examples
 
 = Building the Examples =
 
