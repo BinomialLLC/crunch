@@ -10,7 +10,7 @@
 
  * The .CRN compressor does not currently use 3 color (transparent) DXT1 blocks at all, only 4 color blocks. So it doesn't support DXT1A transparency, and its output quality suffers a little due to this limitation. (Note that the clustered DXTn compressor used when writing clustered .DDS files does *not* have this limitation.)
 
- * DXT3 is not supported when writing .CRN or clustered DXTn DDS files. (DXT3 is supported by crnlib's when compressing to regular DXTn DDS files.) You'll get DXT5 files if you request DXT3. However, DXT3 is supported by the regular DXTn block compressor. (DXT3's 4bpp fixed alpha sucks verses DXT5 alpha blocks, so I don't see this as a bug deal.)
+ * DXT3 is not supported when writing .CRN or clustered DXTn DDS files. (DXT3 is supported by crnlib's when compressing to regular DXTn DDS files.) You'll get DXT5 files if you request DXT3. However, DXT3 is supported by the regular DXTn block compressor. (DXT3's 4bpp fixed alpha sucks verses DXT5 alpha blocks, so I don't see this as a big deal.)
 
  * The DXT5_CCXY format uses a simple YCoCg encoding that seems workable but hasn't been tuned for max. quality yet.
 
