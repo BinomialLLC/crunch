@@ -12,7 +12,7 @@ Here's a visualization of the DXT1 color selector palette for kodim04.png (I thi
 
 http://crunch.googlecode.com/svn/wiki/crunch_selectors.png
 
-And here's a visualization of the DXT1 color endpoint palette (this is a very wide image):
+And here's a visualization of the DXT1 color endpoint palette (this is a very wide image, and it gets downsampled when viewed in the wiki):
 http://crunch.googlecode.com/svn/wiki/crunch_color_endpoints.png
 
 This palette contains 2415 entries (on the horizontal axis), where each entry contains two colors (vertical axis, enlarged by 8x in this image).
