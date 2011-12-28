@@ -8,7 +8,7 @@
 
  The current approach compresses the input image multiple times, using an [http://en.wikipedia.org/wiki/Interpolation_search interpolation search] to find the quality level index that gets closest to the target bitrate. (The lib does have some functionality to save the closest quality level found for later runs, but the command line tool doesn't expose this feature yet.)
 
- * The .CRN compressor does not currently use 3 color (transparent) DXT1 blocks at all, only 4 color blocks. So it doesn't support DXT1A transparency, and its output quality suffers a little due to this limitation. (Note that the clustered DXTn compressor used when writing clustered .DDS files does *not* have this limitation.)
+ * The .CRN compressor doesn't use 3 color (transparent) DXT1 blocks at all, only 4 color blocks. (Supporting both block types would be a major pain at this point.) So it doesn't support DXT1A transparency, and its output quality suffers a little due to this limitation. (Note that the clustered DXTn compressor used when writing clustered .DDS files does *not* have this limitation.)
 
  * DXT3 is not supported when writing .CRN or clustered DXTn DDS files. (DXT3 is supported by crnlib's when compressing to regular DXTn DDS files.) You'll get DXT5 files if you request DXT3. However, DXT3 is supported by the regular DXTn block compressor. (DXT3's 4bpp fixed alpha sucks verses DXT5 alpha blocks, so I don't see this as a big deal.)
 
