@@ -1,9 +1,9 @@
-#summary SupportedFormats
+#summary Supported File Formats
 
 = Supported File Formats =
 
 crnlib supports two compressed texture file formats. The first
-format (clustered .DDS) is simple to integrate into an existing project
+format (clustered [http://en.wikipedia.org/wiki/DirectDraw_Surface .DDS]) is simple to integrate into an existing project
 (typically, no code changes are required), but it doesn't offer the
 highest quality/compression ratio that crnlib is capable of. Integrating
 the second, higher quality custom format (.CRN) requires a few
@@ -11,7 +11,7 @@ typically straightforward engine modifications to integrate the
 .CRN->DXTn transcoder header file library into your tools/engine.
 
 == .DDS ==
-crnlib can compress textures to standard DX9-style .DDS files using
+crnlib can compress textures to standard DX9-style [.DDS http://en.wikipedia.org/wiki/DirectDraw_Surface] files using
 clustered DXTn compression, which is a subset of the approach used to
 create .CRN files.(For completeness, crnlib also supports vanilla, block
 by block DXTn compression too, but that's not very interesting.)
