@@ -6,12 +6,12 @@
 
 crnlib/crunch don't build under Linux yet, but the stand-alone transcoder header file library `inc/crn_decomp.h` should compile and work fine under Linux.
 
-== example1 ==
+== [http://code.google.com/p/crunch/source/browse/trunk/example1/example1.cpp example1] ==
 Demonstrates how to use crnlib's high-level C-helper
 compression/decompression/transcoding functions in inc/crnlib.h. It's a
 fairly complete example of crnlib's functionality.
 
-== example2 ==
+== [http://code.google.com/p/crunch/source/browse/trunk/example1/example2.cpp example2] ==
 Shows how to transcodec .CRN files to .DDS using *only*
 the functionality in inc/crn_decomp.h. It does not link against against
 crnlib.lib or depend on it in any way. (Note: The complete source code,
@@ -20,7 +20,7 @@ approx. 4800 lines, to the CRN transcoder is included in inc/crn_decomp.h.)
 example2 is intended to show how simple it is to integrate CRN textures
 into your application.
 
-== example3 ==
+== [http://code.google.com/p/crunch/source/browse/trunk/example1/example3.cpp example3] ==
 Shows how to use the regular, low-level DXTn block compressor
 functions in inc/crnlib.h. This functionality is included for
 completeness. (Your engine or toolchain most likely already has its own
