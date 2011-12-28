@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary Describes the examples included in the source distribution
 
 = Building the Examples =
 
