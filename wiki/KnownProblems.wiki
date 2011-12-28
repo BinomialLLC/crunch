@@ -32,3 +32,5 @@ sucks verses DXT5 alpha blocks, so I don't see this as a bug deal.)
 
  * The DXT5_CCXY format uses a simple YCoCg encoding that is workable but
 hasn't been tuned for max. quality yet.
+
+ * Ignore the SSIM statistics printed when using the -imagestats option - it's currently bogus. I implemented this before fully understanding how the metric is computed over the entire image.
