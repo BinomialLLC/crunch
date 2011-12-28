@@ -1,0 +1,31 @@
+#summary CRN compression algorithm details
+
+= Compression Algorithm Details =
+
+This is pretty high level. I'll improve this over time, for now I hope this is enough:
+
+== Data Format ==
+
+The easiest way to describe how crnlib works is to start at the compressed data stream and the transcoding process. .CRN DXT1 files consist of a small header, followed by a DPCM+Huffman compressed endpoint palette, and a DPCM+Huffman compressed selector palette. (DXT5 files contain two more palettes for alpha.) Each mipmap is divided up into 8x8 pixel "macroblocks". Each macroblock corresponds to four 4x4 pixel DXTn blocks, arranged in a 2x2 block pattern. The macroblocks in each image row are coded in a serpentine scan pattern. Each macroblock is adaptively subdivided by the compressor into one or more "tiles". Very simple macroblocks (say solid ones that use only a single color) can use a single 8x8 pixel tile, but more complex macroblocks can use any non-overlapping combination of 8x4, 4x8, or 4x4 tiles. (There are 9 possible ways of arranging the tiles in a single macroblock.) 
+
+For each tile, a compressed index is sent to select the macroblock tile arrangement, followed by between one to four DPCM+Huffman compressed endpoint palette indices. Four selector indices (again coded using DPCM+Huffman) are always sent immediately after the endpoint(s). 
+
+Zeng's technique is used to order the palettes so DPCM coding of the palette indices works efficiently. See [http://ieeexplore.ieee.org/xpl/freeabs_all.jsp?arnumber=899448 An efficient color re-indexing scheme for palette-based compression] 
+
+For some textures, it's more efficient to reorder the palettes by similarity so they compress more effectively, but this can hurt index compression. The compressor tries several palette orderings and chooses whatever is cheapest overall.
+
+== Transcoding to DXTn ==
+
+To transcode a mipmap level to DXTn, the palettes must be first unpacked, either into a temporary array or cache. Currently, all mipmaps in a .CRN file share the same set of endpoint/selector palettes. To generate the DXTn bits, the transcoder iterates through each macroblock and decodes the palette indices. The actual DXTn bits are effectively just memcpy'd from the palette arrays directly into the destination DXTn texture. The transcoder doesn't care at all what the endpoint/selector palette entries actually consist of during transcoding -- it just copies the bits. Transcoding is quite fast because it works at the macroblock/block level, never at the pixel level.
+
+== Compression ==
+
+The compressor consists of two independent parts, called the "frontend" and "backend". The frontend adaptively subdivides the texture into tiled blocks, finds the endpoint and selector clusters, and then generates optimized palettes based off these clusters. The backend takes the palettes and indices supplied by the frontend and tries to efficiently code them.
+
+The endpoint palettes are created from their source clusters using a very high quality, scalable DXTn endpoint optimizer. This custom optimizer is capable of processing any number of pixels, instead of the typical hard coded 16. crnlib's DXTn endpoint optimizer's quality (in a PSNR sense) is comparable to ATI's, NVidia's, or squish's. (This has been verified by randomly extracting millions of 4x4 pixel blocks for a large corpus of game textures and photos, compressing them using each compressor, and comparing the results.)
+
+The endpoint clusterization step uses top-down [http://en.wikipedia.org/wiki/Cluster_analysis cluster analysis], and [http://en.wikipedia.org/wiki/Vector_quantization Vector quantization] is used to create the initial selector palette. Multiple feedback passes are performed between the clusterization and VQ steps to optimize quality, and the compressor can optionally use several brute force refinement stages to improve quality even more.
+
+Most of the compression steps are multithreaded in a relatively straightforward way: subdivide the work into independent threadpool tasks, fork to multiple threads, then join.
+
+The .CRN format currently utilizes canonical Huffman coding for speed. The symbol codelengths for each Huffman table are sent in a simple compressed manner, like Deflate. Improved compression is definitely possible. (The current format is probably favoring transcoding speed vs. ratio too highly.)
