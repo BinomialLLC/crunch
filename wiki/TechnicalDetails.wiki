@@ -15,7 +15,7 @@ http://crunch.googlecode.com/svn/wiki/crunch_selectors.png
 And here's a visualization of the DXT1 color endpoint palette:
 http://crunch.googlecode.com/svn/wiki/crunch_color_endpoints.png
 
-Note that these a very wide images, so they get downsampled when viewed in the wiki.
+(These a very wide images, so they get downsampled when viewed in the wiki.)
 
 This color endpoint palette contains 2415 entries (horizontal axis), where each entry contains two colors (vertical axis, enlarged by 8x in this image).
 
