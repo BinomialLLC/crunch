@@ -13,8 +13,9 @@ blocks at all, only 4 color blocks. So it doesn't support DXT1A transparency, an
 
  * Clustered DXT5/DXT5A compressor is able to group DXT5A blocks into clusters only if they use absolute (black/white) selector indices. This hurts performance at very low bitrates, because too many bits are effectively given to alpha.
 
- * DXT3 is not supported when writing .CRN or clustered DXTn DDS files.
-(DXT3 is supported by crnlib's when compressing to regular DXTn DDS files.) You'll get DXT5 files if you request DXT3. However, DXT3 is supported by the regular DXTn block compressor. (DXT3's 4bpp fixed alpha sucks verses DXT5 alpha blocks, so I don't see this as a bug deal.)
+ * DXT3 is not supported when writing .CRN or clustered DXTn DDS files 
+
+ (DXT3 is supported by crnlib's when compressing to regular DXTn DDS files.) You'll get DXT5 files if you request DXT3. However, DXT3 is supported by the regular DXTn block compressor. (DXT3's 4bpp fixed alpha sucks verses DXT5 alpha blocks, so I don't see this as a bug deal.)
 
  * The DXT5_CCXY format uses a simple YCoCg encoding that seems workable but hasn't been tuned for max. quality yet.
 
