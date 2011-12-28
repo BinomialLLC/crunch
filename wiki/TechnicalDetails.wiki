@@ -12,7 +12,7 @@ For each tile, a compressed index is sent to select the macroblock tile arrangem
 
 Zeng's technique is used to order the palettes so DPCM coding of the palette indices works efficiently. See [http://ieeexplore.ieee.org/xpl/freeabs_all.jsp?arnumber=899448 An efficient color re-indexing scheme for palette-based compression] 
 
-For some textures, it's more efficient to reorder the palettes by similarity ([http://en.wikipedia.org/wiki/Traveling_salesman_problem the traveling salesman problem]) so they compress more effectively, but this can hurt index compression. The compressor tries several palette orderings and chooses whatever is cheapest overall.
+For some textures, it's more efficient to reorder the palettes by similarity (effectively the [http://en.wikipedia.org/wiki/Traveling_salesman_problem the traveling salesman problem]) so they compress more effectively, but this can hurt index compression. The compressor tries several palette orderings and chooses whatever is cheapest overall.
 
 == Transcoding to DXTn ==
 
