@@ -8,12 +8,14 @@ This is pretty high level and could be much better. I'll improve this over time,
 
 The easiest way to describe how crnlib works is to start at the compressed data stream and the transcoding process and work backwards (which is how I started designing this codec). .CRN DXT1 files consist of a small header, followed by a DPCM+Huffman compressed endpoint palette, and a DPCM+Huffman compressed selector palette. (DXT5 files contain two more palettes for alpha.) 
 
-Here's a visualization of the DXT1 color selector palette for kodim04.png (I think this palette was sorted by similarity - the compressor didn't necessary order the palette entries this way, but it's good for visualization):
+Here's a visualization of the DXT1 color selector palette for kodim04.png. (I think this palette was sorted by similarity - the compressor didn't necessary order the palette entries this way, but it's good for visualization.)
 
 http://crunch.googlecode.com/svn/wiki/crunch_selectors.png
 
-And here's a visualization of the DXT1 color endpoint palette (this is a very wide image, and it gets downsampled when viewed in the wiki):
+And here's a visualization of the DXT1 color endpoint palette:
 http://crunch.googlecode.com/svn/wiki/crunch_color_endpoints.png
+
+Note that these a very wide images, so they get downsampled when viewed in the wiki.
 
 This palette contains 2415 entries (on the horizontal axis), where each entry contains two colors (vertical axis, enlarged by 8x in this image).
 
