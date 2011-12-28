@@ -13,23 +13,13 @@ custom lossless compressors for bitrate measurement.
 The current approach compresses the input image multiple times, using an [http://en.wikipedia.org/wiki/Interpolation_search interpolation search] to find the integer quality that gets closest to the target bitrate.
 
  * The .CRN compressor does not currently use 3 color (transparent) DXT1
-blocks at all, only 4 color blocks. So it doesn't support DXT1A
-transparency, and its output quality suffers a little due to this
-limitation. (Note that the clustered DXTn compressor used when
-writing clustered .DDS files does *not* have this limitation.)
+blocks at all, only 4 color blocks. So it doesn't support DXT1A transparency, and its output quality suffers a little due to this limitation. (Note that the clustered DXTn compressor used when writing clustered .DDS files does *not* have this limitation.)
 
- * Clustered DXT5/DXT5A compressor is able to group DXT5A blocks into
-clusters only if they use absolute (black/white) selector indices. This
-hurts performance at very low bitrates, because too many bits are
-effectively given to alpha.
+ * Clustered DXT5/DXT5A compressor is able to group DXT5A blocks into clusters only if they use absolute (black/white) selector indices. This hurts performance at very low bitrates, because too many bits are effectively given to alpha.
 
  * DXT3 is not supported when writing .CRN or clustered DXTn DDS files.
-(DXT3 is supported by crnlib's when compressing to regular DXTn DDS
-files.) You'll get DXT5 files if you request DXT3. However, DXT3 is
-supported by the regular DXTn block compressor. (DXT3's 4bpp fixed alpha
-sucks verses DXT5 alpha blocks, so I don't see this as a bug deal.)
+(DXT3 is supported by crnlib's when compressing to regular DXTn DDS files.) You'll get DXT5 files if you request DXT3. However, DXT3 is supported by the regular DXTn block compressor. (DXT3's 4bpp fixed alpha sucks verses DXT5 alpha blocks, so I don't see this as a bug deal.)
 
- * The DXT5_CCXY format uses a simple YCoCg encoding that is workable but
-hasn't been tuned for max. quality yet.
+ * The DXT5_CCXY format uses a simple YCoCg encoding that seems workable but hasn't been tuned for max. quality yet.
 
  * Ignore the SSIM statistics printed when using the -imagestats option - it's currently bogus. I implemented this before fully understanding how the metric is computed over the entire image.
