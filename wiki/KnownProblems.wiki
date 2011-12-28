@@ -2,6 +2,8 @@
 
 = Known Issues/Bugs =
 
+ * You really should provide crnlib with raw, 24/32-bit source images. Don't provide it with second generation textures that have already been DXTn or JPEG compressed. (You can do it, but obviously don't expect the best results.)
+
  * crnlib currently assumes you'll be further losslessly compressing its output .DDS files using LZMA. However, some engines use weaker codecs such as LZO, zlib, etc., so crnlib's bitrate measurements will be inaccurate. It should be easy to allow the caller to plug-in custom lossless compressors for bitrate measurement.
 
  * Compressing to a desired bitrate can be very time consuming, especially when processing large (2k or 4k) images to the .CRN format. There are several high-level optimizations employed when compressing to clustered DXTn .DDS files using multiple trials, but not so for .CRN.
