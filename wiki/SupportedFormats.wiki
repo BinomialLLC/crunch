@@ -11,7 +11,7 @@ typically straightforward engine modifications to integrate the
 .CRN->DXTn transcoder header file library into your tools/engine.
 
 == .DDS ==
-crnlib can compress textures to standard DX9-style [.DDS http://en.wikipedia.org/wiki/DirectDraw_Surface] files using
+crnlib can compress textures to standard DX9-style [http://en.wikipedia.org/wiki/DirectDraw_Surface .DDS] files using
 clustered DXTn compression, which is a subset of the approach used to
 create .CRN files.(For completeness, crnlib also supports vanilla, block
 by block DXTn compression too, but that's not very interesting.)
