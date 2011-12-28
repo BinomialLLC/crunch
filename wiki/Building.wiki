@@ -4,11 +4,13 @@
 
 {{{crn.2008.sln}}} builds crnlib and the "crunch" command line tool, and {{{crn_examples.2008.sln}}} builds the examples. Both are Visual Studio 2008 (VC9) solution file containing projects for Win32 and x64. crnlib itself also builds with VS2005, VS2010, and gcc 4.5.0 (TDM GCC+MinGW).  A codeblocks 10.05 workspace and project file is also included, but compiling crnlib this way hasn't been tested much.
 
-example1: Demonstrates how to use crnlib's high-level C-helper
+== example1 ==
+Demonstrates how to use crnlib's high-level C-helper
 compression/decompression/transcoding functions in inc/crnlib.h. It's a
 fairly complete example of crnlib's functionality.
 
-example2: Shows how to transcodec .CRN files to .DDS using *only*
+== example2 ==
+Shows how to transcodec .CRN files to .DDS using *only*
 the functionality in inc/crn_decomp.h. It does not link against against
 crnlib.lib or depend on it in any way. (Note: The complete source code,
 approx. 4800 lines, to the CRN transcoder is included in inc/crn_decomp.h.)
@@ -16,7 +18,8 @@ approx. 4800 lines, to the CRN transcoder is included in inc/crn_decomp.h.)
 example2 is intended to show how simple it is to integrate CRN textures
 into your application.
 
-example3: Shows how to use the regular, low-level DXTn block compressor
+== example3 ==
+Shows how to use the regular, low-level DXTn block compressor
 functions in inc/crnlib.h. This functionality is included for
 completeness. (Your engine or toolchain most likely already has its own
 DXTn compressor. crnlib's compressor is typically very competitive or
