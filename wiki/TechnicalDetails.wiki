@@ -8,6 +8,8 @@ This is pretty high level and could be much better. I'll improve this over time,
 
 The easiest way to describe how crnlib works is to start at the compressed data stream and the transcoding process and work backwards (which is how I started designing this codec). .CRN DXT1 files consist of a small header, followed by a DPCM+Huffman compressed endpoint palette, and a DPCM+Huffman compressed selector palette. (DXT5 files contain two more palettes for alpha.) Each mipmap is divided up into 8x8 pixel "macroblocks". Each macroblock corresponds to four 4x4 pixel DXTn blocks, arranged in a 2x2 block pattern. Each macroblock is adaptively subdivided by the compressor into one or more "tiles". Very simple macroblocks (say solid ones that use only a single color) can use a single 8x8 pixel tile, but more complex macroblocks can use any non-overlapping combination of 8x4, 4x8, or 4x4 tiles. (There are 9 possible ways of arranging the tiles in a single macroblock.) 
 
+In this image, the macroblock tile boundaries are outlined in gray:
+
 http://crunch.googlecode.com/svn/wiki/crunch_macroblock_tiles.png
 
 For each tile, a compressed index is sent to select the macroblock tile arrangement, followed by between one to four DPCM+Huffman compressed endpoint palette indices. Four selector indices (again coded using DPCM+Huffman) are always sent immediately after the endpoint(s). 
