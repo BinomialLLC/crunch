@@ -1,9 +1,0 @@
-xcopy /y /s E:\crunch17\*.vcproj . 
-xcopy /y /s E:\crunch17\*.sln .
-xcopy /y /s E:\crunch17\*.workspace .
-xcopy /y /s E:\crunch17\*.cbp .
-xcopy /y /s E:\crunch17\*.cpp .
-xcopy /y /s E:\crunch17\*.c .
-xcopy /y /s E:\crunch17\*.inc .
-xcopy /y /s E:\crunch17\*.h .
-xcopy /y /s E:\crunch17\*.txt .
