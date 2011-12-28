@@ -15,3 +15,5 @@
  * The DXT5_CCXY format uses a simple YCoCg encoding that seems workable but hasn't been tuned for max. quality yet.
 
  * Ignore the SSIM statistics printed when using the -imagestats option - it's currently bogus. (So far, I've been using PSNR, which I know sucks.)
+
+ * The crn_decomp.h header file library is freaking huge (~4800 lines). Also, crnlib is Win32 only.
