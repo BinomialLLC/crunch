@@ -2,8 +2,7 @@
 
 = Known Issues/Bugs =
 
- * crnlib currently assumes you'll be further losslessly compressing its
-output .DDS files using LZMA. However, some engines use weaker codecs
+ * crnlib currently assumes you'll be further losslessly compressing its output .DDS files using LZMA. However, some engines use weaker codecs
 such as LZO, zlib, or custom codecs, so crnlib's bitrate measurements
 will be inaccurate. It should be easy to allow the caller to plug-in
 custom lossless compressors for bitrate measurement.
