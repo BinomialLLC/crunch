@@ -2,7 +2,7 @@
 
 = Compression Algorithm Details =
 
-This is pretty high level. I'll improve this over time, for now I hope this is enough:
+This is pretty high level and could be much better. I'll improve this over time, for now I hope this is enough:
 
 == Data Format ==
 
