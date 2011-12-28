@@ -4,7 +4,7 @@
 
 crnlib supports two compressed texture file formats. The first
 format (clustered [http://en.wikipedia.org/wiki/DirectDraw_Surface .DDS]) is simple to integrate into an existing project
-(typically, no code changes are required), but it doesn't offer the
+(no code changes are typically required), but it doesn't offer the
 highest quality/compression ratio that crnlib is capable of. Integrating
 the second, higher quality custom format (.CRN) requires a few
 typically straightforward engine modifications to integrate the
