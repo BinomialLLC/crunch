@@ -1,4 +1,5 @@
 #summary Supported File Formats
+#labels Featured
 
 = Supported File Formats =
 
