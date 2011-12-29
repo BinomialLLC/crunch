@@ -1,4 +1,5 @@
 #summary CRN compression algorithm details
+#labels Featured
 
 = Compression Algorithm Details =
 
