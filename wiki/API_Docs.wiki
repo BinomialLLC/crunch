@@ -377,6 +377,32 @@ void *crn_compress(const crn_comp_params &comp_params, const crn_mipmap_params &
   crn_uint32 &compressed_size, crn_uint32 *pActual_quality_level = NULL, float *pActual_bitrate = NULL);
 }}}
 
+These functions compress a 32-bit/pixel texture to either: a regular DX9-style .DDS file, a "clustered" (or reduced entropy) .DDS file, or a .CRN file in memory.
+
+Input parameters:
+
+  * *comp_params* is the compression parameters struct, defined above.
+
+  * *compressed_size* will be set to the size of the returned memory block containing the output file. The returned block must be freed by calling `crn_free_block()`.
+
+  * *`*`pActual_quality_level* will be set to the actual quality level used to compress the image. May be NULL.
+
+  * *`*`pActual_bitrate* will be set to the output file's effective bitrate, possibly taking into account LZMA compression. May be NULL.
+
+Return value:
+  A pointer to the compressed file data, or NULL on failure. The returned block must be freed by calling `crn_free_block()`.
+
+  *compressed_size* will be set to the size of the returned memory buffer.
+
+Notes:
+  * A "regular" .DDS file is compressed using normal (plain block by block) DXTn compression at the specified DXT quality level, using multiple threads if threading is enabled.
+  * A "clustered" DDS file is compressed using clustered DXTn compression to either the target bitrate or the specified integer quality factor. 
+  * The output file is a standard DX9 format DDS file, except the compressor assumes you will be later losslessly compressing the DDS output file using the LZMA algorithm.
+  * A texture is defined as an array of 1 or 6 "faces" (6 faces=cubemap), where each "face" consists of between [1,cCRNMaxLevels] mipmap levels.
+  * Mipmap levels are simple 32-bit 2D images with a pitch of width*sizeof(uint32), arranged in the usual raster order (top scanline first).
+  * The image pixels may be grayscale (YYYX), grayscale/alpha (YYYA), 24-bit RGBX, or 32-bit RGBA colors (where "X"=don't care).
+  * If the input is not sRGB, be sure to clear the `cCRNCompFlagPerceptual` flag in the `crn_comp_params` struct.
+
 == Transcoding ==
 
 === crn_decompress_crn_to_dds function ===
