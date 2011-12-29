@@ -414,6 +414,12 @@ void crn_compress_block(crn_block_compressor_context_t pContext, const crn_uint3
 void crn_free_block_compressor(crn_block_compressor_context_t pContext);
 }}}
 
+These functions allow the caller to compress 4x4 pixel image blocks to any non-swizzled DXTn format supported by crnlib: DXT1, DXT3, DXT5, DXT5A, DXN_XY and DXN_YX (basically BC1-BC5).
+
+Note that, unlike most other compressors crnlib's block compressor is stateful, so for efficient usage you should call `crn_create_block_compressor()` to create a state object and reuse it as many times as possible. (If you're curious, the state consists of an endpoint cache, and a bunch of heap blocks used for temporary arrays.)
+
+crnlib's DXTn endpoint optimizer actually supports any number of source pixels (i.e. from 1 to thousands, not just 16), but for simplicity this API currently only supports 4x4 texel blocks.
+
 == Helper Functions ==
 
 crnlib exposes a number of straightforward functions to convert the crn-related enums defined above to ANSI/Unicode strings and back. There are also functions to retrieve various bits of info about the supported pixel formats.
