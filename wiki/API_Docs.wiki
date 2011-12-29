@@ -399,7 +399,7 @@ Notes:
   * A texture is defined as an array of 1 or 6 "faces" (6 faces=cubemap), where each "face" consists of between [1,cCRNMaxLevels] mipmap levels.
   * Mipmap levels are simple 32-bit 2D images with a pitch of width*sizeof(uint32), arranged in the usual raster order (top scanline first).
   * The image pixels may be grayscale (YYYX), grayscale/alpha (YYYA), 24-bit RGBX, or 32-bit RGBA colors (where "X"=don't care).
-  * If the input is not sRGB, be sure to clear the `cCRNCompFlagPerceptual` flag in the [[API_Docs#enum_crn_comp_params crn_comp_params] struct.
+  * If the input is not sRGB, be sure to clear the `cCRNCompFlagPerceptual` flag in the [API_Docs#enum_crn_comp_params crn_comp_params] struct.
 
 == Transcoding ==
 
