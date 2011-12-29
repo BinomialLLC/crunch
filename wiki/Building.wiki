@@ -14,7 +14,7 @@ fairly complete example of crnlib's functionality.
 
 == [http://code.google.com/p/crunch/source/browse/trunk/example2/example2.cpp example2] ==
 Shows how to transcodec .CRN files to .DDS using *only*
-the functionality in inc/crn_decomp.h. It does not link against against
+the functionality in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h]. It does not link against against
 crnlib.lib or depend on it in any way. (Note: The complete source code,
 approx. 4800 lines, to the CRN transcoder is included in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h].)
 
