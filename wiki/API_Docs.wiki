@@ -1,4 +1,5 @@
 #summary Using crnlib
+#labels Featured
 
 == Contents ==
 
