@@ -381,7 +381,7 @@ These functions compress a 32-bit/pixel texture to either: a regular DX9-style .
 
 Input parameters:
 
-  * *comp_params* is the compression parameters struct, defined above.
+  * *comp_params* is the [API_Docs#enum_crn_comp_params compression parameters struct].
 
   * *compressed_size* will be set to the size of the returned memory block containing the output file. The returned block must be freed by calling `crn_free_block()`.
 
@@ -389,10 +389,8 @@ Input parameters:
 
   * *`*`pActual_bitrate* will be set to the output file's effective bitrate, possibly taking into account LZMA compression. May be NULL.
 
-Return value:
-  A pointer to the compressed file data, or NULL on failure. The returned block must be freed by calling `crn_free_block()`.
-
-  *compressed_size* will be set to the size of the returned memory buffer.
+Return values:
+  A pointer to the compressed file data, or NULL on failure. The returned block must be freed by calling `crn_free_block()`. The *compressed_size* parameter will be set to the size of the returned memory buffer.
 
 Notes:
   * A "regular" .DDS file is compressed using normal (plain block by block) DXTn compression at the specified DXT quality level, using multiple threads if threading is enabled.
