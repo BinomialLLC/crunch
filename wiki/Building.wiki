@@ -16,7 +16,7 @@ fairly complete example of crnlib's functionality.
 Shows how to transcodec .CRN files to .DDS using *only*
 the functionality in inc/crn_decomp.h. It does not link against against
 crnlib.lib or depend on it in any way. (Note: The complete source code,
-approx. 4800 lines, to the CRN transcoder is included in inc/crn_decomp.h.)
+approx. 4800 lines, to the CRN transcoder is included in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h].)
 
 example2 is intended to show how simple it is to integrate CRN textures
 into your application.
