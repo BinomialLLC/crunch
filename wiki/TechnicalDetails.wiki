@@ -33,9 +33,37 @@ For each tile, a compressed index is sent to select the macroblock tile arrangem
 
 The C++ code for the transcoder's inner loop is in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h crn_decomp.h]. DXT1 textures are handled by `crn_unpacker::unpack_dxt1()`.
 
-Zeng's technique is used to order the palettes so DPCM coding of the palette indices works efficiently. See [http://ieeexplore.ieee.org/xpl/freeabs_all.jsp?arnumber=899448 An efficient color re-indexing scheme for palette-based compression] 
+Zeng's technique is used to order the palettes so DPCM coding of the various block palette indices works efficiently. See [http://ieeexplore.ieee.org/xpl/freeabs_all.jsp?arnumber=899448 An efficient color re-indexing scheme for palette-based compression] 
 
 For some textures, it's more efficient to reorder the palettes by similarity (effectively the [http://en.wikipedia.org/wiki/Traveling_salesman_problem the traveling salesman problem]) so they compress more effectively, but this can hurt index compression. The compressor tries several palette orderings and chooses whatever is cheapest overall.
+
+The example1 tool can display a bunch of information about .CRN files, such as the compressed size of each palette, Huffman tables, and mip levels. For example:
+
+{{{
+   E:\crunch17_3\bin>example1 i kodim04.crn
+   example1 - Version v1.00 Built Dec 27 2011, 17:18:08
+   Loading source file: kodim04.crn
+   crnd_validate_file:
+   File size: 85949
+   ActualDataSize: 85949
+   HeaderSize: 110
+   TotalPaletteSize: 12687
+   TablesSize: 1448
+   Levels: 10
+   LevelCompressedSize: 51830 14460 3968 1050 271 68 26 12 13 6 0 0 0 0 0 0
+   ColorEndpointPaletteSize: 2415
+   ColorSelectorPaletteSize: 2692
+   AlphaEndpointPaletteSize: 0
+   AlphaSelectorPaletteSize: 0
+   crnd_get_texture_info:
+   Dimensions: 512x768
+   Levels: 10
+   Faces: 1
+   BytesPerBlock: 8
+   UserData0: 0
+   UserData1: 0
+   CrnFormat: DXT1
+}}}
 
 == Transcoding to DXTn ==
 
