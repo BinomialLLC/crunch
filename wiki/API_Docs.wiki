@@ -16,7 +16,9 @@
 
 == Introduction ==
 
-crnlib is a C++ library designed to be statically linked into the calling application. It can compress to .CRN, regular .DDS, or clustered .DDS files. It can also transcode .CRN to .DDS, and unpack .DDS files to individual 24/32-bit images. Finally, for completeness and testing, crnlib's high-quality DXTn block compressor is also exposed. It does not use C++ exceptions, but it does use some C++ features such as templates, virtuals and heap allocation. It does not make much if any use of STL.
+crnlib is a C++ library designed to be statically linked into the calling application. It can compress to .CRN, regular .DDS, or clustered .DDS files. It can also transcode .CRN to .DDS, and unpack .DDS files to individual 24/32-bit images. Finally, for completeness and testing, crnlib's high-quality DXTn block compressor is also exposed. 
+
+The library does not use C++ exceptions, but it does use some C++ features such as templates, virtuals, and heap allocation. Due to porting, exception, and inconsistent performance issues (especially in debug builds) crnlib does not use STL.
 
 The VC9 (Visual Studio 2008) .LIB files are built here:
 
