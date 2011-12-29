@@ -399,7 +399,7 @@ Notes:
   * A "clustered" DDS file is compressed using clustered DXTn compression to either the target bitrate or the specified integer quality factor. 
   * The output file is a standard DX9 format DDS file, except the compressor assumes you will be later losslessly compressing the DDS output file using the LZMA algorithm.
   * A texture is defined as an array of 1 or 6 "faces" (6 faces=cubemap), where each "face" consists of between [1,cCRNMaxLevels] mipmap levels.
-  * Mipmap levels are simple 32-bit 2D images with a pitch of width*sizeof(uint32), arranged in the usual raster order (top scanline first).
+  * Mipmap levels are simple 32-bit 2D images with a pitch of width*sizeof(uint32), arranged in the usual raster order (top scanline first). Each pixel is arranged in memory as [R,G,B,A], where R is always first independent of platform endianness.
   * The image pixels may be grayscale (YYYX), grayscale/alpha (YYYA), 24-bit RGBX, or 32-bit RGBA colors (where "X"=don't care).
   * If the input is not sRGB, be sure to clear the `cCRNCompFlagPerceptual` flag in the [API_Docs#enum_crn_comp_params crn_comp_params] struct.
 
