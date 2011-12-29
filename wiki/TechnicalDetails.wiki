@@ -81,4 +81,4 @@ The endpoint clusterization step uses top-down [http://en.wikipedia.org/wiki/Clu
 
 Most of the compression steps are multithreaded in a relatively straightforward way: subdivide the work into independent threadpool tasks, fork to multiple threads, then join.
 
-The .CRN format currently utilizes canonical Huffman coding for speed. The symbol codelengths for each Huffman table are sent in a simple compressed manner, like Deflate. Improvements here are definitely possible, but I ran out of time. (The current format is probably favoring transcoding speed too highly vs. ratio.)
+The .CRN format currently utilizes canonical Huffman coding for speed. The symbol codelengths for each Huffman table are sent in a simple compressed manner, like Deflate. Improvements here are definitely possible, but I ran out of time. The current format is probably favoring transcoding speed too highly vs. ratio. Also, the Huffman tables contain too many symbols in the current format.
