@@ -402,10 +402,9 @@ bool crn_decompress_dds_to_images(const void *pDDS_file_data, crn_uint32 dds_fil
 void crn_free_all_images(crn_uint32 **ppImages, const crn_texture_desc &desc);
 }}}
 
-`crn_decompress_dds_to_images()` decompresses an entire DDS file in any supported format to uncompressed 32-bit/pixel image(s).
-See the crnlib::pixel_format enum in [http://code.google.com/p/crunch/source/browse/trunk/inc/dds_defs.h inc/dds_defs.h] for a list of the supported DDS formats.
+`crn_decompress_dds_to_images()` decompresses an entire .DDS file in any supported compressed/uncompressed pixel format to one or more uncompressed 32-bit/pixel images. See the crnlib::pixel_format enum in [http://code.google.com/p/crunch/source/browse/trunk/inc/dds_defs.h inc/dds_defs.h] for a list of the supported .DDS pixel formats.
 
-You are responsible for freeing each returned image, either by calling `crn_free_all_images()` or manually calling `crn_free_block()` on each image pointer.
+The caller is responsible for freeing each returned image, either by calling `crn_free_all_images()` or by manually calling `crn_free_block()` on each image pointer.
 
 == DXTn Block Compression ==
 
