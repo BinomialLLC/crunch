@@ -1,5 +1,19 @@
 #summary Using crnlib
 
+== Contents ==
+
+  * [Introduction]
+  * [Public_API_Overview]
+  * [Public_API_Enums]
+  * [Public_API_Structs]
+  * [Public_API_Functions]
+    * [Memory_Allocation]
+    * [Compression]
+    * [Transcoding]
+    * [Decompression]
+    * [DXTn_Block_Compression]
+    * [Helper_Functions]
+
 == Introduction ==
 
 crnlib is a C++ library designed to be statically linked into the calling application. It can compress to .CRN, regular .DDS, or clustered .DDS files. It can also transcode .CRN to .DDS, and unpack .DDS files to individual 24/32-bit images. Finally, for completeness and testing crnlib's high-quality DXTn block compressor is also exposed. It does not use C++ exceptions, but it does use some C++ features such as templates, virtuals and heap allocation. It does not make much if any use of STL.
@@ -315,5 +329,97 @@ Various low-level .CRN specific parameters:
 *float m_crn_adaptive_tile_color_psnr_derating* and *float m_crn_adaptive_tile_alpha_psnr_derating*: Default: 2.0f PSNR. Controls how aggressively the frontend uses large (non-4x4) tiles. Higher settings result in fewer tiles, resulting in lower quality/more blockiness, but smaller files. If this value is set too high the output may become too blocky.
 
 *crn_uint32 m_crn_color_endpoint_palette_size*, *crn_uint32 m_crn_color_selector_palette_size*, *crn_uint32 m_crn_alpha_endpoint_palette_size*, *crn_uint32 m_crn_alpha_selector_palette_size*: Default: 0. These parameters allow the caller to directly control the palette sizes used by the frontend. The `cCRNCompFlagManualPaletteSizes` flag must be set.
+
+== Public API Functions ==
+
+=== Memory Allocation ===
+{{{
+#define CRNLIB_MIN_ALLOC_ALIGNMENT sizeof(size_t) * 2
+
+typedef void*  (*crn_realloc_func)(void* p, size_t size, size_t* pActual_size, bool movable, void* pUser_data);
+typedef size_t (*crn_msize_func)(void* p, void* pUser_data);
+
+void crn_set_memory_callbacks(crn_realloc_func pRealloc, crn_msize_func pMSize, void* pUser_data);
+
+void crn_free_block(void *pBlock);
+}}}
+
+By default, crnlib calls the usual C-API's to manage memory ({{{malloc}}}, {{{realloc}}}, {{{free}}}, etc.). Call {{{crn_set_memory_callbacks}}} to globally override this behavior. The user must implement two callbacks, one to handle block allocation/reallocation/freeing, and another that returns the size of allocated blocks.
+
+This function is not thread safe, so don't call it while another thread is inside the library.
+
+The custom realloc and msize functions must be implemented in a thread safe manner. These functions can be called from multiple threads when threaded compression is enabled.
+
+All block pointers returned by the realloc callback must be aligned to at least {{{CRNLIB_MIN_ALLOC_ALIGNMENT}}} bytes.
+
+=== realloc callback ===
+
+The custom reallocation function callback {{{crn_realloc_func}}} must examine its input parameters to determine the caller's actual intent. If the input pointer {{{p}}} is NULL, the caller wants to allocate a block which must be at least as large as {{{size}}}. NULL is returned if the allocation fails. 
+
+If {{{p}}} is not NULL but {{{size}}} is 0, the caller wants to free the block pointed to by {{{p}}}. 
+
+Otherwise, the caller wants to attempt to change the size of the block pointed to by {{{p}}}. In this case, if {{{movable}}} is true, it is acceptable to physically move the block to satisfy the reallocation request. If {{{movable}}} is false, the block *must not* be moved. NULL is returned if reallocation fails for any reason. In this case, the original allocated block must remain allocated.
+
+If {{{pActual_size}}} is not NULL, {{{*pActual_size}}} should be set to the actual size of the returned block. 
+
+=== crn_free_block function ===
+
+Call this function to free the memory blocks allocated and returned by `crn_compress()`, `crn_decompress_crn_to_dds()`, or `crn_decompress_dds_to_images()`.
+
+== Compression ==
+
+=== crn_compress functions (overloaded) ===
+{{{
+void *crn_compress(const crn_comp_params &comp_params, 
+  crn_uint32 &compressed_size, crn_uint32 *pActual_quality_level = NULL, float *pActual_bitrate = NULL);
+
+void *crn_compress(const crn_comp_params &comp_params, const crn_mipmap_params &mip_params, 
+  crn_uint32 &compressed_size, crn_uint32 *pActual_quality_level = NULL, float *pActual_bitrate = NULL);
+}}}
+
+== Transcoding ==
+
+=== crn_decompress_crn_to_dds function ===
+{{{
+void *crn_decompress_crn_to_dds(const void *pCRN_file_data, crn_uint32 &file_size);
+}}}
+
+== Decompressing ==
+
+=== crn_decompress_dds_to_images function ===
+{{{
+struct crn_texture_desc
+{
+   crn_uint32 m_faces;
+   crn_uint32 m_width;
+   crn_uint32 m_height;
+   crn_uint32 m_levels;
+   crn_uint32 m_fmt_fourcc; // Same as crnlib::pixel_format
+};
+bool crn_decompress_dds_to_images(const void *pDDS_file_data, crn_uint32 dds_file_size, 
+  crn_uint32 **ppImages, crn_texture_desc &tex_desc);
+
+void crn_free_all_images(crn_uint32 **ppImages, const crn_texture_desc &desc);
+}}}
+
+== DXTn Block Compression ==
+
+{{{
+typedef void *crn_block_compressor_context_t;
+
+crn_block_compressor_context_t crn_create_block_compressor(const crn_comp_params &params);
+
+void crn_compress_block(crn_block_compressor_context_t pContext, const crn_uint32 *pPixels, void *pDst_block);
+
+void crn_free_block_compressor(crn_block_compressor_context_t pContext);
+}}}
+
+== Helper Functions ==
+
+crnlib exposes a number of straightforward functions to convert the crn-related enums defined above to ANSI/Unicode strings and back. There are also functions to retrieve various bits of info about the supported pixel formats.
+
+They don't seem worth individually listing here, just see the [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. 
+
+
 
 
