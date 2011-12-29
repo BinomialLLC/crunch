@@ -2,7 +2,7 @@
 
 == Contents ==
 
-  * [Introduction]
+  * Introduction
   * [Public_API_Overview]
   * [Public_API_Enums]
   * [Public_API_Structs]
@@ -419,7 +419,5 @@ void crn_free_block_compressor(crn_block_compressor_context_t pContext);
 crnlib exposes a number of straightforward functions to convert the crn-related enums defined above to ANSI/Unicode strings and back. There are also functions to retrieve various bits of info about the supported pixel formats.
 
 They don't seem worth individually listing here, just see the [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. 
-
-
 
 
