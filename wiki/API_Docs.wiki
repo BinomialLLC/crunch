@@ -73,8 +73,8 @@ Each crnlib API falls into one of the following categories:
       * `crn_get_dxt_quality_string()`
 
 Several custom types and parameter structs are also defined in [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. The most important structs are:
-  * `struct crn_comp_params`, which contains all the parameters passed to the compression function `crn_compress()`
-  * `struct crn_mipmap_params`, which contains a bunch of parameters that control crnlib's optional mipmap generator.
+  * [API_Docs#enum_crn_comp_params crn_comp_params], which contains all the parameters passed to the compression function `crn_compress()`
+  * `struct crn_mipmap_params`, which contains a bunch of parameters that control crnlib's optional mipmap generator. (This struct is not yet documented here.) 
 
 == Public Enums ==
 
