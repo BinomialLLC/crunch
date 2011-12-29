@@ -403,6 +403,8 @@ Notes:
   * The image pixels may be grayscale (YYYX), grayscale/alpha (YYYA), 24-bit RGBX, or 32-bit RGBA colors (where "X"=don't care).
   * If the input is not sRGB, be sure to clear the `cCRNCompFlagPerceptual` flag in the [API_Docs#enum_crn_comp_params crn_comp_params] struct.
 
+See [http://code.google.com/p/crunch/source/browse/trunk/example1/example1.cpp example1.cpp] for a usage example of this function.
+
 == Transcoding ==
 
 === crn_decompress_crn_to_dds function ===
