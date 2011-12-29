@@ -1,7 +1,7 @@
 #summary Statistics
 
 
-Here's a spreadsheet comparing RYG's real-time DXT1 compressor, crnlib's DXT1 compressor using uniform or perceptual metrics, vs. .CRN at .75, 1.0, 1.25, 1.5, 1.75, and 2.0bpp:
+Here's a spreadsheet comparing the RGB [http://en.wikipedia.org/wiki/RMSE RMSE] (root mean square error) RYG's real-time DXT1 compressor, crnlib's DXT1 compressor using uniform or perceptual metrics, vs. .CRN at .75, 1.0, 1.25, 1.5, 1.75, and 2.0bpp:
 
 [http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.htm] 
 
