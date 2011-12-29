@@ -25,6 +25,5 @@ into your application.
 Shows how to use the regular, low-level DXTn block compressor
 functions in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crnlib.h]. This functionality is included for
 completeness. (Your engine or toolchain most likely already has its own
-DXTn compressor. crnlib's compressor is typically very competitive or
-superior to most available closed and open source CPU-based
+DXTn compressor. crnlib's compressor is very competitive to most available closed and open source CPU-based
 compressors.)
