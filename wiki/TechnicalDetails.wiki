@@ -31,6 +31,8 @@ Notice that the more complex areas of the image contain smaller tiles, so these 
 
 For each tile, a compressed index is sent to select the macroblock tile arrangement, followed by between one to four DPCM+Huffman compressed endpoint palette indices. Four selector indices (again coded using DPCM+Huffman) are always sent immediately after the endpoint(s). The macroblock rows are raster scanned in a serpentine order: left->right, then right->left, etc.)
 
+The C++ code for the transcoder's inner loop is in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h crn_decomp.h]. DXT1 textures are handled by `crn_unpacker::unpack_dxt1()`.
+
 Zeng's technique is used to order the palettes so DPCM coding of the palette indices works efficiently. See [http://ieeexplore.ieee.org/xpl/freeabs_all.jsp?arnumber=899448 An efficient color re-indexing scheme for palette-based compression] 
 
 For some textures, it's more efficient to reorder the palettes by similarity (effectively the [http://en.wikipedia.org/wiki/Traveling_salesman_problem the traveling salesman problem]) so they compress more effectively, but this can hurt index compression. The compressor tries several palette orderings and chooses whatever is cheapest overall.
