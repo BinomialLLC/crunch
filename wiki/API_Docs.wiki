@@ -379,6 +379,8 @@ void *crn_compress(const crn_comp_params &comp_params, const crn_mipmap_params &
 
 These functions compress a 32-bit/pixel texture to either: a regular DX9-style .DDS file, a "clustered" (or reduced entropy) .DDS file, or a .CRN file in memory.
 
+This function is overloaded. The first variant cannot automatically generate mipmap levels, and the second one can.
+
 Input parameters:
 
   * *comp_params* is the [API_Docs#enum_crn_comp_params compression parameters struct].
