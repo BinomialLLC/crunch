@@ -406,6 +406,8 @@ void crn_free_all_images(crn_uint32 **ppImages, const crn_texture_desc &desc);
 
 The caller is responsible for freeing each returned image, either by calling `crn_free_all_images()` or by manually calling `crn_free_block()` on each image pointer.
 
+For an example usage, see the example1 project, or [http://code.google.com/p/crunch/source/browse/trunk/example1/example1.cpp example1.cpp].
+
 == DXTn Block Compression ==
 
 {{{
