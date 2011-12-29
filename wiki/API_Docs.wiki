@@ -1,6 +1,6 @@
 #summary Using crnlib
 
-= Introduction =
+== Introduction ==
 
 crnlib is designed to be statically linked into the calling application. The VC9 (Visual Studio 2008) .LIB files are built here:
 
@@ -26,7 +26,5 @@ crnlib exposes a high level, C-style function based API, defined in the single p
   * Various misc. helpers:
     * *Pixel format info*: `crn_get_format_fourcc()`, `crn_get_format_bits_per_texel()`, `crn_get_bytes_per_dxt_block()`, and `crn_get_fundamental_dxt_format()`
     * *Pixel format to/from ANSI and UTF16 string*: `crn_get_file_type_ext()`, `crn_get_file_type_exta()`, `crn_get_format_stringa()`, `crn_get_format_string()`, `crn_get_dxt_quality_string()`, `crn_get_dxt_quality_stringa()`
-
-
 
 
