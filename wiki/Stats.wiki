@@ -1,5 +1,9 @@
 #summary Statistics
 
-[http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.htm] Spreadsheet comparing RYG's real-time DXT1 compressor, crnlib's DXT1 compressor using uniform or perceptual metrics, vs. .CRN at .75, 1.0, 1.25, 1.5, 1.75, and 2.0bpp.
 
+Here's a spreadsheet comparing RYG's real-time DXT1 compressor, crnlib's DXT1 compressor using uniform or perceptual metrics, vs. .CRN at .75, 1.0, 1.25, 1.5, 1.75, and 2.0bpp:
+
+[http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.htm] 
+
+And here's the raw excel file:
 [http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.xlsx Excel Spreadsheet file]
