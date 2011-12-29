@@ -162,7 +162,7 @@ The `crn_comp_flags` enum contains a number of compression related flags:
 
 `cCRNCompFlagUseBothBlockTypes`: Default: Enabled. This flag controls which block types are used when compressing to .DDS. (This flag is not relevant when compressing to .CRN, which only uses a subset of the possible DXTn block types.)
 
-  DXT1: OK to use DXT1A (3 color) alpha blocks if doing so leads to lower RGB error, or for transparent pixels. 
+  DXT1: OK to use DXT1A (3 color) alpha blocks if doing so results in lower RGB error, or for transparent pixels. 
 
   DXT5: OK to use both DXT5 block types.
 
@@ -180,6 +180,140 @@ This increases quality when compressing grayscale images, because the compressor
 
 `cCRNCompFlagDebugging`: Default: Disabled. If enabled, the frontend and backend gather and dump various statistics during the compression process. Only used for development/debugging purposes.
 
+=== enum crn_dxt_quality ===
+{{{
+enum crn_dxt_quality
+{
+   cCRNDXTQualitySuperFast,
+   cCRNDXTQualityFast,
+   cCRNDXTQualityNormal,
+   cCRNDXTQualityBetter,
+   cCRNDXTQualityUber,
+};
+}}}
 
+The `crn_dxt_quality` enum lists the various quality modes supported by the endpoint optimizers. This enum is only relevant when compressing to .DDS. cCRNDXTQualityUber is slower, but it has the best PSNR.
+
+
+=== enum crn_dxt_compressor_type ===
+{{{
+enum crn_dxt_compressor_type
+{
+   cCRNDXTCompressorCRN,
+   cCRNDXTCompressorCRNF,
+   cCRNDXTCompressorRYG
+};
+}}}
+
+This enum lists the DXTn block compressors supported by the library. Only enum is only relevant when compressing to non-clustered .DDS files.
+
+`cCRNDXTCompressorCRN`: crnlib's default endpoint optimizer.
+
+`cCRNDXTCompressorCRNF`: A faster version of the default optimizer.
+
+`cCRNDXTCompressorRYG`: RYG's public domain endpoint optimizer.
+
+== Public API Structs ==
+
+=== enum crn_comp_params ===
+{{{
+typedef crn_bool (*crn_progress_callback_func)(crn_uint32 phase_index, crn_uint32 total_phases, 
+  crn_uint32 subphase_index, crn_uint32 total_subphases, void* pUser_data_ptr);
+
+struct crn_comp_params
+{
+   inline crn_comp_params();
+
+   inline void clear();
+
+   inline bool check() const;
+
+   inline bool get_flag(crn_comp_flags flag) const;
+   inline void set_flag(crn_comp_flags flag, bool val);
+   
+   crn_uint32                 m_size_of_obj;
+      
+   crn_file_type              m_file_type;               
+
+   crn_uint32                 m_faces;                   
+   crn_uint32                 m_width;                   
+   crn_uint32                 m_height;                  
+   crn_uint32                 m_levels;                  
+   
+   crn_format                 m_format;                  
+
+   crn_uint32                 m_flags;                   
+
+   const crn_uint32*          m_pImages[cCRNMaxFaces][cCRNMaxLevels];
+
+   float                      m_target_bitrate;
+   
+   crn_uint32                 m_quality_level;           
+   
+   crn_uint32                 m_dxt1a_alpha_threshold;
+   crn_dxt_quality            m_dxt_quality;
+   crn_dxt_compressor_type    m_dxt_compressor_type;
+   
+   crn_uint32                 m_alpha_component;
+
+   float                      m_crn_adaptive_tile_color_psnr_derating;
+   float                      m_crn_adaptive_tile_alpha_psnr_derating;
+
+   crn_uint32                 m_crn_color_endpoint_palette_size;  
+   crn_uint32                 m_crn_color_selector_palette_size;  
+
+   crn_uint32                 m_crn_alpha_endpoint_palette_size;  
+   crn_uint32                 m_crn_alpha_selector_palette_size;  
+
+   crn_uint32                 m_num_helper_threads;
+
+   crn_uint32                 m_userdata0;
+   crn_uint32                 m_userdata1;
+
+   crn_progress_callback_func m_pProgress_func;
+   void*                      m_pProgress_func_data;
+};
+}}}
+
+The `crn_comp_params` struct contains all parameters passed to the compressor. The caller must fill in this struct before calling `crn_compress()`. Note that some parameters/flags are relevant only when compressing to .CRN, clustered .DDS, or regular .DDS (I've tried to document all dependencies but I'm sure I missed some).
+
+This struct contains several simple inline methods defined in this header. The constructor calls `clear()`, and the `clear()` method sets all parameters to their defaults. The `check()` method returns true if all parameters are within reasonable/supported ranges. The `get_flag()` and `set_flag()` helpers directly manipulate the `m_flags` member.
+
+*crn_file_type m_file_type*: Default: cCRNFileTypeCRN. Output file type. May be `cCRNFileTypeCRN` or `cCRNFileTypeDDS`.
+
+*crn_uint32 m_faces*: Default: 1. Set to 1 to compress 2D textures, or 6 to compress cubemaps.
+
+*crn_uint32 m_width* and *crn_uint32 m_height*: Default: (0,0). The source texture's topmost (largest) mipmap dimensions in pixels. Must be in the range [1, cCRNMaxLevelResolution], non-power of 2 is OK, non-square OK. Textures that don't have dimensions divisible by 4 will be padded to the next multiple of 4.
+
+*crn_uint32 m_levels*: Default: 1. The source texture's total mipmap chain size, where 1 is not mipmapped. Must be in the range [1, cCRNMaxLevelResolution].
+
+*crn_format m_format*: Default: cCRNFmtDXT1. Sets the output file's compressed pixel format.
+
+*crn_uint32 m_flags*: Defualt: `cCRNCompFlagPerceptual` | `cCRNCompFlagHierarchical` | `cCRNCompFlagUseBothBlockTypes`. Compressor flags logically OR'd together, see the [enum_crn_comp_flags crn_comp_flags enum].
+
+
+*const crn_uint32`*` m_pImages`[`cCRNMaxFaces`]``[`cCRNMaxLevels`]`*: Default: All NULL. 2D array of pointers to 32bpp RGBA input images. The red component is always first in memory, independent of platform endianness.
+
+*float m_target_bitrate*: Default: 0. Target bitrate. If non-zero, the compressor will use an interpolative search to find the highest quality level that results in a file length that is <= the target bitrate. If it fails to find a bitrate high enough, the compressor will disable adaptive block sizes (by disabled the cCRNCompFlagHierarchical flag) and try again. This process can be pretty slow.
+
+*crn_uint32 m_quality_level*: Default: cCRNMaxQualityLevel (255). Sets the desired quality level (higher=better). Must range between [cCRNMinQualityLevel, cCRNMaxQualityLevel]. Note that .CRN and .DDS quality levels are not compatible with each other from an image quality standpoint.
+
+m_quality_level directly controls the endpoint/selector palette sizes used by the .CRN/clustered .DDS frontends.
+
+*crn_uint32 m_dxt1a_alpha_threshold*, *crn_dxt_quality m_dxt_quality*, *crn_dxt_compressor_type m_dxt_compressor_type*: These parameters are only relevant when compressing to .DDS files.
+
+*crn_uint32 m_alpha_component*: Default: 3. Specifies which source image component contains the alpha channel. 
+
+*crn_uint32 m_num_helper_threads*: Number of helper threads to create to assist the compressor. 0=no threading. Must be in the range [0,cCRNMaxHelperThreads].
+
+*crn_uint32 m_userdata0*, *crn_uint32 m_userdata1*: Default: 0. These two 32-bit values are written directly to the header of the output .CRN file. They can be retrieved from a .CRN file by using the `crnd::crnd_get_texture_info()` helper function in `inc/crn_decomp.h`.
+
+*crn_progress_callback_func m_pProgress_func*, *void`*`                      m_pProgress_func_data*: Pointer to a user-provided progress function and user data. This function is called periodically during compression, and can be used to terminate compression before it completes.
+
+Various low-level .CRN specific parameters:
+
+*float m_crn_adaptive_tile_color_psnr_derating* and *float m_crn_adaptive_tile_alpha_psnr_derating*: Default: 2.0f PSNR. Controls how aggressively the frontend uses large (non-4x4) tiles. Higher settings result in fewer tiles, resulting in lower quality/more blockiness, but smaller files. If this value is set too high the output may become too blocky.
+
+*crn_uint32 m_crn_color_endpoint_palette_size*, *crn_uint32 m_crn_color_selector_palette_size*, *crn_uint32 m_crn_alpha_endpoint_palette_size*, *crn_uint32 m_crn_alpha_selector_palette_size*: Default: 0. These parameters allow the caller to directly control the palette sizes used by the frontend. The `cCRNCompFlagManualPaletteSizes` flag must be set.
 
 
