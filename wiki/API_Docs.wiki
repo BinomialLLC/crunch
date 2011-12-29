@@ -2,17 +2,17 @@
 
 == Contents ==
 
-  * Introduction
-  * [Public_API_Overview]
-  * [Public_API_Enums]
-  * [Public_API_Structs]
-  * [Public_API_Functions]
-    * [Memory_Allocation]
-    * [Compression]
-    * [Transcoding]
-    * [Decompression]
-    * [DXTn_Block_Compression]
-    * [Helper_Functions]
+  * [API_Docs#Introduction Introduction]
+  * [API_Docs#Public_API_Overview Public Overview]
+  * [API_Docs#Public_Enums Public Enums]
+  * [API_Docs#Public_Structs Public Structs]
+  * [API_Docs#Public_Functions Public Functions]
+    * [API_Docs#Memory_Allocation Memory Allocation]
+    * [API_Docs#Compression Compression]
+    * [API_Docs#Transcoding Transcoding]
+    * [API_Docs#Decompression Decompression]
+    * [API_Docs#DXTn_Block_Compression DXTn Block Compression]
+    * [API_Docs#Helper_Functions Helper Functions]
 
 == Introduction ==
 
@@ -76,7 +76,7 @@ Several custom types and parameter structs are also defined in [http://code.goog
   * `struct crn_comp_params`, which contains all the parameters passed to the compression function `crn_compress()`
   * `struct crn_mipmap_params`, which contains a bunch of parameters that control crnlib's optional mipmap generator.
 
-== Public API Enums ==
+== Public Enums ==
 
 === enum crn_file_type ===
 {{{
@@ -227,7 +227,7 @@ This enum lists the DXTn block compressors supported by the library. Only enum i
 
 `cCRNDXTCompressorRYG`: RYG's public domain endpoint optimizer.
 
-== Public API Structs ==
+== Public Structs ==
 
 === enum crn_comp_params ===
 {{{
@@ -330,7 +330,7 @@ Various low-level .CRN specific parameters:
 
 *crn_uint32 m_crn_color_endpoint_palette_size*, *crn_uint32 m_crn_color_selector_palette_size*, *crn_uint32 m_crn_alpha_endpoint_palette_size*, *crn_uint32 m_crn_alpha_selector_palette_size*: Default: 0. These parameters allow the caller to directly control the palette sizes used by the frontend. The `cCRNCompFlagManualPaletteSizes` flag must be set.
 
-== Public API Functions ==
+== Public Functions ==
 
 === Memory Allocation ===
 {{{
@@ -419,5 +419,4 @@ void crn_free_block_compressor(crn_block_compressor_context_t pContext);
 crnlib exposes a number of straightforward functions to convert the crn-related enums defined above to ANSI/Unicode strings and back. There are also functions to retrieve various bits of info about the supported pixel formats.
 
 They don't seem worth individually listing here, just see the [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. 
-
 
