@@ -1,0 +1,32 @@
+#summary Using crnlib
+
+= Introduction =
+
+crnlib is designed to be statically linked into the calling application. The VC9 (Visual Studio 2008) .LIB files are built here:
+
+{{{
+  lib\VC9\release\win32\crnlib_vc9.lib
+  lib\VC9\release\win64\crnlib_x64_vc9.lib
+  lib\VC9\release_dll\win32\crnlib_DLL_vc9.lib
+  lib\VC9\release_dll\win64\crnlib_DLL_x64_vc9.lib
+}}}
+
+crnlib should also build with VC10 (Visual Studio 2010), and Codeblocks 10.05 using TDM-GCC, but the majority of my testing has been with VC9. 
+
+Currently crnlib is Win32 only, but it already compiles with GCC so a Linux/BSD/Mac port shouldn't be too difficult.
+
+== Public API ==
+
+crnlib exposes a high level, C-style function based API, defined in the single public header file [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. Each API falls into one of the following categories:
+
+  * *Memory management*: `crn_set_memory_callbacks()` and `crn_free_block()`
+  * *Image or texture compression* to CRN or DDS: `crn_compress()`
+  * *Texture decompression*: `crn_decompress_crn_to_dds()`, `crn_decompress_dds_to_images()`, and `crn_free_all_images()`
+  * *Plain DXTn block compression*: `crn_create_block_compressor()`, `crn_compress_block()`, `crn_free_block_compressor()`
+  * Various misc. helpers:
+    * *Pixel format info*: `crn_get_format_fourcc()`, `crn_get_format_bits_per_texel()`, `crn_get_bytes_per_dxt_block()`, and `crn_get_fundamental_dxt_format()`
+    * *Pixel format to/from ANSI and UTF16 string*: `crn_get_file_type_ext()`, `crn_get_file_type_exta()`, `crn_get_format_stringa()`, `crn_get_format_string()`, `crn_get_dxt_quality_string()`, `crn_get_dxt_quality_stringa()`
+
+
+
+
