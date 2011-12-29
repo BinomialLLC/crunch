@@ -2,7 +2,7 @@
 
 == Introduction ==
 
-crnlib is a C++ library designed to be statically linked into the calling application. It does not use C++ exceptions, but it does use templates and it depends heavily on heap allocation.
+crnlib is a C++ library designed to be statically linked into the calling application. It can compress to .CRN, regular .DDS, or clustered .DDS files. It can also transcode .CRN to .DDS, and unpack .DDS files to individual 24/32-bit images. Finally, for completeness and testing crnlib's high-quality DXTn block compressor is also exposed. It does not use C++ exceptions, but it does use some C++ features such as templates, virtuals and heap allocation. It does not make much if any use of STL.
 
 The VC9 (Visual Studio 2008) .LIB files are built here:
 
@@ -15,11 +15,17 @@ The VC9 (Visual Studio 2008) .LIB files are built here:
 
 crnlib should also build with VC10 (Visual Studio 2010), and Codeblocks 10.05 using TDM-GCC, but the majority of my testing has been with VC9. 
 
-Currently crnlib is Win32 only, but it already compiles with GCC so a Linux/BSD/Mac port shouldn't be too difficult. (The threading related code is the biggest blocker to a successful port.)
+Currently crnlib is Win32 only, but it already compiles with GCC so a Linux/BSD/Mac port shouldn't be too difficult. (The threading related code is the biggest blocker to porting.)
 
-== Public API ==
+== Public API Overview ==
 
-crnlib exposes a high level, C-style function based API, defined in the single public header file [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. Each API falls into one of the following categories:
+There are two header files of interest, both under the `inc` directory.
+
+crnlib exposes a high level, C-style function based API, defined in the single public header file [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. 
+
+The second header file, [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h], contains all the functionality needed to transcode .CRN files to raw DXTn bits. It does not depend on crnlib in any way, although crnlib internally uses `crn_decomp.h` itself to transcode, examine, and validate .CRN files.
+
+Each crnlib API falls into one of the following categories:
 
   * *Memory management*: 
     * `crn_set_memory_callbacks()`
@@ -55,3 +61,125 @@ crnlib exposes a high level, C-style function based API, defined in the single p
 Several custom types and parameter structs are also defined in [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. The most important structs are:
   * `struct crn_comp_params`, which contains all the parameters passed to the compression function `crn_compress()`
   * `struct crn_mipmap_params`, which contains a bunch of parameters that control crnlib's optional mipmap generator.
+
+== Public API Enums ==
+
+=== enum crn_file_type ===
+{{{
+enum crn_file_type
+{
+   cCRNFileTypeCRN = 0,
+   cCRNFileTypeDDS,
+};
+}}}
+
+`crn_file_type` contains the supported file types. crnlib only supports DX9-style .DDS files.
+
+`cCRNFileTypeCRN`: .CRN file format
+
+`cCRNFileTypeDDS`: .DDS file format
+
+
+=== enum crn_format ===
+{{{
+enum crn_format
+{
+   cCRNFmtInvalid = -1,
+
+   cCRNFmtDXT1 = 0,
+   
+   cCRNFmtFirstValid = cCRNFmtDXT1,
+
+   // cCRNFmtDXT3 is not currently supported when writing to CRN - only DDS.
+   cCRNFmtDXT3,
+
+   cCRNFmtDXT5,
+   
+   // Various DXT5 derivatives
+   cCRNFmtDXT5_CCxY,    // Luma-chroma
+   cCRNFmtDXT5_xGxR,    // Swizzled 2-component
+   cCRNFmtDXT5_xGBR,    // Swizzled 3-component
+   cCRNFmtDXT5_AGBR,    // Swizzled 4-component
+
+   // ATI 3DC and X360 DXN
+   cCRNFmtDXN_XY,       
+   cCRNFmtDXN_YX,
+
+   // DXT5 alpha blocks only
+   cCRNFmtDXT5A,
+
+   cCRNFmtTotal,
+};
+}}}
+
+The `crn_format` enum contains the supported compressed pixel formats. It lists all the standard DX9 compressed pixel formats (BC1-BC5), with some swizzled DXT5 formats (most of them supported by ATI's Compressonator).
+
+=== enum crn_limits ===
+{{{
+enum crn_limits
+{
+   cCRNMaxLevelResolution     = 4096,
+
+   cCRNMinPaletteSize         = 8,
+   cCRNMaxPaletteSize         = 8192,
+
+   cCRNMaxFaces               = 6,
+   cCRNMaxLevels              = 16,
+
+   cCRNMaxHelperThreads       = 16,
+
+   cCRNMinQualityLevel        = 0,
+   cCRNMaxQualityLevel        = 255
+};
+}}}
+
+The `crn_limits` enum lists various library limits. Notable, the max supported texture resolution is currently limited to 4096x4096.
+
+=== enum crn_comp_flags ===
+{{{
+enum crn_comp_flags
+{
+   cCRNCompFlagPerceptual = 1,    
+   cCRNCompFlagHierarchical = 2,    
+   cCRNCompFlagQuick = 4,
+   cCRNCompFlagUseBothBlockTypes = 8,    
+   cCRNCompFlagUseTransparentIndicesForBlack = 16,
+   cCRNCompFlagDisableEndpointCaching = 32, 
+   cCRNCompFlagManualPaletteSizes = 64,
+   cCRNCompFlagDXT1AForTransparency = 128,
+   cCRNCompFlagGrayscaleSampling = 256,
+   cCRNCompFlagDebugging = 0x80000000,
+};
+}}}
+
+The `crn_comp_flags` enum contains a number of compression related flags:
+
+`cCRNCompFlagPerceptual`: Default: Enabled. If enabled, perceptual colorspace distance metrics are enabled. *Important*: Be sure to *disable* this flag when compressing non-sRGB colorspace images, like normal maps!
+
+`cCRNCompFlagHierarchical`: Default: Enabled. If enabled, 4x4, 4x8, 8x4, and 8x8 tiles may be used in each macroblock. If disabled, all macroblocks are forced to use four 4x4 pixel tiles. Compression ratio will be lower when disabled, and transcoding will be a bit slower, but this will reduce block artifacts due to macroblocks.
+
+`cCRNCompFlagQuick`: Default: Disabled. If enabled, this flag disables several output file optimizations. Intended for things like quicker previews.
+
+`cCRNCompFlagUseBothBlockTypes`: Default: Enabled. This flag controls which block types are used when compressing to .DDS. (This flag is not relevant when compressing to .CRN, which only uses a subset of the possible DXTn block types.)
+
+  DXT1: OK to use DXT1A (3 color) alpha blocks if doing so leads to lower RGB error, or for transparent pixels. 
+
+  DXT5: OK to use both DXT5 block types.
+
+`cCRNCompFlagUseTransparentIndicesForBlack`: Default: Disabled. If enabled, it's OK to use DXT1A transparent indices to encode full black colors (assumes pixel shader ignores fetched alpha). (Not relevant when compressing to .CRN files, because it never uses alpha blocks.)
+
+`cCRNCompFlagDisableEndpointCaching`: Default: Disabled. When set, this flag disables endpoint caching, for deterministic output. Only relevant when compressing to .DDS.
+
+`cCRNCompFlagManualPaletteSizes`: Default: Disabled. If enabled, use the cCRNColorEndpointPaletteSize, etc. params to control the CRN palette sizes. Only relevant when compressing to .CRN.
+
+`cCRNCompFlagDXT1AForTransparency`: Default: Disabled. If enabled, DXT1A alpha blocks are used to encode single bit transparency. Only relevant when compressing to .DDS, .CRN does not support DXT1A alpha blocks.
+
+`cCRNCompFlagGrayscaleSampling`: Default: Disabled. If enabled, the DXT1 compressor's color distance metric assumes the pixel shader will be converting the fetched RGB results to luma (Y part of YCbCr).
+
+This increases quality when compressing grayscale images, because the compressor can spread the luma error amoung all three channels (i.e. it can generate blocks with some chroma present if doing so will ultimately lead to lower luma error). Of course, only enable on grayscale source images.
+
+`cCRNCompFlagDebugging`: Default: Disabled. If enabled, the frontend and backend gather and dump various statistics during the compression process. Only used for development/debugging purposes.
+
+
+
+
