@@ -35,7 +35,7 @@ Currently crnlib is Win32 only, but it already compiles with GCC so a Linux/BSD/
 
 == Public API Overview ==
 
-There are two header files of interest, both under the `inc` directory.
+There are two header files of interest, both under the [http://code.google.com/p/crunch/source/browse/trunk/#trunk%2Finc inc] directory.
 
 crnlib exposes a high level, C-style function based API, defined in the single public header file [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. 
 
