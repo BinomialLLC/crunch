@@ -414,7 +414,7 @@ void crn_compress_block(crn_block_compressor_context_t pContext, const crn_uint3
 void crn_free_block_compressor(crn_block_compressor_context_t pContext);
 }}}
 
-These functions allow the caller to compress 4x4 pixel image blocks to any non-swizzled DXTn format supported by crnlib: DXT1, DXT3, DXT5, DXT5A, DXN_XY and DXN_YX (basically BC1-BC5).
+These functions allow the caller to compress 4x4 pixel image blocks to any non-swizzled DXTn format supported by crnlib: DXT1, DXT3, DXT5, DXT5A, DXN_XY and DXN_YX (basically BC1-BC5). See the example3 project or [http://code.google.com/p/crunch/source/browse/trunk/example3/example3.cpp example3.cpp] for a usage example.
 
 Unlike most other DXTn block compressors (such as ATI_Compress or squish) crnlib's is stateful, so for efficient usage you should call `crn_create_block_compressor()` to create a state object and reuse it as many times as possible. (If you're curious, the state consists of an endpoint cache, and a bunch of heap memory used by the compressor for temporary arrays.) Don't call `crn_create_block_compressor()` once for each block to compress, or performance will be dreadful.
 
