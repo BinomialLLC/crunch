@@ -6,7 +6,7 @@ This is pretty high level and could be much better. I'll improve this over time,
 
 == Data Format ==
 
-The easiest way to describe how crnlib works is to start at the compressed data stream and the transcoding process and work backwards (which mirrors the design process followed when I designed crnlib).
+The easiest way to describe how crnlib works is to start at the compressed data stream and the transcoding process and work backwards, which also mirrors the design process followed when I designed crnlib.
 
 .CRN DXT1 files consist of a small header, followed by a DPCM+Huffman compressed endpoint palette, and a DPCM+Huffman compressed selector palette. (DXT5 files contain two more palettes for alpha.) 
 
