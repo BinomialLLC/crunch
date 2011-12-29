@@ -388,7 +388,7 @@ void *crn_decompress_crn_to_dds(const void *pCRN_file_data, crn_uint32 &file_siz
 
 This is a fast operation, because the .CRN format is explicitly designed to be efficiently transcodable to DXTn.
 
-For more control over decompression, see the lower-level helper functions in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h], which do not depend at all on crnlib.
+For more control over decompression (particularly over memory management, and to implement palette caching), see the lower-level helper functions in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h], which do not depend at all on crnlib.
 
 == Decompressing ==
 
