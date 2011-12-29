@@ -384,9 +384,7 @@ void *crn_compress(const crn_comp_params &comp_params, const crn_mipmap_params &
 void *crn_decompress_crn_to_dds(const void *pCRN_file_data, crn_uint32 &file_size);
 }}}
 
-`crn_decompress_crn_to_dds()` transcodes an entire .CRN file to .DDS using the [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h] header file library to do most of the heavy lifting. The output .DDS file's format is guaranteed to be one of the DXTn formats in the `crn_format` enum.
-
-This is a fast operation, because the .CRN format is explicitly designed to be efficiently transcodable to DXTn.
+`crn_decompress_crn_to_dds()` transcodes an entire .CRN file to .DDS using the [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h] header file library to do most of the heavy lifting. The output .DDS file's format is guaranteed to be one of the DXTn formats in the `crn_format` enum. This is a very fast operation, because the .CRN format is explicitly designed to be efficiently transcodable to DXTn.
 
 For more control over decompression (particularly over memory management, and to implement palette caching), see the lower-level helper functions in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h], which do not depend at all on crnlib.
 
