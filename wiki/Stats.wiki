@@ -1,7 +1,7 @@
 #summary Statistics
 #labels Featured
 
-== CRN vs. JPEG followed by Real-Time DXT1 ==
+== CRN vs. JPEG+Real-Time DXT1 ==
 
 A popular alternative technique involves bolting some sort of real-time DXT compressor onto the back end of a transform coder, like JPEG. JPEG is far from state of the art, but it's very fast and quite popular. The following data shows that CRN is competitive against transform based solutions.
 
