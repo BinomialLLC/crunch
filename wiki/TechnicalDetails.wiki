@@ -11,7 +11,7 @@ The easiest way to describe how crnlib works is to start at the compressed data 
 
 .CRN DXT1 files consist of a small header, followed by a [http://en.wikipedia.org/wiki/DPCM DPCM]+[http://en.wikipedia.org/wiki/Huffman_Compression Huffman] compressed endpoint palette, and a DPCM+Huffman compressed selector palette. (DXT5 files contain two more palettes for alpha endpoints and selectors. Also, I'm not sure that "palette" is the best word. "Codebook" may be more appropriate.)
 
-Here's a visualization of the DXT1 color selector palette for kodim04.png. It's 2692x16. The selectors where scaled to [0,255]. (I think this palette was sorted by similarity - the compressor didn't necessary order the palette entries this way, but it's good for visualization.)
+Here's a visualization of the DXT1 color selector palette for kodim04.png. It's 2692x16. The 2-bit selectors where scaled to [0,255]. (I think this palette was sorted by similarity - the compressor didn't necessary order the palette entries this way, but it's good for visualization.)
 
 http://crunch.googlecode.com/svn/wiki/crunch_selectors.png
 
@@ -20,7 +20,7 @@ http://crunch.googlecode.com/svn/wiki/crunch_color_endpoints.png
 
 (These a very wide images, so they get downsampled when viewed in the wiki.)
 
-This color endpoint palette contains 2415 entries (horizontal axis), where each entry contains two 565 colors (vertical axis, enlarged by 8x in this image).
+This color endpoint palette contains 2415 entries (horizontal axis), where each entry contains a 32-bit integer containing two 565 colors (vertical axis, enlarged by 8x in this image).
 
 Each mipmap is divided up into 8x8 pixel "macroblocks". Each macroblock corresponds to four 4x4 pixel DXTn blocks, arranged in a 2x2 block pattern. Each macroblock is adaptively subdivided by the compressor into one or more "tiles". Very simple macroblocks (say solid ones that use only a single color) can use a single 8x8 pixel tile, but more complex macroblocks can use any non-overlapping combination of 8x4, 4x8, or 4x4 tiles. (There are 9 possible ways of arranging the tiles in a single macroblock.)
 
