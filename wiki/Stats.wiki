@@ -29,7 +29,7 @@ This test shows that, in an RMSE sense, CRN is comparable to JPG+RYG_DXT1 at 1.0
 
 These results in similar to [http://www.jacobstrom.com/publications/StromWennerstenHPG2011.pdf Stromm and Wennersten's results with JPEG followed by ETC1]:
 
-"If JPEG is used as the transport format, the textures will need to
+ "If JPEG is used as the transport format, the textures will need to
 be compressed on-the-ﬂy to a texture compression format such as
 ETC1 after download. To ﬁnd out how much this transcoding will
 lower the quality, we compressed the JPEG images to ETC1 and
