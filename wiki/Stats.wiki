@@ -13,9 +13,29 @@ These RMSE values should be comparable to the values in Charles Bloom's very use
 
 == CRN vs. JPEG followed by Real-Time DXT1 ==
 
-[http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_stats_dec29.htm Charts]
+In this test, I compressed the test corpus with libjpeg at various bitrates using a binary search to find the JPEG quality factor level closest to each test bitrate. The test bitrates where .75-2.0 bpp at .25 bpp increments.
 
-[http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_stats_dec29.xlsx Excel spreadsheet]
+These .JPG files where then unpacked to 24-bit RGB (using the decompressor in [http://nothings.org/stb_image.c stb_image.c]), then compressed to DXT1 using [http://www.farb-rausch.de/~fg/code/ RYG's real-time DXT1 compressor]. The resulting DXT1 bits where then unpacked using crnlib and compared to the original images to generate this data:
+
+[http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_stats_dec29.htm Charts at various bitrates]
+
+[http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_stats_dec29.xlsx Raw Excel spreadsheet]
+
+This test shows that, in an RMSE sense, CRN is comparable to JPG+RYG_DXT1 at 1.0-1.25bpp. At less than 1.0bpp, CRN is worse, and beginning at roughly 1.25bpp CRN is generally superior than using JPEG followed by real-time DXT1 compression. 
+
+These results in similar to [http://www.jacobstrom.com/publications/StromWennerstenHPG2011.pdf Stromm and Wennersten's results with JPEG followed by ETC1]:
+
+"If JPEG is used as the transport format, the textures will need to
+be compressed on-the-ﬂy to a texture compression format such as
+ETC1 after download. To ﬁnd out how much this transcoding will
+lower the quality, we compressed the JPEG images to ETC1 and
+measured the average mean square error. The result was an increased error equivalent to a PSNR drop of 2.02 dB than if just
+ETC1 encoding were used. Thus even if the JPEGs have equal
+quality to the proposed scheme, after the transcoding there will be
+a signiﬁcant quality penalty. The transcoding used slow exhaustive
+compression—fast transcoding will give an even higher penalty"
+
+====
 
 == Comparison Images ==
 
