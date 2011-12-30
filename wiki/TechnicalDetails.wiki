@@ -32,7 +32,7 @@ Notice that the more complex areas of the image contain smaller tiles, so these 
 
 The endpoint/selector palettes are shared by all mipmap levels.
 
-For each tile, a compressed index is sent to select the macroblock tile arrangement, followed by between one to four DPCM+Huffman compressed endpoint palette indices. Four selector indices (again coded using DPCM+Huffman) are always sent immediately after the endpoint(s). The macroblock rows are raster scanned in a serpentine order: left->right, then right->left, etc.)
+For each tile, a compressed index is sent to select the macroblock tile arrangement, followed by between one to four DPCM+Huffman compressed endpoint palette indices. Four selector indices (again coded using DPCM+Huffman) are always sent immediately after the endpoint(s). The macroblock rows are raster scanned in a serpentine order: left->right, then right->left, etc.
 
 The C++ code for the transcoder's inner loop is in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h crn_decomp.h]. DXT1 textures are handled by `crn_unpacker::unpack_dxt1()`.
 
