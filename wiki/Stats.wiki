@@ -39,7 +39,7 @@ These results are similar to [http://www.jacobstrom.com/publications/StromWenner
 
  "If JPEG is used as the transport format, the textures will need to be compressed on-the-ﬂy to a texture compression format such as ETC1 after download. To ﬁnd out how much this transcoding will lower the quality, we compressed the JPEG images to ETC1 and measured the average mean square error. The result was an increased error equivalent to a PSNR drop of 2.02 dB than if just ETC1 encoding were used. Thus even if the JPEGs have equal quality to the proposed scheme, after the transcoding there will be a signiﬁcant quality penalty. The transcoding used slow exhaustive compression—fast transcoding will give an even higher penalty"
 
-Also, this observation from the introduction is relevant to this comparison:
+Also, these observations from the introduction are relevant to this comparison:
 
  "[...] This is often a good solution, especially if low bit rates are of interest, but the resulting texture quality suffers for two reasons: First, the ﬁnal texture will include image artifacts both from JPEG and from the texture codec. Second, to make recompression from JPEG to the texture codec quick enough, shortcuts may be necessary, especially on mobile devices with limited computational power. This lowers quality,  specially when compared to slow, perhaps exhaustive compression."
 
