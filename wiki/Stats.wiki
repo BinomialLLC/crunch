@@ -1,7 +1,7 @@
 #summary Statistics
 #labels Featured
 
-== JPEG followed by Real-Time DXT1 vs. CRN ==
+== CRN vs. JPEG followed by Real-Time DXT1 ==
 
 A popular alternative technique involves bolting some sort of real-time DXT compressor onto the back end of a transform coder, like JPEG. JPEG is far from state of the art, but it's very fast and quite popular. The following data shows that CRN is competitive against transform based solutions.
 
@@ -35,7 +35,7 @@ Also, these observations from the introduction are relevant to this comparison:
 
 ----
 
-== Raw Data: DXT1 vs. CRN at Various Bitrates ==
+== Raw Data: CRN vs. Several DXT1 Compressors at .75-2.0bpp ==
 
 Here's a [http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.htm table] containing the RGB [http://en.wikipedia.org/wiki/RMSE RMSE] of RYG's real-time DXT1 compressor, crnlib's regular DXT1 compressor using uniform or perceptual metrics (which is very similar to ATI_Compress or squish), and .CRN at .75-2.0bpp at .25bpp increments. This chart also has two columns showing how many bits/pixel are needed by LZMA to compress DXT1 uniform and perceptual .DDS files.
 
