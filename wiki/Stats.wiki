@@ -29,7 +29,7 @@ This test shows that, in a RMSE sense, CRN is worse than JPG+RYG_DXT1 at less th
 
 http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_1_0.png
 
-And beginning at 1.25bpp CRN is usually better than JPEG followed by real-time DXT1 compression:
+Beginning at 1.25bpp CRN is usually better than JPEG followed by real-time DXT1 compression:
 
 http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_1_25.png
 
