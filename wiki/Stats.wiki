@@ -19,7 +19,7 @@ These RMSE values should be comparable to the values in Charles Bloom's very use
 
 In this test, I compressed the test corpus with libjpeg at various bitrates using a binary search to find the JPEG quality factor level closest to each test bitrate. The test bitrates where .75-2.0 bpp at .25 bpp increments.
 
-These .JPG files where then unpacked to 24-bit RGB (using the decompressor in [http://nothings.org/stb_image.c stb_image.c]), then compressed to DXT1 using [http://www.farb-rausch.de/~fg/code/ RYG's excellent real-time DXT1 compressor]. The resulting DXT1 bits where then unpacked using crnlib to back to 24-bit RGB and compared to the original images to generate this RMSE data:
+These .JPG files where then unpacked to 24-bit RGB (using the decompressor in [http://nothings.org/stb_image.c stb_image.c]), then compressed to DXT1 using [http://www.farb-rausch.de/~fg/code/ RYG's real-time DXT1 compressor]. The resulting DXT1 bits where then unpacked using crnlib to back to 24-bit RGB and compared to the original images to generate this RMSE data:
 
 [http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_stats_dec29.htm Charts at various bitrates]
 
