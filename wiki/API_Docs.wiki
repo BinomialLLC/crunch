@@ -15,6 +15,8 @@
     * [API_Docs#DXTn_Block_Compression DXTn Block Compression]
     * [API_Docs#Helper_Functions Helper Functions]
 
+----
+
 == Introduction ==
 
 crnlib is a C++ library designed to be statically linked into the calling application. It can compress to .CRN, regular .DDS, or clustered .DDS files. It can also transcode .CRN to .DDS, and unpack .DDS files to individual 24/32-bit images. For completeness, crnlib's high-quality DXTn block compressor is also accessible. 
@@ -33,6 +35,8 @@ The VC9 (Visual Studio 2008) .LIB files are built here:
 crnlib should also build with VC10 (Visual Studio 2010), and Codeblocks 10.05 using TDM-GCC, but the majority of my testing has been with VC9. 
 
 Currently crnlib is Win32 only, but it already compiles with GCC so a Linux/BSD/Mac port shouldn't be too difficult. (The threading related code is the biggest blocker to porting.)
+
+----
 
 == Public API Overview ==
 
@@ -76,6 +80,8 @@ Each crnlib API falls into one of the following categories:
 Several custom types and parameter structs are also defined in [http://code.google.com/p/crunch/source/browse/trunk/inc/crnlib.h inc/crnlib.h]. The most important structs are:
   * [API_Docs#enum_crn_comp_params crn_comp_params], which contains all the parameters passed to the compression function `crn_compress()`
   * `struct crn_mipmap_params`, which contains a bunch of parameters that control crnlib's optional mipmap generator. (This struct is not yet documented here.) 
+
+----
 
 == Public Enums ==
 
@@ -228,6 +234,8 @@ This enum lists the DXTn block compressors supported by the library. Only enum i
 
 `cCRNDXTCompressorRYG`: RYG's public domain endpoint optimizer.
 
+----
+
 == Public Structs ==
 
 === enum crn_comp_params ===
@@ -330,6 +338,8 @@ Various low-level .CRN specific parameters:
 *float m_crn_adaptive_tile_color_psnr_derating* and *float m_crn_adaptive_tile_alpha_psnr_derating*: Default: 2.0f PSNR. Controls how aggressively the frontend uses large (non-4x4) tiles. Higher settings result in fewer tiles, resulting in lower quality/more blockiness, but smaller files. If this value is set too high the output may become too blocky.
 
 *crn_uint32 m_crn_color_endpoint_palette_size*, *crn_uint32 m_crn_color_selector_palette_size*, *crn_uint32 m_crn_alpha_endpoint_palette_size*, *crn_uint32 m_crn_alpha_selector_palette_size*: Default: 0. These parameters allow the caller to directly control the palette sizes used by the frontend. The `cCRNCompFlagManualPaletteSizes` flag must be set.
+
+----
 
 == Public Functions ==
 
