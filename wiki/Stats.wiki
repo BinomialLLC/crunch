@@ -9,4 +9,4 @@ Here's a spreadsheet comparing the RGB [http://en.wikipedia.org/wiki/RMSE RMSE] 
 Here's the raw excel file:
 [http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.xlsx Excel Spreadsheet file]
 
-These RMSE values should be comparable to the values in Charles Bloom's excellent [http://cbloomrants.blogspot.com/2008/11/11-20-08-dxtc-part-3.html blog post] comparing various DXT1 compressors. (My RYG RMSE stats are very slightly different from the ones here, and I don't know why.)
+These RMSE values should be comparable to the values in Charles Bloom's excellent [http://cbloomrants.blogspot.com/2008/11/11-20-08-dxtc-part-3.html blog post] comparing various DXT1 compressors. (My RYG RMSE stats are very slightly different from the ones here, and I don't know exactly why, but I'm guessing our versions are slightly different.)
