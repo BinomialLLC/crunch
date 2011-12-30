@@ -15,7 +15,7 @@ These RMSE values should be comparable to the values in Charles Bloom's very use
 
 ----
 
-== CRN vs. JPEG followed by Real-Time DXT1 ==
+== JPEG followed by Real-Time DXT1 vs. CRN ==
 
 In this test, I compressed the test corpus with libjpeg at various bitrates using a binary search to find the JPEG quality factor level closest to each test bitrate. The test bitrates where .75-2.0 bpp at .25 bpp increments.
 
