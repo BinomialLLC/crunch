@@ -35,7 +35,7 @@ Also, these observations from the introduction are relevant to this comparison:
 
 ----
 
-== Raw Data: CRN .75-2.0bpp vs. DXT1 (real-time and offline) ==
+== Raw Statistics: CRN .75-2.0bpp vs. DXT1 (real-time and offline) ==
 
 Here's a [http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.htm table] containing the RGB [http://en.wikipedia.org/wiki/RMSE RMSE] of RYG's real-time DXT1 compressor, crnlib's regular DXT1 compressor using uniform or perceptual metrics (which is very similar to ATI_Compress or squish), and .CRN at .75-2.0bpp at .25bpp increments. This chart also has two columns showing how many bits/pixel are needed by LZMA to compress DXT1 uniform and perceptual .DDS files.
 
