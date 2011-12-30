@@ -15,7 +15,7 @@ These RMSE values should be comparable to the values in Charles Bloom's very use
 
 == JPEG followed by Real-Time DXT1 vs. CRN ==
 
-A popular alternative technique involves bolting some sort of real-time DXT compressor on the back end of a transform coder, like JPEG. JPEG is far from state of the art, but it's very fast and quite popular. The following data shows that CRN is competitive against transform based solutions.
+A popular alternative technique involves bolting some sort of real-time DXT compressor onto the back end of a transform coder, like JPEG. JPEG is far from state of the art, but it's very fast and quite popular. The following data shows that CRN is competitive against transform based solutions.
 
 In this test, I compressed the test corpus with libjpeg at various bitrates using a binary search to find the JPEG quality factor level closest to each test bitrate. The test bitrates where .75-2.0 bpp at .25 bpp increments.
 
