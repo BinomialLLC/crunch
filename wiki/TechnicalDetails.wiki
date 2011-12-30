@@ -9,7 +9,7 @@ This is pretty high level and could be much better. I'll improve this over time,
 
 The easiest way to describe how crnlib works is to start at the compressed data stream and the transcoding process and work backwards to the compressor, which also mirrors the design process followed when I designed crnlib.
 
-.CRN DXT1 files consist of a small header, followed by a [http://en.wikipedia.org/wiki/DPCM DPCM]+[http://en.wikipedia.org/wiki/Huffman_Compression Huffman] compressed endpoint palette, and a DPCM+Huffman compressed selector palette. (DXT5 files contain two more palettes for alpha endpoints and selectors. Also, I'm not sure that "palette" is the best word. "Codebook" may be more appropriate, but graphics programmers seem more familiar with palettes.)
+.CRN DXT1 files consist of a small header, followed by a [http://en.wikipedia.org/wiki/DPCM DPCM]+[http://en.wikipedia.org/wiki/Huffman_Compression Huffman] compressed endpoint palette, and a DPCM+Huffman compressed selector palette. (DXT5 files contain two more palettes for alpha endpoints and selectors. Also, I'm not sure that "palette" is the best word. "Codebook" may be more appropriate, but graphics programmers seem more familiar with the concept of palettes.)
 
 Here's a visualization of the DXT1 color selector palette for kodim04.png. It's 2692x16. The 2-bit selectors where scaled to [0,255]. (I think this palette was sorted by similarity, which is one of the palette orderings tested by the compressor's backend.)
 
