@@ -1,5 +1,4 @@
 #summary Page listing known issues/bugs
-#labels Featured
 
 = Known Issues/Bugs =
 
