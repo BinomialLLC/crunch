@@ -5,6 +5,8 @@
 
 This is pretty high level and could be much better. I'll improve this over time, for now I hope this is enough:
 
+----
+
 == Data Format ==
 
 The easiest way to describe how crnlib works is to start at the compressed data stream and the transcoding process and work backwards to the compressor, which also mirrors the design process followed when I designed crnlib.
@@ -68,9 +70,13 @@ The example1 tool can display a bunch of information about .CRN files, such as t
    CrnFormat: DXT1
 }}}
 
+----
+
 == Transcoding to DXTn ==
 
 To transcode a mipmap level to DXTn, the palettes must be first unpacked, either into a temporary array or cache. Currently, all mipmaps in a .CRN file share the same set of endpoint/selector palettes. To generate the DXTn bits, the transcoder iterates through each macroblock and decodes the palette indices. The actual DXTn bits are effectively just memcpy'd from the palette arrays directly into the destination DXTn texture. The transcoder doesn't care at all what the endpoint/selector palette entries actually consist of during transcoding -- it just copies the bits. Transcoding is quite fast because it works at the macroblock/block level, never at the pixel level.
+
+----
 
 == Compression ==
 
