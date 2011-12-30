@@ -22,7 +22,7 @@ http://crunch.googlecode.com/svn/wiki/crunch_color_endpoints.png
 
 This color endpoint palette contains 2415 entries (horizontal axis), where each entry contains a 32-bit integer containing two 565 colors (vertical axis, enlarged by 8x in this image).
 
-Each mipmap is divided up into 8x8 pixel "macroblocks". Each macroblock corresponds to four 4x4 pixel DXTn blocks, arranged in a 2x2 block pattern. Each macroblock is adaptively subdivided by the compressor into one or more "tiles". Very simple macroblocks (say solid ones that use only a single color) can use a single 8x8 pixel tile, but more complex macroblocks can use any non-overlapping combination of 8x4, 4x8, or 4x4 tiles. (There are 9 possible ways of arranging the tiles in a single macroblock.)
+Each mipmap is divided up into 8x8 pixel "macroblocks". Each macroblock corresponds to four 4x4 pixel DXTn blocks arranged in a 2x2 block pattern. Each macroblock is adaptively subdivided by the compressor into one or more "tiles". Very simple macroblocks (say solid ones that use only a single color) can use a single 8x8 pixel tile, but more complex macroblocks can use any non-overlapping combination of 8x4, 4x8, or 4x4 tiles. (There are 9 possible ways of arranging the tiles in a single macroblock.)
 
 In this image, the macroblock tile boundaries are outlined in gray:
 
