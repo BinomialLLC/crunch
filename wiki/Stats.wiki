@@ -23,7 +23,7 @@ These .JPG files where then unpacked to 24-bit RGB (using the decompressor in [h
 
 [http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_stats_dec29.xlsx Raw Excel spreadsheet]
 
-This test shows that, in a RMSE sense, CRN is roughly comparable to JPG+RYG_DXT1 at between 1.0-1.25bpp. At less than 1.0bpp, CRN is worse, and beginning at ~1.25bpp CRN is usually better than JPEG followed by real-time DXT1 compression. At or above 1.5bpp CRN was always better in this test.
+This test shows that, in a RMSE sense, CRN is roughly comparable to JPG+RYG_DXT1 at between 1.0-1.25bpp. At less than 1.0bpp, CRN is worse, and beginning at ~1.25bpp CRN is usually better than JPEG followed by real-time DXT1 compression. At 1.5bpp or higher CRN was always better in this test.
 
 These results are similar to [http://www.jacobstrom.com/publications/StromWennerstenHPG2011.pdf Stromm and Wennersten's published results of testing JPEG followed by ETC1]:
 
