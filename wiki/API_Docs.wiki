@@ -34,7 +34,7 @@ The VC9 (Visual Studio 2008) .LIB files are built here:
 
 crnlib should also build with VC10 (Visual Studio 2010), and Codeblocks 10.05 using TDM-GCC, but the majority of my testing has been with VC9. 
 
-Currently crnlib is Win32 only, but it already compiles with GCC so a Linux/BSD/Mac port shouldn't be too difficult. (The threading related code is the biggest blocker to porting.)
+Currently crnlib is Win32 only, but it already compiles with GCC so a Linux/BSD/Mac port shouldn't be too difficult. (The threading related code is the biggest blocker to porting.) crnlib itself has only been tested on PC's, but [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h crn_decomp.h] (the stand-alone transcoder header file library) should work fine on consoles.
 
 ----
 
