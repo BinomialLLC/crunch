@@ -16,6 +16,6 @@ These RMSE values should be comparable to the values in Charles Bloom's very use
 crnlib .DXT1 (uniform colorspace metrics), RMSE: 8.29, .DDS+LZMA: 2.95 bpp
 http://www.tenacioussoftware.com/crn_stats/kodim14_pics/kodim14_dds_uniform.png
 
-
-
+RYG .DXT1, RMSE: 8.97
+http://www.tenacioussoftware.com/crn_stats/kodim14_pics/kodim14_dds_ryg.png
 
