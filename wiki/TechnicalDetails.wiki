@@ -32,7 +32,7 @@ http://crunch.googlecode.com/svn/wiki/crunch_macroblock_tiles.png
 
 Notice that the more complex areas of the image contain smaller tiles, so these image areas get assigned more endpoints. Simpler areas use larger tiles, so the DXT1 blocks in these tiles are constrained to share the same endpoints. Also, a single color endpoint pair can be shared by many tiles, independent of their location in the image.
 
-The endpoint/selector palettes are shared by all mipmap levels.
+The endpoint/selector palettes are shared by all mipmap levels present in the .CRN file.
 
 For each tile, a compressed index is sent to select the macroblock tile arrangement, followed by between one to four DPCM+Huffman compressed endpoint palette indices. Four selector indices (again coded using DPCM+Huffman) are always sent immediately after the endpoint(s). The macroblock rows are raster scanned in a serpentine order: left->right, then right->left, etc.
 
