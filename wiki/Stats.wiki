@@ -11,7 +11,7 @@ These RMSE values should be comparable to the values in Charles Bloom's very use
 
 [http://www.tenacioussoftware.com/crn_stats/dec29/rmse_chart.png RMSE chart] of the above spreadsheet, sorted by DXT1 uniform RMSE.
 
-====
+----
 
 == CRN vs. JPEG followed by Real-Time DXT1 ==
 
@@ -37,7 +37,7 @@ quality to the proposed scheme, after the transcoding there will be
 a signiﬁcant quality penalty. The transcoding used slow exhaustive
 compression—fast transcoding will give an even higher penalty"
 
-====
+----
 
 == Comparison Images ==
 
