@@ -38,3 +38,6 @@ http://www.tenacioussoftware.com/crn_stats/kodim14_pics/kodim14_crn_1_00.png
 
 *CRN DXT1 .75bpp*, RMSE: 20.69
 http://www.tenacioussoftware.com/crn_stats/kodim14_pics/kodim14_crn_0_75.png
+
+*CRN DXT1 .65bpp*, RMSE: 22.93
+http://www.tenacioussoftware.com/crn_stats/kodim14_pics/kodim14_crn_0_65.png
