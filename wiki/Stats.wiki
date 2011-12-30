@@ -2,9 +2,7 @@
 
 This is a work in progress:
 
-Here's a spreadsheet comparing the RGB [http://en.wikipedia.org/wiki/RMSE RMSE] (root mean square error) of RYG's real-time DXT1 compressor, crnlib's DXT1 compressor using uniform or perceptual metrics (which is quite similar to ATI_Compress), verses .CRN at .75-2.0bpp at .25bpp increments. This spreadsheet also has two columns showing how many bits/pixel are needed by LZMA to compress DXT1 uniform and perceptual .DDS files.
-
-[http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.htm] 
+Here's a [http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.htm spreadsheet] comparing the RGB [http://en.wikipedia.org/wiki/RMSE RMSE] (root mean square error) of RYG's real-time DXT1 compressor, crnlib's DXT1 compressor using uniform or perceptual metrics (which is quite similar to ATI_Compress), verses .CRN at .75-2.0bpp at .25bpp increments. This spreadsheet also has two columns showing how many bits/pixel are needed by LZMA to compress DXT1 uniform and perceptual .DDS files.
 
 Here's the raw excel file:
 [http://www.tenacioussoftware.com/crn_stats/dec29/crn_stats_dec_29.xlsx Excel Spreadsheet file]
