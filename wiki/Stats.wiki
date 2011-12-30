@@ -39,7 +39,7 @@ Also, this observation from the introduction is relevant to this comparison:
 
 == Comparison Images ==
 
-Ordered by highest to lowest quality. It's pretty clear that .CRN's subjective quality starts dropping fast around ~1.0 bpp. (Better coding at the .CRN backend would make a big difference at these bitrates.)
+Ordered by highest to lowest quality. It's pretty clear that .CRN's subjective quality starts dropping fast around ~1.0 bpp. (At these bitrates, better coding at the .CRN backend should make a big difference.)
 
 *crnlib DXT1* (uniform colorspace metrics), RMSE: 8.29, .DDS+LZMA: 2.95 bpp
 http://www.tenacioussoftware.com/crn_stats/kodim14_pics/kodim14_dds_uniform.png
