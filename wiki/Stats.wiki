@@ -13,6 +13,8 @@ These RMSE values should be comparable to the values in Charles Bloom's very use
 
 == CRN vs. JPEG followed by Real-Time DXT1 ==
 
+[http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_stats_dec29.htm Charts]
+
 [http://www.tenacioussoftware.com/crn_stats/dec29/crn_vs_jpg_stats_dec29.xlsx Excel spreadsheet]
 
 == Comparison Images ==
