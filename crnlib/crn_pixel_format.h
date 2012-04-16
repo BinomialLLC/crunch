@@ -35,6 +35,8 @@ namespace crnlib
          return (fmt == PIXEL_FMT_DXT1) || (fmt == PIXEL_FMT_DXT1A);
       }
 
+      // has_alpha() should probably be called "has_opacity()" - it indicates if the format encodes opacity
+      // because some swizzled DXT5 formats do not encode opacity.
       inline bool has_alpha(pixel_format fmt)
       {
          switch (fmt)
@@ -48,6 +50,7 @@ namespace crnlib
             case PIXEL_FMT_A8R8G8B8:
             case PIXEL_FMT_A8:
             case PIXEL_FMT_A8L8:
+            case PIXEL_FMT_DXT5_AGBR:
                return true;
             default: break;
          }

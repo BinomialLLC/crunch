@@ -295,6 +295,9 @@ namespace crnlib
 
       static pixel_format choose_pixel_format(convert_params& params, const crn_comp_params &comp_params, const dds_texture& src_tex, texture_type tex_type)
       {
+         if (params.m_use_source_format)
+            return src_tex.get_format();
+
          const bool is_normal_map = (tex_type == cTextureTypeNormalMap);
 
          if (params.m_dst_file_type == texture_file_types::cFormatCRN)
@@ -409,11 +412,12 @@ namespace crnlib
             m_pInput_texture->get_num_levels(),
             pixel_format_helpers::get_pixel_format_string(m_pInput_texture->get_format()));
 
-         console::debug(L" texture_type: %s", get_texture_type_desc(m_texture_type));
-         console::debug(L" dst_filename: %s", m_dst_filename.get_ptr());
-         console::debug(L"dst_file_type: %s", texture_file_types::get_extension(m_dst_file_type));
-         console::debug(L"   dst_format: %s", pixel_format_helpers::get_pixel_format_string(m_dst_format));
-         console::debug(L"        quick: %u", m_quick);
+         console::debug(L"      texture_type: %s", get_texture_type_desc(m_texture_type));
+         console::debug(L"      dst_filename: %s", m_dst_filename.get_ptr());
+         console::debug(L"     dst_file_type: %s", texture_file_types::get_extension(m_dst_file_type));
+         console::debug(L"        dst_format: %s", pixel_format_helpers::get_pixel_format_string(m_dst_format));
+         console::debug(L"             quick: %u", m_quick);
+         console::debug(L" use_source_format: %u", m_use_source_format);
       }
 
       static bool write_compressed_texture(

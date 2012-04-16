@@ -260,6 +260,11 @@ int main(int argc, char *argv[])
    dds_desc.ddpfPixelFormat.dwFourCC = crn_get_format_fourcc(fmt);
    dds_desc.ddsCaps.dwCaps = DDSCAPS_TEXTURE;
 
+   // Set pitch/linearsize field (some DDS readers require this field to be non-zero).
+   uint bits_per_pixel = crn_get_format_bits_per_texel(fmt);
+   dds_desc.lPitch = (((dds_desc.dwWidth + 3) & ~3) * ((dds_desc.dwHeight + 3) & ~3) * bits_per_pixel) >> 3;
+   dds_desc.dwFlags |= DDSD_LINEARSIZE;
+
    // Write the DDS header to the output file.
    fwrite(&dds_desc, sizeof(dds_desc), 1, pDDS_file);
    
