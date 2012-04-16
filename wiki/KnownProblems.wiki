@@ -5,7 +5,7 @@
 
  * .DDS files written by crunch v1.00 (and output by crnlib v1.00) don't have the pitch/linearsize fields set in the DDS header. Some DDS readers expect valid values here (and expect the DDSD_LINEARSIZE flag to be set too). This should be fixed in v1.01.
 
- * You really should provide crnlib with raw, 24/32-bit source images. Don't provide it with second generation textures that have already been DXTn or JPEG compressed. (You can do it, but obviously don't expect the best results.)
+ * You really should provide crnlib with raw, 24/32-bit source textures. Don't provide it with second generation textures that have already been DXTn or JPEG compressed. Of course, you can do so, and I know of one company doing this to repackage existing assets (without source art) so they download more quickly, but obviously don't expect the highest quality.
 
  * crnlib currently assumes you'll be further losslessly compressing its output .DDS files using LZMA. However, some engines use weaker codecs such as LZO, zlib, etc., so crnlib's bitrate measurements will be inaccurate. It should be easy to allow the caller to plug-in custom lossless compressors for bitrate measurement.
 
