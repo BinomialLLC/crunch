@@ -1,5 +1,5 @@
-// File: crn_decomp.h - CRN texture decompressor v1.00
-// Copyright (c) 2010-2011 Tenacious Software LLC
+// File: crn_decomp.h - CRN texture decompressor v1.01
+// Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC
 //
 // This single header file contains *all* of the code necessary to unpack .CRN files to raw DXTn bits.
 // It does NOT depend on the crn compression library.
@@ -17,7 +17,8 @@
 // Include crnlib header - only to bring in some basic some CRN-related types.
 #include "crnlib.h"
 
-#define CRND_VERSION_STRING "00.96"
+#define CRND_LIB_VERSION 101
+#define CRND_VERSION_STRING "01.01"
 
 #ifdef _DEBUG
 #define CRND_BUILD_DEBUG
@@ -4826,7 +4827,7 @@ namespace crnd
 // crn_decomp.h uses the ZLIB license:
 // http://opensource.org/licenses/Zlib
 //
-// Copyright (c) 2010-2011 Tenacious Software LLC
+// Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages

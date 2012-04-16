@@ -67,7 +67,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)lib\VC9\$(ConfigurationName)\$(PlatformName)\crnlibD_VC9.lib&quot;"
 				OutputFile="$(OutDir)\$(ProjectName)D.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -146,7 +145,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)lib\VC9\$(ConfigurationName)\$(PlatformName)\crnlibD_x64_VC9.lib&quot;"
 				OutputFile="$(OutDir)\$(ProjectName)D_x64.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -230,7 +228,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)lib\VC9\$(ConfigurationName)\$(PlatformName)\crnlib_VC9.lib&quot;"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -315,7 +312,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)lib\VC9\$(ConfigurationName)\$(PlatformName)\crnlib_x64_VC9.lib&quot;"
 				OutputFile="$(OutDir)\$(ProjectName)_x64.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
@@ -397,7 +393,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)lib\VC9\$(ConfigurationName)\$(PlatformName)\crnlibD_DLL_VC9.lib&quot;"
 				OutputFile="$(OutDir)\$(ProjectName)D_DLL.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -476,7 +471,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)lib\VC9\$(ConfigurationName)\$(PlatformName)\crnlibD_DLL_x64_VC9.lib&quot;"
 				OutputFile="$(OutDir)\$(ProjectName)D_DLL_x64.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -560,7 +554,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)lib\VC9\$(ConfigurationName)\$(PlatformName)\crnlib_DLL_VC9.lib&quot;"
 				OutputFile="$(OutDir)\$(ProjectName)_DLL.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
@@ -646,7 +639,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)lib\VC9\$(ConfigurationName)\$(PlatformName)\crnlib_DLL_x64_VC9.lib&quot;"
 				OutputFile="$(OutDir)\$(ProjectName)_DLL_x64.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
