@@ -9,7 +9,7 @@
 
  * crnlib currently assumes you'll be further losslessly compressing its output .DDS files using LZMA. However, some engines use weaker codecs such as LZO, zlib, etc., so crnlib's bitrate measurements will be inaccurate. It should be easy to allow the caller to plug-in custom lossless compressors for bitrate measurement.
 
- * Compressing to a desired bitrate can be very time consuming, especially when processing large (2k or 4k) images to the .CRN format. There are several high-level optimizations employed when compressing to clustered DXTn .DDS files using multiple trials, but not so for .CRN.
+ * Compressing to a desired bitrate can be very (to extremely) time consuming, especially when processing large (2k or 4k) images to the .CRN format. There are several high-level optimizations employed when compressing to clustered DXTn .DDS files using multiple trials, but not so for .CRN.
 
  The current approach compresses the input image multiple times, using an [http://en.wikipedia.org/wiki/Interpolation_search interpolation search] to find the quality level index that gets closest to the target bitrate. The lib does have some functionality to save the closest quality level found for later runs, but the command line tool doesn't expose this feature yet.
 
