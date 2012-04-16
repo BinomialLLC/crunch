@@ -1,5 +1,5 @@
-crunch/crnlib v1.00 - Advanced DXTn texture compression library
-Copyright (C) 2010-2011 Tenacious Software LLC
+crunch/crnlib v1.01 - Advanced DXTn texture compression library
+Copyright (C) 2010-2012 Rich Geldreich and Tenacious Software LLC
 
 For bugs or support contact Rich Geldreich <richgel99@gmail.com>.
 

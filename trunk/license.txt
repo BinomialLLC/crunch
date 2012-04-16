@@ -1,7 +1,7 @@
 crunch/crnlib uses the ZLIB license:
 http://opensource.org/licenses/Zlib
 
-Copyright (c) 2010-2011 Tenacious Software LLC
+Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages

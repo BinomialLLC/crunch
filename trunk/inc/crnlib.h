@@ -1,5 +1,5 @@
 // File: crnlib.h - Advanced DXTn texture compression library.
-// Copyright (c) 2010-2011 Tenacious Software LLC
+// Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC
 // See copyright notice and license at the end of this file.
 //
 // This header file contains the public crnlib declarations for DXTn and
@@ -13,7 +13,7 @@
 #ifndef CRNLIB_H
 #define CRNLIB_H
 
-#define CRNLIB_VERSION 100
+#define CRNLIB_VERSION 101
 
 typedef unsigned char   crn_uint8;
 typedef unsigned short  crn_uint16;
@@ -529,7 +529,7 @@ void crn_free_block_compressor(crn_block_compressor_context_t pContext);
 // crnlib uses the ZLIB license:
 // http://opensource.org/licenses/Zlib
 //
-// Copyright (c) 2010-2011 Tenacious Software LLC
+// Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC
 // 
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
