@@ -620,7 +620,17 @@ namespace crnlib
       uint pitch = desc.lPitch;
       if (!pitch)
          pitch = default_pitch;
-      else if ((pitch > default_pitch * 8) || (pitch & 3))
+#if 0      
+      else if (pitch & 3)
+      {
+         // MS's DDS docs say the pitch must be DWORD aligned - but this isn't always the case.
+         // ATI Compressonator writes images with non-DWORD aligned pitches, and the DDSWithoutD3DX sample from MS doesn't compute the proper DWORD aligned pitch when reading DDS
+         // files, so the docs must be wrong/outdated.
+         console::warning(L"DDS file's pitch is not divisible by 4 - trying to load anyway.");
+      }
+#endif
+      // Check for obviously wacky source pitches (probably a corrupted/invalid file).
+      else if (pitch > default_pitch * 8)
       {
          set_last_error(L"Invalid pitch");
          return false;
@@ -946,6 +956,10 @@ namespace crnlib
                break;
             }
          }
+
+         uint bits_per_pixel = pixel_format_helpers::get_bpp(m_format);
+         desc.lPitch = (((desc.dwWidth + 3) & ~3) * ((desc.dwHeight + 3) & ~3) * bits_per_pixel) >> 3;
+         desc.dwFlags |= DDSD_LINEARSIZE;
       }
       else
       {
@@ -998,8 +1012,12 @@ namespace crnlib
                return false;
             }
          }
-      }
 
+         uint bits_per_pixel = desc.ddpfPixelFormat.dwRGBBitCount;
+         desc.lPitch = (desc.dwWidth * bits_per_pixel) >> 3;
+         desc.dwFlags |= DDSD_LINEARSIZE;
+      }
+      
       if (!c_crnlib_little_endian_platform)
          utils::endian_switch_dwords(reinterpret_cast<uint32*>(&desc), sizeof(desc) / sizeof(uint32));
 
@@ -1272,6 +1290,7 @@ namespace crnlib
             else
             {
                image_u8* p = crnlib_new<image_u8>(mip_width, mip_height);
+               p->set_comp_flags(m_comp_flags);
                m_faces[f][l]->assign(p, m_format);
             }
          }

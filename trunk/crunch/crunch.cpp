@@ -65,6 +65,7 @@ public:
 
    static void print_usage()
    {
+      //                -------------------------------------------------------------------------------
       console::message(L"\nCommand line usage:");
       console::printf(L"crunch [options] -file filename");
       console::printf(L"-file filename - Required input filename, wildcards, multiple /file params OK.");
@@ -104,7 +105,7 @@ public:
       console::printf(L"/mipstats - Print statistics for each mipmap, not just the top mip");
       console::printf(L"/lzmastats - Print size of output file compressed with LZMA codec");
       console::printf(L"/split - Write faces/mip levels to multiple separate output files");
-
+      
       console::message(L"\nImage rescaling (mutually exclusive options)");
       console::printf(L"/rescale <int> <int> - Rescale image to specified resolution");
       console::printf(L"/relscale <float> <float> - Rescale image to specified relative resolution");
@@ -125,9 +126,14 @@ public:
       console::printf(L"/ca # - Alpha endpoint palette size, 32-8192, default=3072");
       console::printf(L"/sa # - Alpha selector palette size, 32-8192, default=3072");
 
+      //                -------------------------------------------------------------------------------
       console::message(L"\nMipmap filtering options:");
       console::printf(L"/mipMode [UseSourceOrGenerate,UseSource,Generate,None]");
       console::printf(L"         Default mipMode is UseSourceOrGenerate");
+      console::printf(L" UseSourceOrGenerate: Use source mipmaps if possible, or create new mipmaps.");
+      console::printf(L" UseSource: Always use source mipmaps, if any (never generate new mipmaps)");
+      console::printf(L" Generate: Always generate a new mipmap chain (ignore source mipmaps)");
+      console::printf(L" None: Do not output any mipmaps");
       console::printf(L"/mipFilter [box,tent,lanczos4,mitchell,kaiser], default=kaiser");
       console::printf(L"/gamma # - Mipmap gamma correction value, default=2.2, use 1.0 for linear");
       console::printf(L"/blurriness # - Scale filter kernel, >1=blur, <1=sharpen, .01-8, default=.9");
@@ -150,12 +156,16 @@ public:
       console::printf(L"/forceprimaryencoding - Only use DXT1 color4 and DXT5 alpha8 block encodings.");
       console::printf(L"/usetransparentindicesforblack - Try DXT1 transparent indices for dark pixels.");
 
+      console::message(L"\nOuptut pixel format options:");
+      console::printf(L"/usesourceformat - Use input file's format for output format (when possible).");
       console::message(L"\nAll supported texture formats (Note: .CRN only supports DXTn pixel formats):");
       for (uint i = 0; i < pixel_format_helpers::get_num_formats(); i++)
       {
          pixel_format fmt = pixel_format_helpers::get_pixel_format_by_index(i);
          console::printf(L"/%s", pixel_format_helpers::get_pixel_format_string(fmt));
       }
+
+      console::printf(L"\nFor bugs, support, or feedback: richgel99@gmail.com");
    }
 
    bool convert(const wchar_t* pCommand_line)
@@ -221,6 +231,7 @@ public:
          { L"info" },
          { L"forceprimaryencoding" },
          { L"usetransparentindicesforblack" },
+         { L"usesourceformat" },
 
          { L"rescalemode", 1 },
          { L"rescale", 2 },
@@ -475,10 +486,17 @@ private:
 
          if (!m_params.has_key(L"fileformat"))
          {
-            texture_file_types::format input_file_type = texture_file_types::determine_file_format(in_filename.get_ptr());
-            if (input_file_type == texture_file_types::cFormatCRN)
+            if (m_params.has_key(L"split"))
             {
-               out_file_type = texture_file_types::cFormatDDS;
+               out_file_type = texture_file_types::cFormatTGA;
+            }
+            else
+            {
+               texture_file_types::format input_file_type = texture_file_types::determine_file_format(in_filename.get_ptr());
+               if (input_file_type == texture_file_types::cFormatCRN)
+               {
+                  out_file_type = texture_file_types::cFormatDDS;
+               }
             }
          }
 
@@ -1106,6 +1124,7 @@ private:
       params.m_dst_file_type = out_file_type;
       params.m_lzma_stats = m_params.has_key(L"lzmastats");
       params.m_write_mipmaps_to_multiple_files = m_params.has_key(L"split");
+      params.m_use_source_format = m_params.has_key(L"usesourceformat");
 
       if ((!m_params.get_value_as_bool(L"noprogress")) && (!m_params.get_value_as_bool(L"quiet")))
          params.m_pProgress_func = progress_callback_func;
@@ -1203,8 +1222,8 @@ static bool check_for_option(int argc, wchar_t *argv[], const wchar_t *pOption)
 
 static void print_title()
 {
-   console::printf(L"crunch: Advanced DXTn Texture Compressor");
-   console::printf(L"Copyright (c) 2010-2011 Tenacious Software LLC");
+   console::printf(L"crunch: Advanced DXTn Texture Compressor - http://code.google.com/p/crunch");
+   console::printf(L"Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC");
    console::printf(L"crnlib version v%u.%02u %s Built %s, %s", CRNLIB_VERSION / 100U, CRNLIB_VERSION % 100U, crnlib_is_x64() ? L"x64" : L"x86", U(__DATE__), U(__TIME__));
    console::printf(L"");
 }

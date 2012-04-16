@@ -3,7 +3,8 @@
 // This tool does NOT depend on the crnlib library at all. It only needs the low-level 
 // decompression/transcoding functionality defined in inc/crn_decomp.h.
 // This is the basic functionality a game engine would need to employ at runtime to utilize 
-// .CRN textures.
+// .CRN textures (excluding writing the output DDS file - instead you would provide the DXTn
+// bits directly to OpenGL/D3D).
 // See Copyright Notice and license at the end of inc/crnlib.h
 #include <stdlib.h>
 #include <stdio.h>
@@ -170,6 +171,7 @@ int main(int argc, char *argv[])
    dds_desc.ddpfPixelFormat.dwFourCC = crnd::crnd_crn_format_to_fourcc(fundamental_fmt);
    if (fundamental_fmt != tex_info.m_format)
    {
+      // It's a funky swizzled DXTn format - write its FOURCC to dwRGBBitCount.
       dds_desc.ddpfPixelFormat.dwRGBBitCount = crnd::crnd_crn_format_to_fourcc(tex_info.m_format);
    }
 
@@ -185,6 +187,11 @@ int main(int argc, char *argv[])
          DDSCAPS2_CUBEMAP_POSITIVEX | DDSCAPS2_CUBEMAP_NEGATIVEX | DDSCAPS2_CUBEMAP_POSITIVEY | 
          DDSCAPS2_CUBEMAP_NEGATIVEY | DDSCAPS2_CUBEMAP_POSITIVEZ | DDSCAPS2_CUBEMAP_NEGATIVEZ;
    }
+
+   // Set pitch/linearsize field (some DDS readers require this field to be non-zero).
+   int bits_per_pixel = crnd::crnd_get_crn_format_bits_per_texel(tex_info.m_format);
+   dds_desc.lPitch = (((dds_desc.dwWidth + 3) & ~3) * ((dds_desc.dwHeight + 3) & ~3) * bits_per_pixel) >> 3;
+   dds_desc.dwFlags |= DDSD_LINEARSIZE;
 
    // Write the DDS header to the output file.
    fwrite(&dds_desc, sizeof(dds_desc), 1, pDDS_file);

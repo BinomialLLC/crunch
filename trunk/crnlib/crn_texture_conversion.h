@@ -60,7 +60,8 @@ namespace crnlib
             m_no_stats(false),
             m_lzma_stats(false),
             m_status(false),
-            m_canceled(false)
+            m_canceled(false),
+            m_use_source_format(false)
          {
          }
 
@@ -96,6 +97,7 @@ namespace crnlib
          bool                          m_debugging;
          bool                          m_param_debugging;
          bool                          m_no_stats;
+         bool                          m_use_source_format;
          
          bool                          m_lzma_stats;
          mutable bool                  m_status;
