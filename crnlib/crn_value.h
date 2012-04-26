@@ -2,7 +2,7 @@
 // See Copyright Notice and license at the end of inc/crnlib.h
 #pragma once
 #include "crn_strutils.h"
-#include "crn_dynamic_wstring.h"
+#include "crn_dynamic_string.h"
 #include "crn_vec.h"
 
 namespace crnlib
@@ -21,7 +21,7 @@ namespace crnlib
       cDTTotal
    };
 
-   extern const wchar_t* gValueDataTypeStrings[cDTTotal + 1];
+   extern const char* gValueDataTypeStrings[cDTTotal + 1];
 
    class value
    {
@@ -31,13 +31,13 @@ namespace crnlib
       {
       }
 
-      value(const wchar_t* pStr) :
-         m_pStr(crnlib_new<dynamic_wstring>(pStr)), m_type(cDTString)
+      value(const char* pStr) :
+         m_pStr(crnlib_new<dynamic_string>(pStr)), m_type(cDTString)
       {
       }
 
-       value(const dynamic_wstring& str) :
-         m_pStr(crnlib_new<dynamic_wstring>(str)), m_type(cDTString)
+       value(const dynamic_string& str) :
+         m_pStr(crnlib_new<dynamic_string>(str)), m_type(cDTString)
       {
       }
 
@@ -125,7 +125,7 @@ namespace crnlib
          m_type = cDTInvalid;
       }
 
-      void set_string(const wchar_t* pStr)
+      void set_string(const char* pStr)
       {
          set_str(pStr);
       }
@@ -170,7 +170,7 @@ namespace crnlib
          m_pVec3I->set(v);
       }
 
-      bool parse(const wchar_t* p)
+      bool parse(const char* p)
       {
          if ((!p) || (!p[0]))
          {
@@ -178,12 +178,12 @@ namespace crnlib
             return false;
          }
 
-         if (_wcsicmp(p, L"false") == 0)
+         if (_stricmp(p, "false") == 0)
          {
             set_bool(false);
             return true;
          }
-         else if (_wcsicmp(p, L"true") == 0)
+         else if (_stricmp(p, "true") == 0)
          {
             set_bool(true);
             return true;
@@ -191,7 +191,7 @@ namespace crnlib
 
          if (p[0] == '\"')
          {
-            dynamic_wstring str;
+            dynamic_string str;
             str = p + 1;
             if (!str.is_empty())
             {
@@ -205,21 +205,21 @@ namespace crnlib
             }
          }
 
-         if (wcschr(p, L',') != NULL)
+         if (strchr(p, ',') != NULL)
          {
             float fx = 0, fy = 0, fz = 0;
 #ifdef _MSC_VER
-            if (swscanf_s(p, L"%f,%f,%f", &fx, &fy, &fz) == 3)
+            if (sscanf_s(p, "%f,%f,%f", &fx, &fy, &fz) == 3)
 #else
-            if (swscanf(p, L"%f,%f,%f", &fx, &fy, &fz) == 3)
+            if (sscanf(p, "%f,%f,%f", &fx, &fy, &fz) == 3)
 #endif
             {
                bool as_float = true;
                int ix = 0, iy = 0, iz = 0;
 #ifdef _MSC_VER
-               if (swscanf_s(p, L"%i,%i,%i", &ix, &iy, &iz) == 3)
+               if (sscanf_s(p, "%i,%i,%i", &ix, &iy, &iz) == 3)
 #else
-               if (swscanf(p, L"%i,%i,%i", &ix, &iy, &iz) == 3)
+               if (sscanf(p, "%i,%i,%i", &ix, &iy, &iz) == 3)
 #endif
                {
                   if ((ix == fx) && (iy == fy) && (iz == fz))
@@ -235,7 +235,7 @@ namespace crnlib
             }
          }
 
-         const wchar_t* q = p;
+         const char* q = p;
          bool success = string_to_uint(q, m_uint);
          if ((success) && (*q == 0))
          {
@@ -264,18 +264,18 @@ namespace crnlib
          return true;
       }
 
-      dynamic_wstring& get_as_string(dynamic_wstring& dst) const
+      dynamic_string& get_as_string(dynamic_string& dst) const
       {
          switch (m_type)
          {
             case cDTInvalid:  dst.clear(); break;
             case cDTString:   dst = *m_pStr; break;
-            case cDTBool:     dst = m_bool ? L"TRUE" : L"FALSE"; break;
-            case cDTInt:      dst.format(L"%i", m_int); break;
-            case cDTUInt:     dst.format(L"%u", m_uint); break;
-            case cDTFloat:    dst.format(L"%f", m_float); break;
-            case cDTVec3F:    dst.format(L"%f,%f,%f", (*m_pVec3F)[0], (*m_pVec3F)[1], (*m_pVec3F)[2]); break;
-            case cDTVec3I:    dst.format(L"%i,%i,%i", (*m_pVec3I)[0], (*m_pVec3I)[1], (*m_pVec3I)[2]); break;
+            case cDTBool:     dst = m_bool ? "TRUE" : "FALSE"; break;
+            case cDTInt:      dst.format("%i", m_int); break;
+            case cDTUInt:     dst.format("%u", m_uint); break;
+            case cDTFloat:    dst.format("%f", m_float); break;
+            case cDTVec3F:    dst.format("%f,%f,%f", (*m_pVec3F)[0], (*m_pVec3F)[1], (*m_pVec3F)[2]); break;
+            case cDTVec3I:    dst.format("%i,%i,%i", (*m_pVec3I)[0], (*m_pVec3I)[1], (*m_pVec3I)[2]); break;
             default: break;
          }
 
@@ -293,7 +293,7 @@ namespace crnlib
             }
             case cDTString:
             {
-               const wchar_t* p = m_pStr->get_ptr();
+               const char* p = m_pStr->get_ptr();
                return string_to_int(p, val);
             }
             case cDTBool:  val = m_bool; break;
@@ -359,7 +359,7 @@ namespace crnlib
             }
             case cDTString:
             {
-               const wchar_t* p = m_pStr->get_ptr();
+               const char* p = m_pStr->get_ptr();
                return string_to_uint(p, val);
             }
             case cDTBool:
@@ -438,7 +438,7 @@ namespace crnlib
             }
             case cDTString:
             {
-               const wchar_t* p = m_pStr->get_ptr();
+               const char* p = m_pStr->get_ptr();
                return string_to_bool(p, val);
             }
             case cDTBool:
@@ -497,7 +497,7 @@ namespace crnlib
             }
             case cDTString:
             {
-               const wchar_t* p = m_pStr->get_ptr();
+               const char* p = m_pStr->get_ptr();
                return string_to_float(p, val);
             }
             case cDTBool:
@@ -556,12 +556,12 @@ namespace crnlib
             }
             case cDTString:
             {
-               const wchar_t* p = m_pStr->get_ptr();
+               const char* p = m_pStr->get_ptr();
                float x = 0, y = 0, z = 0;
 #ifdef _MSC_VER
-               if (wscanf_s(p, L"%f,%f,%f", &x, &y, &z) == 3)
+               if (sscanf_s(p, "%f,%f,%f", &x, &y, &z) == 3)
 #else
-               if (wscanf(p, L"%f,%f,%f", &x, &y, &z) == 3)
+               if (sscanf(p, "%f,%f,%f", &x, &y, &z) == 3)
 #endif
                {
                   val.set(x, y, z);
@@ -619,12 +619,12 @@ namespace crnlib
             }
             case cDTString:
             {
-               const wchar_t* p = m_pStr->get_ptr();
+               const char* p = m_pStr->get_ptr();
                float x = 0, y = 0, z = 0;
 #ifdef _MSC_VER
-               if (wscanf_s(p, L"%f,%f,%f", &x, &y, &z) == 3)
+               if (sscanf_s(p, "%f,%f,%f", &x, &y, &z) == 3)
 #else
-               if (wscanf(p, L"%f,%f,%f", &x, &y, &z) == 3)
+               if (sscanf(p, "%f,%f,%f", &x, &y, &z) == 3)
 #endif
                {
                   if ((x < INT_MIN) || (x > INT_MAX) || (y < INT_MIN) || (y > INT_MAX) || (z < INT_MIN) || (z > INT_MAX))
@@ -963,7 +963,7 @@ namespace crnlib
             switch (m_type)
             {
                case cDTString:
-                  m_pStr = crnlib_new<dynamic_wstring>();
+                  m_pStr = crnlib_new<dynamic_string>();
                   break;
                case cDTVec3F:
                   m_pVec3F = crnlib_new<vec3F>();
@@ -976,7 +976,7 @@ namespace crnlib
          }
       }
 
-      void set_str(const dynamic_wstring& s)
+      void set_str(const dynamic_string& s)
       {
          if (m_type == cDTString)
             m_pStr->set(s);
@@ -985,11 +985,11 @@ namespace crnlib
             clear_dynamic();
 
             m_type = cDTString;
-            m_pStr = crnlib_new<dynamic_wstring>(s);
+            m_pStr = crnlib_new<dynamic_string>(s);
          }
       }
 
-      void set_str(const wchar_t* p)
+      void set_str(const char* p)
       {
          if (m_type == cDTString)
             m_pStr->set(p);
@@ -998,7 +998,7 @@ namespace crnlib
             clear_dynamic();
 
             m_type = cDTString;
-            m_pStr = crnlib_new<dynamic_wstring>(p);
+            m_pStr = crnlib_new<dynamic_string>(p);
          }
       }
 
@@ -1013,7 +1013,7 @@ namespace crnlib
 
          vec3F*            m_pVec3F;
          vec3I*            m_pVec3I;
-         dynamic_wstring*  m_pStr;
+         dynamic_string*   m_pStr;
 
          uint              m_union[cUnionSize];
       };

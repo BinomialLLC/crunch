@@ -7,8 +7,8 @@
 #endif
 #include "crn_ryg_dxt.hpp"
 #include "crn_dxt_fast.h"
-#include "crn_task_pool.h"
 #include "crn_console.h"
+#include "crn_threading.h"
 
 #if CRNLIB_SUPPORT_ATI_COMPRESS
    #ifdef _DLL
@@ -216,8 +216,8 @@ namespace crnlib
       dxt_format                    m_fmt;
       const image_u8*               m_pImg;
       const dxt_image::pack_params* m_pParams;
-      uint32                        m_main_thread;
-      int32                         m_canceled;
+      crn_thread_id_t               m_main_thread;
+      atomic32_t                    m_canceled;
    };
 
    void dxt_image::init_task(uint64 data, void* pData_ptr)
@@ -227,7 +227,7 @@ namespace crnlib
 
       const image_u8& img = *pInit_params->m_pImg;
       const pack_params& p = *pInit_params->m_pParams;
-      const bool is_main_thread = (get_current_thread_id() == pInit_params->m_main_thread);
+      const bool is_main_thread = (crn_get_current_thread_id() == pInit_params->m_main_thread);
 
       uint block_index = 0;
 
@@ -252,7 +252,7 @@ namespace crnlib
                   prev_progress_percentage = progress_percentage;
                   if (!(p.m_pProgress_callback)(progress_percentage, p.m_pProgress_callback_user_data_ptr))
                   {
-                     interlocked_exchange32(&pInit_params->m_canceled, CRNLIB_TRUE);
+                     atomic_exchange32(&pInit_params->m_canceled, CRNLIB_TRUE);
                      return;
                   }
                }
@@ -351,7 +351,7 @@ namespace crnlib
 
       if (fmt == cDXT1A)
       {
-         options.bDXT1UseAlpha = TRUE;
+         options.bDXT1UseAlpha = true;
          options.nAlphaThreshold = (ATI_TC_BYTE)p.m_dxt1a_alpha_threshold;
       }
       options.bDisableMultiThreading = (p.m_num_helper_threads == 0);
@@ -370,7 +370,7 @@ namespace crnlib
 
       if (p.m_perceptual)
       {
-         options.bUseChannelWeighting = TRUE;
+         options.bUseChannelWeighting = true;
          options.fWeightingRed =   .212671f;
          options.fWeightingGreen = .715160f;
          options.fWeightingBlue =  .072169f;
@@ -405,7 +405,7 @@ namespace crnlib
       init_params.m_fmt = fmt;
       init_params.m_pImg = &img;
       init_params.m_pParams = &p;
-      init_params.m_main_thread = get_current_thread_id();
+      init_params.m_main_thread = crn_get_current_thread_id();
       init_params.m_canceled = false;
 
       for (uint i = 0; i <= p.m_num_helper_threads; i++)
@@ -1135,7 +1135,7 @@ namespace crnlib
 
    int dxt_image::get_block_endpoints(uint block_x, uint block_y, uint element_index, color_quad_u8& low_endpoint, color_quad_u8& high_endpoint, bool scaled) const
    {
-      uint l, h;
+      uint l = 0, h = 0;
       get_block_endpoints(block_x, block_y, element_index, l, h);
 
       switch (m_element_type[element_index])

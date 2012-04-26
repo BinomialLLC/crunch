@@ -228,7 +228,7 @@ namespace crnlib
             
             sym_freq& sf = state.syms0[num_used_syms];
             sf.m_left = (uint16)i;
-            sf.m_right = UINT16_MAX;
+            sf.m_right = cUINT16_MAX;
             sf.m_freq = freq;
             num_used_syms++;
          }            
@@ -263,8 +263,8 @@ namespace crnlib
 #else    
       // Dummy node
       sym_freq& sf = state.syms0[num_used_syms];
-      sf.m_left = UINT16_MAX;
-      sf.m_right = UINT16_MAX;
+      sf.m_left = cUINT16_MAX;
+      sf.m_right = cUINT16_MAX;
       sf.m_freq = UINT_MAX;
       
       uint next_internal_node = num_used_syms + 1;

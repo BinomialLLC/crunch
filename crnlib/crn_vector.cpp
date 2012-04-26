@@ -6,14 +6,13 @@
 
 #include "crn_color.h"
 #include "crn_vec.h"
-#include <stdio.h>
 
 namespace crnlib
 {
    bool elemental_vector::increase_capacity(uint min_new_capacity, bool grow_hint, uint element_size, object_mover pMover, bool nofail)
    {
       CRNLIB_ASSERT(m_size <= m_capacity);
-#ifdef CRNLIB_PLATFORM_PC_X64
+#ifdef CRNLIB_64BIT_POINTERS
       CRNLIB_ASSERT(min_new_capacity < (0x400000000ULL / element_size));
 #else
       CRNLIB_ASSERT(min_new_capacity < (0x7FFF0000U / element_size));

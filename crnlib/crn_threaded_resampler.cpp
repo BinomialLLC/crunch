@@ -3,6 +3,7 @@
 #include "crn_core.h"
 #include "crn_threaded_resampler.h"
 #include "crn_resample_filters.h"
+#include "crn_threading.h"
 
 namespace crnlib
 {

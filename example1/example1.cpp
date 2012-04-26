@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
             uint f;
             for (f = 0; f < cCRNFmtTotal; f++)
             {
-               if (!_stricmp(argv[i], crn_get_format_stringa(static_cast<crn_format>(f))))
+               if (!_stricmp(argv[i], crn_get_format_string(static_cast<crn_format>(f))))
                {
                   fmt = static_cast<crn_format>(f);
                   break;
@@ -456,7 +456,7 @@ int main(int argc, char *argv[])
       float actual_bitrate;
       crn_uint32 output_file_size;
 
-      printf("Compressing to %s\n", crn_get_format_stringa(comp_params.m_format));
+      printf("Compressing to %s\n", crn_get_format_string(comp_params.m_format));
       
       // Now compress to DDS or CRN.
       void *pOutput_file_data = crn_compress(comp_params, mip_params, output_file_size, &actual_quality_level, &actual_bitrate);

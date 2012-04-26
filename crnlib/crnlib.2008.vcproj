@@ -587,6 +587,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\crn_atomics.h"
+				>
+			</File>
+			<File
 				RelativePath=".\crn_core.cpp"
 				>
 				<FileConfiguration
@@ -978,13 +982,6 @@
 				<File
 					RelativePath=".\crn_lzma_codec.cpp"
 					>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\crn_lzma_codec.h"
@@ -1063,63 +1060,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\crn_dynamic_wstring.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_dynamic_wstring.h"
-					>
-				</File>
-				<File
 					RelativePath=".\crn_strutils.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\crn_strutils.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="win32"
-				>
-				<File
-					RelativePath=".\crn_win32_console.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_win32_console.h"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_win32_file_utils.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_win32_file_utils.h"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_win32_find_files.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_win32_find_files.h"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_win32_threading.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_win32_threading.h"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_win32_timer.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_win32_timer.h"
 					>
 				</File>
 			</Filter>
@@ -1167,6 +1112,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\crn_timer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\crn_timer.h"
+					>
+				</File>
+				<File
 					RelativePath=".\crn_traits.h"
 					>
 				</File>
@@ -1211,6 +1164,14 @@
 				Name="console"
 				>
 				<File
+					RelativePath=".\crn_colorized_console.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\crn_colorized_console.h"
+					>
+				</File>
+				<File
 					RelativePath=".\crn_console.cpp"
 					>
 				</File>
@@ -1223,35 +1184,26 @@
 				Name="threading"
 				>
 				<File
-					RelativePath=".\crn_condition_var.cpp"
+					RelativePath=".\crn_threading.h"
 					>
 				</File>
 				<File
-					RelativePath=".\crn_condition_var.h"
+					RelativePath=".\crn_threading_null.h"
 					>
 				</File>
 				<File
-					RelativePath=".\crn_event.h"
+					RelativePath=".\crn_threading_win32.cpp"
 					>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\crn_mutex.h"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_semaphore.h"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_spinlock.h"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_task_pool.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\crn_task_pool.h"
+					RelativePath=".\crn_threading_win32.h"
 					>
 				</File>
 			</Filter>
@@ -1472,6 +1424,26 @@
 				</File>
 				<File
 					RelativePath="..\inc\dds_defs.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="file"
+				>
+				<File
+					RelativePath=".\crn_file_utils.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\crn_file_utils.h"
+					>
+				</File>
+				<File
+					RelativePath=".\crn_find_files.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\crn_find_files.h"
 					>
 				</File>
 			</Filter>

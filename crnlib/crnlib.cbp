@@ -14,6 +14,7 @@
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
 				<Compiler>
+					<Add option="-Wextra" />
 					<Add option="-Wall" />
 					<Add option="-g" />
 				</Compiler>
@@ -26,8 +27,11 @@
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
 				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-Wextra" />
 					<Add option="-Wall" />
-					<Add option="-O2" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -35,6 +39,8 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Wextra" />
+			<Add option="-Wall" />
 			<Add option="-Wno-unused-value" />
 			<Add option="-Wno-unused" />
 		</Compiler>
@@ -48,11 +54,12 @@
 		<Unit filename="crn_checksum.h" />
 		<Unit filename="crn_clusterizer.h" />
 		<Unit filename="crn_color.h" />
+		<Unit filename="crn_colorized_console.cpp" />
+		<Unit filename="crn_colorized_console.h" />
 		<Unit filename="crn_command_line_params.cpp" />
 		<Unit filename="crn_command_line_params.h" />
 		<Unit filename="crn_comp.cpp" />
 		<Unit filename="crn_comp.h" />
-		<Unit filename="crn_condition_var.cpp" />
 		<Unit filename="crn_condition_var.h" />
 		<Unit filename="crn_console.cpp" />
 		<Unit filename="crn_console.h" />
@@ -85,9 +92,10 @@
 		<Unit filename="crn_dynamic_stream.h" />
 		<Unit filename="crn_dynamic_string.cpp" />
 		<Unit filename="crn_dynamic_string.h" />
-		<Unit filename="crn_dynamic_wstring.cpp" />
-		<Unit filename="crn_dynamic_wstring.h" />
-		<Unit filename="crn_event.h" />
+		<Unit filename="crn_file_utils.cpp" />
+		<Unit filename="crn_file_utils.h" />
+		<Unit filename="crn_find_files.cpp" />
+		<Unit filename="crn_find_files.h" />
 		<Unit filename="crn_fixed_array.h" />
 		<Unit filename="crn_hash.cpp" />
 		<Unit filename="crn_hash.h" />
@@ -130,18 +138,14 @@
 		<Unit filename="crn_ryg_dxt.cpp" />
 		<Unit filename="crn_ryg_dxt.hpp" />
 		<Unit filename="crn_ryg_types.hpp" />
-		<Unit filename="crn_semaphore.h" />
 		<Unit filename="crn_sparse_array.h" />
 		<Unit filename="crn_sparse_bit_array.cpp" />
 		<Unit filename="crn_sparse_bit_array.h" />
-		<Unit filename="crn_spinlock.h" />
 		<Unit filename="crn_stb_image.cpp" />
 		<Unit filename="crn_strutils.cpp" />
 		<Unit filename="crn_strutils.h" />
 		<Unit filename="crn_symbol_codec.cpp" />
 		<Unit filename="crn_symbol_codec.h" />
-		<Unit filename="crn_task_pool.cpp" />
-		<Unit filename="crn_task_pool.h" />
 		<Unit filename="crn_texture_comp.cpp" />
 		<Unit filename="crn_texture_comp.h" />
 		<Unit filename="crn_texture_conversion.cpp" />
@@ -151,6 +155,13 @@
 		<Unit filename="crn_threaded_clusterizer.h" />
 		<Unit filename="crn_threaded_resampler.cpp" />
 		<Unit filename="crn_threaded_resampler.h" />
+		<Unit filename="crn_threading.h" />
+		<Unit filename="crn_threading_null.h" />
+		<Unit filename="crn_threading_pthreads.h" />
+		<Unit filename="crn_threading_win32.cpp" />
+		<Unit filename="crn_threading_win32.h" />
+		<Unit filename="crn_timer.cpp" />
+		<Unit filename="crn_timer.h" />
 		<Unit filename="crn_traits.h" />
 		<Unit filename="crn_tree_clusterizer.h" />
 		<Unit filename="crn_types.h" />
@@ -162,16 +173,6 @@
 		<Unit filename="crn_vec_interval.h" />
 		<Unit filename="crn_vector.cpp" />
 		<Unit filename="crn_vector.h" />
-		<Unit filename="crn_win32_console.cpp" />
-		<Unit filename="crn_win32_console.h" />
-		<Unit filename="crn_win32_file_utils.cpp" />
-		<Unit filename="crn_win32_file_utils.h" />
-		<Unit filename="crn_win32_find_files.cpp" />
-		<Unit filename="crn_win32_find_files.h" />
-		<Unit filename="crn_win32_threading.cpp" />
-		<Unit filename="crn_win32_threading.h" />
-		<Unit filename="crn_win32_timer.cpp" />
-		<Unit filename="crn_win32_timer.h" />
 		<Unit filename="crn_winhdr.h" />
 		<Unit filename="crn_zeng.cpp" />
 		<Unit filename="crn_zeng.h" />
@@ -180,7 +181,6 @@
 		<Unit filename="lzma_7zBuf.cpp" />
 		<Unit filename="lzma_7zBuf.h" />
 		<Unit filename="lzma_7zBuf2.cpp" />
-		<Unit filename="lzma_7zCrc.cpp" />
 		<Unit filename="lzma_7zCrc.h" />
 		<Unit filename="lzma_7zFile.cpp" />
 		<Unit filename="lzma_7zFile.h" />
@@ -210,9 +210,13 @@
 		<Unit filename="lzma_Threads.cpp" />
 		<Unit filename="lzma_Threads.h" />
 		<Unit filename="lzma_Types.h" />
+		<Unit filename="..\inc\crn_decomp.h" />
+		<Unit filename="..\inc\crnlib.h" />
+		<Unit filename="..\inc\dds_defs.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

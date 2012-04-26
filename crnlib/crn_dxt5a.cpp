@@ -62,7 +62,7 @@ namespace crnlib
       m_trial_selectors.resize(m_unique_values.size());
       m_best_selectors.resize(m_unique_values.size());
 
-      r.m_error = UINT64_MAX;
+      r.m_error = cUINT64_MAX;
 
       for (uint i = 0; i < m_unique_values.size() - 1; i++)
       {

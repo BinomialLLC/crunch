@@ -2,6 +2,7 @@
 // See Copyright Notice and license at the end of inc/crnlib.h
 #pragma once
 #include "crn_clusterizer.h"
+#include "crn_threading.h"
 
 namespace crnlib
 {
@@ -43,7 +44,7 @@ namespace crnlib
          progress_callback_func pProgress_callback,
          void* pProgress_callback_data)
       {
-         m_main_thread_id = get_current_thread_id();
+         m_main_thread_id = crn_get_current_thread_id();
          m_canceled = false;
          m_pProgress_callback = pProgress_callback;
          m_pProgress_callback_data = pProgress_callback_data;
@@ -136,7 +137,7 @@ namespace crnlib
    private:
       task_pool* m_pTask_pool;
 
-      uint32 m_main_thread_id;
+      crn_thread_id_t m_main_thread_id;
 
       struct create_clusters_task_state
       {
@@ -328,7 +329,7 @@ namespace crnlib
          if (m_canceled)
             return;
 
-         const bool is_main_thread = (get_current_thread_id() == m_main_thread_id);
+         const bool is_main_thread = (crn_get_current_thread_id() == m_main_thread_id);
 
          const bool quick = false;
          m_clusterizers[partition_index].generate_codebook(

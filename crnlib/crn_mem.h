@@ -14,7 +14,8 @@ namespace crnlib
    const uint32 CRNLIB_MAX_POSSIBLE_BLOCK_SIZE = 0x7FFF0000U;
 #endif
 
-   void*    crnlib_malloc(size_t size, size_t* pActual_size = NULL);
+   void*    crnlib_malloc(size_t size);
+   void*    crnlib_malloc(size_t size, size_t* pActual_size);
    void*    crnlib_realloc(void* p, size_t size, size_t* pActual_size = NULL, bool movable = true);
    void*    crnlib_calloc(size_t count, size_t size, size_t* pActual_size = NULL);
    void     crnlib_free(void* p);
@@ -183,3 +184,26 @@ namespace crnlib
    }   
    
 } // namespace crnlib
+#define CRNLIB_DEFINE_NEW_DELETE \
+   void* operator new (size_t size) \
+   { \
+      void* p = crnlib::crnlib_malloc(size); \
+      if (!p) \
+         crnlib_fail("new: Out of memory!", __FILE__, __LINE__); \
+      return p; \
+   } \
+   void* operator new[] (size_t size) \
+   { \
+      void* p = crnlib::crnlib_malloc(size); \
+      if (!p) \
+         crnlib_fail("new[]: Out of memory!", __FILE__, __LINE__); \
+      return p; \
+   } \
+   void operator delete (void* p_block) \
+   { \
+      crnlib::crnlib_free(p_block); \
+   } \
+   void operator delete[] (void* p_block) \
+   { \
+      crnlib::crnlib_free(p_block); \
+   }

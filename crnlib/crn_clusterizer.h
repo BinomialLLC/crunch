@@ -140,7 +140,7 @@ namespace crnlib
 
       inline uint get_num_training_vecs() const { return m_training_vecs.size(); }
       const VectorType& get_training_vec(uint index) const { return m_training_vecs[index].first; }
-      const uint get_training_vec_weight(uint index) const { return m_training_vecs[index].second; }
+      uint get_training_vec_weight(uint index) const { return m_training_vecs[index].second; }
 
       typedef crnlib::vector< std::pair<VectorType, uint> > training_vec_array;
 
@@ -170,7 +170,7 @@ namespace crnlib
          return m_codebook;
       }
 
-      const uint find_best_codebook_entry(const VectorType& v) const
+      uint find_best_codebook_entry(const VectorType& v) const
       {
          uint cur_node_index = 0;
 
@@ -218,7 +218,7 @@ namespace crnlib
          }
       }
 
-      const uint find_best_codebook_entry_fs(const VectorType& v) const
+      uint find_best_codebook_entry_fs(const VectorType& v) const
       {
          float best_dist = math::cNearlyInfinite;
          uint best_index = 0;
@@ -362,7 +362,7 @@ namespace crnlib
 
       void compute_split_estimate(VectorType& left_child_res, VectorType& right_child_res, const vq_node& parent_node)
       {
-         VectorType furthest;
+         VectorType furthest(0);
          double furthest_dist = -1.0f;
 
          for (uint i = 0; i < parent_node.m_vectors.size(); i++)
@@ -377,7 +377,7 @@ namespace crnlib
             }
          }
 
-         VectorType opposite;
+         VectorType opposite(0);
          double opposite_dist = -1.0f;
 
          for (uint i = 0; i < parent_node.m_vectors.size(); i++)

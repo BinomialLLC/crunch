@@ -6,6 +6,8 @@
 #include "crn_resampler.h"
 #include "crn_threaded_resampler.h"
 #include "crn_strutils.h"
+#include "crn_file_utils.h"
+#include "crn_threading.h"
 
 #define STBI_HEADER_FILE_ONLY
 #include "crn_stb_image.cpp"
@@ -18,10 +20,10 @@ namespace crnlib
 
    namespace image_utils
    {
-      bool load_from_file_stb(const wchar_t* pFilename, image_u8& img)
+      bool load_from_file_stb(const char* pFilename, image_u8& img)
       {
          int x = 0, y = 0, n = 0;
-         unsigned char* pData = stbi_load_w(pFilename, &x, &y, &n, 4);
+         unsigned char* pData = stbi_load(pFilename, &x, &y, &n, 4);
 
          if (!pData)
             return false;
@@ -66,20 +68,20 @@ namespace crnlib
          return true;
       }
 
-      bool save_to_file_stb(const wchar_t* pFilename, const image_u8& img, uint save_flags, int comp_index)
+      bool save_to_file_stb(const char* pFilename, const image_u8& img, uint save_flags, int comp_index)
       {
          if (!img.get_width())
             return false;
 
          bool bSaveBMP = false;
-         dynamic_wstring ext(pFilename);
-         if (get_extension(ext))
+         dynamic_string ext(pFilename);
+         if (file_utils::get_extension(ext))
          {
-            if (ext == L"bmp")
+            if (ext == "bmp")
                bSaveBMP = true;
-            else if (ext != L"tga")
+            else if (ext != "tga")
             {
-               console::error(L"crnlib::image_utils::save_to_file_stb: Can only write .BMP or .TGA files!\n");
+               console::error("crnlib::image_utils::save_to_file_stb: Can only write .BMP or .TGA files!\n");
                return false;
             }
          }
@@ -114,7 +116,7 @@ namespace crnlib
                }
             }
 
-            return (bSaveBMP ? stbi_write_bmp_w : stbi_write_tga_w)(pFilename, img.get_width(), img.get_height(), 1, &temp[0]) == CRNLIB_TRUE;
+            return (bSaveBMP ? stbi_write_bmp : stbi_write_tga)(pFilename, img.get_width(), img.get_height(), 1, &temp[0]) == CRNLIB_TRUE;
          }
          else if ((!img.is_component_valid(3)) || (save_flags & cSaveIgnoreAlpha))
          {
@@ -138,27 +140,27 @@ namespace crnlib
                }
             }
 
-            return (bSaveBMP ? stbi_write_bmp_w : stbi_write_tga_w)(pFilename, img.get_width(), img.get_height(), 3, &temp[0]) == CRNLIB_TRUE;
+            return (bSaveBMP ? stbi_write_bmp : stbi_write_tga)(pFilename, img.get_width(), img.get_height(), 3, &temp[0]) == CRNLIB_TRUE;
          }
          else
          {
-            return (bSaveBMP ? stbi_write_bmp_w : stbi_write_tga_w)(pFilename, img.get_width(), img.get_height(), 4, img.get_ptr()) == CRNLIB_TRUE;
+            return (bSaveBMP ? stbi_write_bmp : stbi_write_tga)(pFilename, img.get_width(), img.get_height(), 4, img.get_ptr()) == CRNLIB_TRUE;
          }
       }
 
-      bool load_from_file(image_u8& dest, const wchar_t* pFilename, int flags)
+      bool load_from_file(image_u8& dest, const char* pFilename, int flags)
       {
          flags;
          return image_utils::load_from_file_stb(pFilename, dest);
       }
 
-      bool save_to_grayscale_file(const wchar_t* pFilename, const image_u8& src, int component, int flags)
+      bool save_to_grayscale_file(const char* pFilename, const image_u8& src, int component, int flags)
       {
          flags;
          return image_utils::save_to_file_stb(pFilename, src, image_utils::cSaveGrayscale, component);
       }
 
-      bool save_to_file(const wchar_t* pFilename, const image_u8& src, int flags, bool ignore_alpha)
+      bool save_to_file(const char* pFilename, const image_u8& src, int flags, bool ignore_alpha)
       {
          if (src.is_grayscale())
             return save_to_grayscale_file(pFilename, src, cSaveLuma, flags);
@@ -220,7 +222,7 @@ namespace crnlib
          }
       }
 
-      bool is_normal_map(const image_u8& img, const wchar_t* pFilename)
+      bool is_normal_map(const image_u8& img, const char* pFilename)
       {
          float score = 0.0f;
 
@@ -259,13 +261,13 @@ namespace crnlib
 
          if (pFilename)
          {
-            dynamic_wstring str(pFilename);
+            dynamic_string str(pFilename);
             str.tolower();
 
-            if (str.contains(L"normal")  || str.contains(L"local") || str.contains(L"nmap"))
+            if (str.contains("normal")  || str.contains("local") || str.contains("nmap"))
                score += 1.0f;
 
-            if (str.contains(L"diffuse") || str.contains(L"spec") || str.contains(L"gloss"))
+            if (str.contains("diffuse") || str.contains("spec") || str.contains("gloss"))
                score -= 1.0f;
          }
 
@@ -712,32 +714,34 @@ namespace crnlib
          if (!total_blocks)
             return 0.0f;
 
-         //save_to_file_stb(L"ssim.tga", yimg, cSaveGrayscale);
+         //save_to_file_stb("ssim.tga", yimg, cSaveGrayscale);
 
          return total_ssim / total_blocks;
       }
 
       void print_ssim(const image_u8& src_img, const image_u8& dst_img)
       {
-         double y_ssim = compute_ssim(src_img, dst_img, -1);
-         console::printf(L"Luma MSSIM: %f, Scaled: %f", y_ssim, (y_ssim - .8f) / .2f);
+         src_img;
+         dst_img;
+         //double y_ssim = compute_ssim(src_img, dst_img, -1);
+         //console::printf("Luma MSSIM: %f, Scaled: %f", y_ssim, (y_ssim - .8f) / .2f);
 
          //double r_ssim = compute_ssim(src_img, dst_img, 0);
-         //console::printf(L"   R MSSIM: %f", r_ssim);
+         //console::printf("   R MSSIM: %f", r_ssim);
 
          //double g_ssim = compute_ssim(src_img, dst_img, 1);
-         //console::printf(L"   G MSSIM: %f", g_ssim);
+         //console::printf("   G MSSIM: %f", g_ssim);
 
          //double b_ssim = compute_ssim(src_img, dst_img, 2);
-         //console::printf(L"   B MSSIM: %f", b_ssim);
+         //console::printf("   B MSSIM: %f", b_ssim);
       }
 
-      void error_metrics::print(const wchar_t* pName) const
+      void error_metrics::print(const char* pName) const
       {
          if (mPeakSNR >= cInfinitePSNR)
-            console::printf(L"%s Error: Max: %3u, Mean: %3.3f, RMS: %3.3f, PSNR: Infinite", pName, mMax, mMean, mRootMeanSquared);
+            console::printf("%s Error: Max: %3u, Mean: %3.3f, MSE: %3.3f, RMS: %3.3f, PSNR: Infinite", pName, mMax, mMean, mMeanSquared, mRootMeanSquared);
          else
-            console::printf(L"%s Error: Max: %3u, Mean: %3.3f, RMS: %3.3f, PSNR: %3.3f", pName, mMax, mMean, mRootMeanSquared, mPeakSNR);
+            console::printf("%s Error: Max: %3u, Mean: %3.3f, MSE: %3.3f, RMS: %3.3f, PSNR: %3.3f", pName, mMax, mMean, mMeanSquared, mRootMeanSquared, mPeakSNR);
       }
 
       bool error_metrics::compute(const image_u8& a, const image_u8& b, uint first_channel, uint num_channels, bool average_component_error)
@@ -808,35 +812,35 @@ namespace crnlib
       void print_image_metrics(const image_u8& src_img, const image_u8& dst_img)
       {
          if ( (!src_img.get_width()) || (!dst_img.get_height()) || (src_img.get_width() != dst_img.get_width()) || (src_img.get_height() != dst_img.get_height()) )
-            console::printf(L"print_image_metrics: Image resolutions don't match exactly (%ux%u) vs. (%ux%u)", src_img.get_width(), src_img.get_height(), dst_img.get_width(), dst_img.get_height());
+            console::printf("print_image_metrics: Image resolutions don't match exactly (%ux%u) vs. (%ux%u)", src_img.get_width(), src_img.get_height(), dst_img.get_width(), dst_img.get_height());
 
          image_utils::error_metrics error_metrics;
 
          if (src_img.has_rgb() || dst_img.has_rgb())
          {
             error_metrics.compute(src_img, dst_img, 0, 3, false);
-            error_metrics.print(L"RGB Total  ");
+            error_metrics.print("RGB Total  ");
 
             error_metrics.compute(src_img, dst_img, 0, 3, true);
-            error_metrics.print(L"RGB Average");
+            error_metrics.print("RGB Average");
 
             error_metrics.compute(src_img, dst_img, 0, 0);
-            error_metrics.print(L"Luma       ");
+            error_metrics.print("Luma       ");
 
             error_metrics.compute(src_img, dst_img, 0, 1);
-            error_metrics.print(L"Red        ");
+            error_metrics.print("Red        ");
 
             error_metrics.compute(src_img, dst_img, 1, 1);
-            error_metrics.print(L"Green      ");
+            error_metrics.print("Green      ");
 
             error_metrics.compute(src_img, dst_img, 2, 1);
-            error_metrics.print(L"Blue       ");
+            error_metrics.print("Blue       ");
          }
 
          if (src_img.has_alpha() || dst_img.has_alpha())
          {
             error_metrics.compute(src_img, dst_img, 3, 1);
-            error_metrics.print(L"Alpha      ");
+            error_metrics.print("Alpha      ");
          }
       }
 

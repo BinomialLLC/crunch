@@ -9,8 +9,7 @@
 #include "crn_image.h"
 #include "crn_dxt_hc_common.h"
 #include "crn_tree_clusterizer.h"
-#include "crn_task_pool.h"
-#include "crn_spinlock.h"
+#include "crn_threading.h"
 
 #define CRN_NO_FUNCTION_DEFINITIONS
 #include "../inc/crnlib.h"
@@ -163,8 +162,8 @@ namespace crnlib
 
          uint8 m_selectors[cBlockPixelHeight][cBlockPixelWidth];
 
-         uint8 get_by_index(uint i) const { CRNLIB_ASSERT(i < (cBlockPixelWidth * cBlockPixelHeight)); return *(&m_selectors[0][0] + i); }
-         void set_by_index(uint i, uint v) { CRNLIB_ASSERT(i < (cBlockPixelWidth * cBlockPixelHeight)); *(&m_selectors[0][0] + i) = static_cast<uint8>(v); }
+         uint8 get_by_index(uint i) const { CRNLIB_ASSERT(i < (cBlockPixelWidth * cBlockPixelHeight)); const uint8* p = (const uint8*)m_selectors; return *(p + i); }
+         void set_by_index(uint i, uint v) { CRNLIB_ASSERT(i < (cBlockPixelWidth * cBlockPixelHeight)); uint8* p = (uint8*)m_selectors; *(p + i) = static_cast<uint8>(v); }
       };
       typedef crnlib::vector<selectors> selectors_vec;
 
@@ -272,9 +271,9 @@ namespace crnlib
       };
       compressed_chunk_vec m_compressed_chunks[cNumCompressedChunkVecs];
 
-      int32 m_encoding_hist[cNumChunkEncodings];
+      volatile atomic32_t m_encoding_hist[cNumChunkEncodings];
 
-      int32 m_total_tiles;
+      atomic32_t m_total_tiles;
 
       void compress_dxt1_block(
          dxt1_endpoint_optimizer::results& results,
@@ -350,7 +349,7 @@ namespace crnlib
 
       pixel_chunk_vec m_dbg_chunk_pixels_final;
 
-      uint32 m_main_thread_id;
+      crn_thread_id_t m_main_thread_id;
       bool m_canceled;
       task_pool* m_pTask_pool;
 

@@ -2,7 +2,6 @@
 // See Copyright Notice and license at the end of inc/crnlib.h
 #include "crn_core.h"
 #include "crn_data_stream.h"
-#include <stdio.h>
 
 namespace crnlib
 {
@@ -12,7 +11,7 @@ namespace crnlib
    {
    }
 
-   data_stream::data_stream(const wchar_t* pName, uint attribs) :
+   data_stream::data_stream(const char* pName, uint attribs) :
       m_name(pName),
       m_attribs(static_cast<uint16>(attribs)),
       m_opened(false), m_error(false), m_got_cr(false)
@@ -85,42 +84,17 @@ namespace crnlib
       va_list args;
 
       va_start(args, p);
-      char buf[4096];
-#ifdef _MSC_VER
-      int l = vsprintf_s(buf, sizeof(buf), p, args);
-#else
-      int l = vsprintf(buf, p, args);
-#endif
-      va_end(args);
-      if (l < 0)
-         return false;
-      return write(buf, l) == static_cast<uint>(l);
-   }
-
-   bool data_stream::printf(const wchar_t* p, ...)
-   {
-      va_list args;
-
-      va_start(args, p);
-      dynamic_wstring buf;
+      dynamic_string buf;
       buf.format_args(p, args);
       va_end(args);
 
-      return write(buf.get_ptr(), buf.get_len() * sizeof(wchar_t)) == buf.get_len() * sizeof(wchar_t);
+      return write(buf.get_ptr(), buf.get_len() * sizeof(char)) == buf.get_len() * sizeof(char);
    }
 
    bool data_stream::write_line(const dynamic_string& str)
    {
       if (!str.is_empty())
          return write(str.get_ptr(), str.get_len()) == str.get_len();
-
-      return true;
-   }
-
-   bool data_stream::write_line(const dynamic_wstring& str)
-   {
-      if (!str.is_empty())
-         return write(str.get_ptr(), str.get_len() * sizeof(wchar_t)) == str.get_len() * sizeof(wchar_t);
 
       return true;
    }

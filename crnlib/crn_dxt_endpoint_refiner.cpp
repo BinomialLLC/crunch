@@ -20,7 +20,7 @@ namespace crnlib
       m_pParams = &p;
       m_pResults = &r;
 
-      r.m_error = UINT64_MAX;
+      r.m_error = cUINT64_MAX;
       r.m_low_color = 0;
       r.m_high_color = 0;
 

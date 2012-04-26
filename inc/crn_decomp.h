@@ -1,5 +1,6 @@
-// File: crn_decomp.h - CRN texture decompressor v1.01
+// File: crn_decomp.h - Fast CRN->DXTc texture transcoder header file library
 // Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC
+// See Copyright Notice and license at the end of this file.
 //
 // This single header file contains *all* of the code necessary to unpack .CRN files to raw DXTn bits.
 // It does NOT depend on the crn compression library.
@@ -8,17 +9,14 @@
 //   If CRND_INCLUDE_CRND_H is NOT defined, the header is included.
 //   If CRND_HEADER_FILE_ONLY is NOT defined, the implementation is included.
 
-// Define PLATFORM_NACL if compiling under native client.
-//#define PLATFORM_NACL
-
 #ifndef CRND_INCLUDE_CRND_H
 #define CRND_INCLUDE_CRND_H
 
-// Include crnlib header - only to bring in some basic some CRN-related types.
+// Include crnlib.h (only to bring in some basic CRN-related types).
 #include "crnlib.h"
 
-#define CRND_LIB_VERSION 101
-#define CRND_VERSION_STRING "01.01"
+#define CRND_LIB_VERSION 103
+#define CRND_VERSION_STRING "01.03"
 
 #ifdef _DEBUG
 #define CRND_BUILD_DEBUG
@@ -37,10 +35,13 @@ namespace crnd
    typedef uint32             uint32;
    typedef unsigned int       uint;
    typedef signed int         int32;
-#ifndef PLATFORM_NACL
-   typedef unsigned __int64   uint64;
-   typedef signed __int64     int64;
-#endif
+   #ifdef __GNUC__
+      typedef unsigned long long    uint64;
+      typedef long long             int64;
+   #else
+      typedef unsigned __int64      uint64;
+      typedef signed __int64        int64;
+   #endif
 
    // The crnd library assumes all allocation blocks have at least CRND_MIN_ALLOC_ALIGNMENT alignment.
    const uint32 CRND_MIN_ALLOC_ALIGNMENT = sizeof(uint32) * 2U;
@@ -129,29 +130,32 @@ namespace crnd
    // The crn_file_info.m_struct_size field must be set before calling this function.
    bool crnd_validate_file(const void* pData, uint32 data_size, crn_file_info* pFile_info);
 
+   // Retrieves texture information from the CRN file.
    // The crn_texture_info.m_struct_size field must be set before calling this function.
    bool crnd_get_texture_info(const void* pData, uint32 data_size, crn_texture_info* pTexture_info);
 
+   // Retrieves mipmap level specific information from the CRN file.
    // The crn_level_info.m_struct_size field must be set before calling this function.
    bool crnd_get_level_info(const void* pData, uint32 data_size, uint32 level_index, crn_level_info* pLevel_info);
 
+   // Transcode/unpack context handle.
    typedef void* crnd_unpack_context;
 
    // crnd_unpack_begin() - Decompresses the texture's decoder tables and endpoint/selector palettes.
    // Once you call this function, you may call crnd_unpack_level() to unpack one or more mip levels.
    // Don't call this once per mip level (unless you absolutely must)!
-   // This function allocated enough memory to hold: Huffman decompression tables, and the endpoint/selector palettes (color and/or alpha).
+   // This function allocates enough memory to hold: Huffman decompression tables, and the endpoint/selector palettes (color and/or alpha).
    // Worst case allocation is approx. 200k, assuming all palettes contain 8192 entries.
-   // pData must point to a buffer holding all of the compressed data.
+   // pData must point to a buffer holding all of the compressed .CRN file data.
    // This buffer must be stable until crnd_unpack_end() is called.
-   // Returns NULL on out of memory or if any of the input parameters are invalid.
+   // Returns NULL if out of memory, or if any of the input parameters are invalid.
    crnd_unpack_context crnd_unpack_begin(const void* pData, uint32 data_size);
 
-   // Returns the compressed data associated with a context.
+   // Returns a pointer to the compressed .CRN data associated with a crnd_unpack_context.
    // Returns false if any of the input parameters are invalid.
    bool crnd_get_data(crnd_unpack_context pContext, const void** ppData, uint32* pData_size);
 
-   // crnd_unpack_level() - Unpacks the specified mipmap level to a destination buffer in cached or write combined memory.
+   // crnd_unpack_level() - Transcodes the specified mipmap level to a destination buffer in cached or write combined memory.
    // pContext - Context created by a call to crnd_unpack_begin().
    // ppDst - A pointer to an array of 1 or 6 destination buffer pointers. Cubemaps require an array of 6 pointers, 2D textures require an array of 1 pointer.
    // dst_size_in_bytes - Optional size of each destination buffer. Only used for debugging - OK to set to UINT32_MAX.
@@ -166,14 +170,14 @@ namespace crnd
 
    // crnd_unpack_level_segmented() - Unpacks the specified mipmap level from a "segmented" CRN file.
    // See the crnd_create_segmented_file() API below.
-   // Segmented files allow the user to control where the compressed mipmaps are stored.
+   // Segmented files allow the user to control where the compressed mipmap data is stored.
    bool crnd_unpack_level_segmented(
       crnd_unpack_context pContext,
       const void* pSrc, uint32 src_size_in_bytes,
       void** ppDst, uint32 dst_size_in_bytes, uint32 row_pitch_in_bytes,
       uint32 level_index);
 
-   // crnd_unpack_end() - Frees the decompress tables and unpacked palettes associated with the specified context.
+   // crnd_unpack_end() - Frees the decompress tables and unpacked palettes associated with the specified unpack context.
    // Returns false if the context is NULL, or if it points to an invalid context.
    // This function frees all memory associated with the context.
    bool crnd_unpack_end(crnd_unpack_context pContext);
@@ -189,7 +193,7 @@ namespace crnd
    // Returns the compressed size of the texture's header and compression tables (but no levels).
    uint32 crnd_get_segmented_file_size(const void* pData, uint32 data_size);
 
-   // Creates a "segmented" CRN texture. The new texture will be created at pBase_data, and will be crnd_get_base_data_size() bytes long.
+   // Creates a "segmented" CRN texture from a normal CRN texture. The new texture will be created at pBase_data, and will be crnd_get_base_data_size() bytes long.
    // base_data_size must be >= crnd_get_base_data_size().
    // The base data will contain the CRN header and compression tables, but no mipmap data.
    bool crnd_create_segmented_file(const void* pData, uint32 data_size, void* pBase_data, uint base_data_size);
@@ -310,12 +314,11 @@ namespace crnd
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifndef PLATFORM_NACL
+#ifdef WIN32
 #include <memory.h>
 #else
 #include <malloc.h>
-#include <process.h>
-#endif 
+#endif
 #include <stdarg.h>
 #include <new> // needed for placement new, _msize, _expand
 
@@ -343,7 +346,7 @@ namespace crnd
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifndef 
+#ifndef
 #define NOMINMAX
 #endif
 #include "windows.h" // only for IsDebuggerPresent(), DebugBreak(), and OutputDebugStringA()
@@ -531,10 +534,8 @@ namespace crnd
    CRND_DEFINE_BUILT_IN_TYPE(unsigned int)
    CRND_DEFINE_BUILT_IN_TYPE(long)
    CRND_DEFINE_BUILT_IN_TYPE(unsigned long)
-#ifndef PLATFORM_NACL
-   CRND_DEFINE_BUILT_IN_TYPE(__int64)
-   CRND_DEFINE_BUILT_IN_TYPE(unsigned __int64)
-#endif
+   CRND_DEFINE_BUILT_IN_TYPE(int64)
+   CRND_DEFINE_BUILT_IN_TYPE(uint64)
    CRND_DEFINE_BUILT_IN_TYPE(float)
    CRND_DEFINE_BUILT_IN_TYPE(double)
    CRND_DEFINE_BUILT_IN_TYPE(long double)
@@ -658,7 +659,7 @@ namespace crnd
    namespace math
    {
       const float cNearlyInfinite = 1.0e+37f;
-                  
+
       const float cDegToRad = 0.01745329252f;
       const float cRadToDeg = 57.29577951f;
 
@@ -1275,33 +1276,33 @@ namespace crnd
          component_type c[cNumComps];
       };
 
-      color_quad()
+      inline color_quad()
       {
       }
 
-      color_quad(eClear) :
-      r(0), g(0), b(0), a(0)
+      inline color_quad(eClear) :
+         r(0), g(0), b(0), a(0)
       {
       }
 
-      color_quad(const color_quad& other) :
-      r(other.r), g(other.g), b(other.b), a(other.a)
+      inline color_quad(const color_quad& other) :
+         r(other.r), g(other.g), b(other.b), a(other.a)
       {
       }
 
-      color_quad(parameter_type y, parameter_type alpha = component_traits::cMax)
+      inline color_quad(parameter_type y, parameter_type alpha = component_traits::cMax)
       {
          set(y, alpha);
       }
 
-      color_quad(parameter_type red, parameter_type green, parameter_type blue, parameter_type alpha = component_traits::cMax)
+      inline color_quad(parameter_type red, parameter_type green, parameter_type blue, parameter_type alpha = component_traits::cMax)
       {
          set(red, green, blue, alpha);
       }
 
       template<typename other_component_type, typename other_parameter_type>
-      color_quad(const color_quad<other_component_type, other_parameter_type>& other) :
-      r(clamp(other.r)), g(clamp(other.g)), b(clamp(other.b)), a(clamp(other.a))
+      inline color_quad(const color_quad<other_component_type, other_parameter_type>& other) :
+         r(clamp(other.r)), g(clamp(other.g)), b(clamp(other.b)), a(clamp(other.a))
       {
       }
 
@@ -1313,7 +1314,7 @@ namespace crnd
          a = 0;
       }
 
-      color_quad& operator= (const color_quad& other)
+      inline color_quad& operator= (const color_quad& other)
       {
          r = other.r;
          g = other.g;
@@ -1323,7 +1324,7 @@ namespace crnd
       }
 
       template<typename other_component_type, typename other_parameter_type>
-      color_quad& operator=(const color_quad<other_component_type, other_parameter_type>& other)
+      inline color_quad& operator=(const color_quad<other_component_type, other_parameter_type>& other)
       {
          r = clamp(other.r);
          g = clamp(other.g);
@@ -1332,7 +1333,7 @@ namespace crnd
          return *this;
       }
 
-      color_quad& set(parameter_type y, parameter_type alpha = component_traits::cMax)
+      inline color_quad& set(parameter_type y, parameter_type alpha = component_traits::cMax)
       {
          y = clamp(y);
          r = static_cast<component_type>(y);
@@ -1342,7 +1343,7 @@ namespace crnd
          return *this;
       }
 
-      color_quad& set(parameter_type red, parameter_type green, parameter_type blue, parameter_type alpha = component_traits::cMax)
+      inline color_quad& set(parameter_type red, parameter_type green, parameter_type blue, parameter_type alpha = component_traits::cMax)
       {
          r = static_cast<component_type>(clamp(red));
          g = static_cast<component_type>(clamp(green));
@@ -1351,7 +1352,7 @@ namespace crnd
          return *this;
       }
 
-      color_quad& set_noclamp_rgba(parameter_type red, parameter_type green, parameter_type blue, parameter_type alpha)
+      inline color_quad& set_noclamp_rgba(parameter_type red, parameter_type green, parameter_type blue, parameter_type alpha)
       {
          r = static_cast<component_type>(red);
          g = static_cast<component_type>(green);
@@ -1360,7 +1361,7 @@ namespace crnd
          return *this;
       }
 
-      color_quad& set_noclamp_rgb(parameter_type red, parameter_type green, parameter_type blue)
+      inline color_quad& set_noclamp_rgb(parameter_type red, parameter_type green, parameter_type blue)
       {
          r = static_cast<component_type>(red);
          g = static_cast<component_type>(green);
@@ -1368,14 +1369,14 @@ namespace crnd
          return *this;
       }
 
-      static parameter_type get_min_comp() { return component_traits::cMin; }
-      static parameter_type get_max_comp() { return component_traits::cMax; }
-      static bool get_comps_are_signed() { return component_traits::cSigned; }
+      static inline parameter_type get_min_comp() { return component_traits::cMin; }
+      static inline parameter_type get_max_comp() { return component_traits::cMax; }
+      static inline bool get_comps_are_signed() { return component_traits::cSigned; }
 
-      component_type operator[] (uint32 i) const { CRND_ASSERT(i < cNumComps); return c[i]; }
-      component_type& operator[] (uint32 i) { CRND_ASSERT(i < cNumComps); return c[i]; }
+      inline component_type operator[] (uint32 i) const { CRND_ASSERT(i < cNumComps); return c[i]; }
+      inline component_type& operator[] (uint32 i) { CRND_ASSERT(i < cNumComps); return c[i]; }
 
-      color_quad& set_component(uint32 i, parameter_type f)
+      inline color_quad& set_component(uint32 i, parameter_type f)
       {
          CRND_ASSERT(i < cNumComps);
 
@@ -1384,14 +1385,14 @@ namespace crnd
          return *this;
       }
 
-      color_quad& clamp(const color_quad& l, const color_quad& h)
+      inline color_quad& clamp(const color_quad& l, const color_quad& h)
       {
          for (uint32 i = 0; i < cNumComps; i++)
             c[i] = static_cast<component_type>(math::clamp<parameter_type>(c[i], l[i], h[i]));
          return *this;
       }
 
-      color_quad& clamp(parameter_type l, parameter_type h)
+      inline color_quad& clamp(parameter_type l, parameter_type h)
       {
          for (uint32 i = 0; i < cNumComps; i++)
             c[i] = static_cast<component_type>(math::clamp<parameter_type>(c[i], l, h));
@@ -1409,23 +1410,23 @@ namespace crnd
       {
          return static_cast<parameter_type>((13938U * r + 46869U * g + 4729U * b + 32768U) >> 16U);
       }
-      
-      uint32 squared_distance(const color_quad& c, bool alpha = true) const
+
+      inline uint32 squared_distance(const color_quad& c, bool alpha = true) const
       {
          return math::square(r - c.r) + math::square(g - c.g) + math::square(b - c.b) + (alpha ? math::square(a - c.a) : 0);
       }
 
-      bool rgb_equals(const color_quad& rhs) const
+      inline bool rgb_equals(const color_quad& rhs) const
       {
          return (r == rhs.r) && (g == rhs.g) && (b == rhs.b);
       }
 
-      bool operator== (const color_quad& rhs) const
+      inline bool operator== (const color_quad& rhs) const
       {
          return (r == rhs.r) && (g == rhs.g) && (b == rhs.b) && (a == rhs.a);
       }
 
-      bool operator< (const color_quad& rhs) const
+      inline bool operator< (const color_quad& rhs) const
       {
          for (uint32 i = 0; i < cNumComps; i++)
          {
@@ -1437,76 +1438,76 @@ namespace crnd
          return false;
       }
 
-      color_quad& operator+= (const color_quad& other)
+      inline color_quad& operator+= (const color_quad& other)
       {
          for (uint32 i = 0; i < 4; i++)
             c[i] = static_cast<component_type>(clamp(c[i] + other.c[i]));
          return *this;
       }
 
-      color_quad& operator-= (const color_quad& other)
+      inline color_quad& operator-= (const color_quad& other)
       {
          for (uint32 i = 0; i < 4; i++)
             c[i] = static_cast<component_type>(clamp(c[i] - other.c[i]));
          return *this;
       }
 
-      color_quad& operator*= (parameter_type v)
+      inline color_quad& operator*= (parameter_type v)
       {
          for (uint32 i = 0; i < 4; i++)
             c[i] = static_cast<component_type>(clamp(c[i] * v));
          return *this;
       }
 
-      color_quad& operator/= (parameter_type v)
+      inline color_quad& operator/= (parameter_type v)
       {
          for (uint32 i = 0; i < 4; i++)
             c[i] = static_cast<component_type>(c[i] / v);
          return *this;
       }
 
-      color_quad get_swizzled(uint32 x, uint32 y, uint32 z, uint32 w) const
+      inline color_quad get_swizzled(uint32 x, uint32 y, uint32 z, uint32 w) const
       {
          CRND_ASSERT((x | y | z | w) < 4);
          return color_quad(c[x], c[y], c[z], c[w]);
       }
 
-      friend color_quad operator+ (const color_quad& lhs, const color_quad& rhs)
+      inline friend color_quad operator+ (const color_quad& lhs, const color_quad& rhs)
       {
          color_quad result(lhs);
          result += rhs;
          return result;
       }
 
-      friend color_quad operator- (const color_quad& lhs, const color_quad& rhs)
+      inline friend color_quad operator- (const color_quad& lhs, const color_quad& rhs)
       {
          color_quad result(lhs);
          result -= rhs;
          return result;
       }
 
-      friend color_quad operator* (const color_quad& lhs, parameter_type v)
+      inline friend color_quad operator* (const color_quad& lhs, parameter_type v)
       {
          color_quad result(lhs);
          result *= v;
          return result;
       }
 
-      friend color_quad operator/ (const color_quad& lhs, parameter_type v)
+      friend inline color_quad operator/ (const color_quad& lhs, parameter_type v)
       {
          color_quad result(lhs);
          result /= v;
          return result;
       }
 
-      friend color_quad operator* (parameter_type v, const color_quad& rhs)
+      friend inline color_quad operator* (parameter_type v, const color_quad& rhs)
       {
          color_quad result(rhs);
          result *= v;
          return result;
       }
 
-      uint32 get_min_component_index(bool alpha = true) const
+      inline uint32 get_min_component_index(bool alpha = true) const
       {
          uint32 index = 0;
          uint32 limit = alpha ? cNumComps : (cNumComps - 1);
@@ -1516,7 +1517,7 @@ namespace crnd
          return index;
       }
 
-      uint32 get_max_component_index(bool alpha = true) const
+      inline uint32 get_max_component_index(bool alpha = true) const
       {
          uint32 index = 0;
          uint32 limit = alpha ? cNumComps : (cNumComps - 1);
@@ -1526,24 +1527,24 @@ namespace crnd
          return index;
       }
 
-      void get_float4(float* pDst)
+      inline void get_float4(float* pDst)
       {
          for (uint32 i = 0; i < 4; i++)
             pDst[i] = ((*this)[i] - component_traits::cMin) / float(component_traits::cMax - component_traits::cMin);
       }
 
-      void get_float3(float* pDst)
+      inline void get_float3(float* pDst)
       {
          for (uint32 i = 0; i < 3; i++)
             pDst[i] = ((*this)[i] - component_traits::cMin) / float(component_traits::cMax - component_traits::cMin);
       }
 
-      static color_quad make_black()
+      static inline color_quad make_black()
       {
          return color_quad(0, 0, 0, component_traits::cMax);
       }
 
-      static color_quad make_white()
+      static inline color_quad make_white()
       {
          return color_quad(component_traits::cMax, component_traits::cMax, component_traits::cMax, component_traits::cMax);
       }
@@ -1988,7 +1989,7 @@ namespace crnd
 
    public:
       uint32                           m_total_syms;
-      crnd::vector<uint8>               m_code_sizes;
+      crnd::vector<uint8>              m_code_sizes;
       prefix_coding::decoder_tables*   m_pDecode_tables;
 
    private:
@@ -2009,11 +2010,7 @@ namespace crnd
       uint32 decode_bits(uint32 num_bits);
       uint32 decode(const static_huffman_data_model& model);
 
-#ifdef PLATFORM_NACL
-      uint32 stop_decoding();
-#else 
       uint64 stop_decoding();
-#endif
 
    public:
       const uint8*         m_pDecode_buf;
@@ -2052,7 +2049,7 @@ namespace crnd
 
       crnd_output_debug_string(buf);
 
-      printf(buf);
+      puts(buf);
 
       if (crnd_is_debugger_present())
          crnd_debug_break();
@@ -2421,11 +2418,13 @@ namespace crnd
          p_new = ::malloc(size);
 
          if (pActual_size)
-#ifdef PLATFORM_NACL
-            *pActual_size = p_new ? malloc_usable_size(p_new) : 0;
+         {
+#ifdef WIN32
+            *pActual_size = p_new ? ::_msize(p_new) : 0;
 #else
-            *pActual_size = p_new ? ::_msize(p_new) : 0; 
+            *pActual_size = p_new ? malloc_usable_size(p_new) : 0;
 #endif
+         }
       }
       else if (!size)
       {
@@ -2438,10 +2437,10 @@ namespace crnd
       else
       {
          void* p_final_block = p;
-#ifdef PLATFORM_NACL
-         p_new = ::realloc(p, size);
-#else
+#ifdef WIN32
          p_new = ::_expand(p, size);
+#else
+         p_new = NULL;
 #endif
 
          if (p_new)
@@ -2455,11 +2454,13 @@ namespace crnd
          }
 
          if (pActual_size)
-#ifdef PLATFORM_NACL
-            *pActual_size = ::malloc_usable_size(p_final_block);
-#else
+         {
+#ifdef WIN32
             *pActual_size = ::_msize(p_final_block);
+#else
+            *pActual_size = ::malloc_usable_size(p_final_block);
 #endif
+         }
       }
 
       return p_new;
@@ -2468,10 +2469,10 @@ namespace crnd
    static size_t crnd_default_msize(void* p, void* pUser_data)
    {
       pUser_data;
-#ifdef PLATFORM_NACL
-      return p ? malloc_usable_size(p) : 0;
-#else
+#ifdef WIN32
       return p ? _msize(p) : 0;
+#else
+      return p ? malloc_usable_size(p) : 0;
 #endif
    }
 
@@ -2722,7 +2723,7 @@ namespace crnd
          return false;
       if ((pHeader->m_levels < 1) || (pHeader->m_levels > utils::compute_max_mips(pHeader->m_width, pHeader->m_height)))
          return false;
-      if ((pHeader->m_format < cCRNFmtDXT1) || (pHeader->m_format >= cCRNFmtTotal))
+      if (((int)pHeader->m_format < cCRNFmtDXT1) || ((int)pHeader->m_format >= cCRNFmtTotal))
          return false;
 
       if (pFile_info)
@@ -3277,38 +3278,20 @@ uint32 symbol_codec::decode(const static_huffman_data_model& model)
    return sym;
 }
 
-#ifdef PLATFORM_NACL
-      
-   uint32 symbol_codec::stop_decoding()
-   {
-   #if 0
-      uint32 i = get_bits(4);
-      uint32 k = get_bits(3);
-      i, k;
-      CRND_ASSERT((i == 15) && (k == 3));
-   #endif
-
-      uint32 n = m_pDecode_buf_next - m_pDecode_buf;
-
-      return n;
-   }
-
-#else 
-
    uint64 symbol_codec::stop_decoding()
    {
-   #if 0
+#if 0
       uint32 i = get_bits(4);
       uint32 k = get_bits(3);
       i, k;
       CRND_ASSERT((i == 15) && (k == 3));
-   #endif
+#endif
 
-      uint64 n = m_pDecode_buf_next - m_pDecode_buf;
+      uint64 n = static_cast<uint64>(m_pDecode_buf_next - m_pDecode_buf);
 
       return n;
    }
-#endif
+
 } // namespace crnd
 
 // File: crnd_dxt_hc_common.cpp
@@ -3591,10 +3574,9 @@ namespace crnd
 namespace crnd
 {
 #if CRND_CREATE_BYTE_STREAMS
-   static void write_array_to_file(const wchar_t* pFilename, const vector<uint8>& buf)
+   static void write_array_to_file(const char* pFilename, const vector<uint8>& buf)
    {
-      FILE* pFile;
-      _wfopen_s(&pFile, pFilename, L"wb");
+      FILE* pFile = fopen(pFilename, "wb");
       fwrite(&buf[0], buf.size(), 1, pFile);
       fclose(pFile);
    }
@@ -3659,7 +3641,7 @@ namespace crnd
    class crn_unpacker
    {
    public:
-      crn_unpacker() :
+      inline crn_unpacker() :
          m_magic(cMagicValue),
          m_pData(NULL),
          m_data_size(0),
@@ -3667,7 +3649,7 @@ namespace crnd
       {
       }
 
-      ~crn_unpacker()
+      inline ~crn_unpacker()
       {
          m_magic = 0;
       }
@@ -4828,15 +4810,15 @@ namespace crnd
 // http://opensource.org/licenses/Zlib
 //
 // Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC
-// 
+//
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
 // arising from the use of this software.
-// 
+//
 // Permission is granted to anyone to use this software for any purpose,
 // including commercial applications, and to alter it and redistribute it
 // freely, subject to the following restrictions:
-// 
+//
 // 1. The origin of this software must not be misrepresented; you must not
 // claim that you wrote the original software. If you use this software
 // in a product, an acknowledgment in the product documentation would be

@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
          for (f = 0; f < cCRNFmtTotal; f++)
          {
             crn_format actual_fmt = crn_get_fundamental_dxt_format(static_cast<crn_format>(f));
-            if (!_stricmp(argv[i], crn_get_format_stringa(actual_fmt)))
+            if (!_stricmp(argv[i], crn_get_format_string(actual_fmt)))
             {
                fmt = actual_fmt;
                break;
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
          uint q;
          for (q = 0; q < cCRNDXTQualityTotal; q++)
          {
-            if (!_stricmp(argv[i], crn_get_dxt_quality_stringa(static_cast<crn_dxt_quality>(q))))
+            if (!_stricmp(argv[i], crn_get_dxt_quality_string(static_cast<crn_dxt_quality>(q))))
             {
                dxt_quality = static_cast<crn_dxt_quality>(q);
                break;
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 
    crn_block_compressor_context_t pContext = crn_create_block_compressor(comp_params);
 
-   printf("Compressing to %s:     ", crn_get_format_stringa(fmt));
+   printf("Compressing to %s:     ", crn_get_format_string(fmt));
 
    int prev_percentage_complete = -1;
    for (crn_uint32 block_y = 0; block_y  < num_blocks_y; block_y++)

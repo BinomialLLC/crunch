@@ -15,7 +15,7 @@ namespace crnlib
       dds_comp();
       virtual ~dds_comp();
 
-      virtual const wchar_t *get_ext() const { return L"DDS"; }
+      virtual const char *get_ext() const { return "DDS"; }
 
       virtual bool compress_init(const crn_comp_params& params);
       virtual bool compress_pass(const crn_comp_params& params, float *pEffective_bitrate);
@@ -23,7 +23,7 @@ namespace crnlib
 
       virtual const crnlib::vector<uint8>& get_comp_data() const  { return m_comp_data; }
       virtual       crnlib::vector<uint8>& get_comp_data()        { return m_comp_data; }
-      
+
    private:
       dds_texture m_src_tex;
       dds_texture m_packed_tex;
@@ -31,7 +31,7 @@ namespace crnlib
       crnlib::vector<uint8> m_comp_data;
 
       const crn_comp_params* m_pParams;
-      
+
       pixel_format m_pixel_fmt;
       dxt_image::pack_params m_pack_params;
 
@@ -39,7 +39,7 @@ namespace crnlib
       qdxt1_params m_q1_params;
       qdxt5_params m_q5_params;
       dds_texture::qdxt_state *m_pQDXT_state;
-      
+
       void clear();
       bool create_dds_tex(dds_texture &dds_tex);
       bool convert_to_dxt(const crn_comp_params& params);

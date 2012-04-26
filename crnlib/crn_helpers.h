@@ -30,7 +30,7 @@ namespace crnlib
       }
 
       template <typename T> 
-      void construct_array(T* p, uint n) 
+      inline void construct_array(T* p, uint n) 
       { 
          T* q = p + n;
          for ( ; p != q; ++p)
@@ -38,7 +38,7 @@ namespace crnlib
       }
       
       template <typename T, typename U> 
-      void construct_array(T* p, uint n, const U& init) 
+      inline void construct_array(T* p, uint n, const U& init) 
       { 
          T* q = p + n;
          for ( ; p != q; ++p)

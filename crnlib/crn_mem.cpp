@@ -1,15 +1,16 @@
 // File: crn_mem.cpp
 // See Copyright Notice and license at the end of inc/crnlib.h
 #include "crn_core.h"
-#include "crn_spinlock.h"
 #include "crn_console.h"
 #include "../inc/crnlib.h"
 #include <malloc.h>
+#if CRNLIB_USE_WIN32_API
 #include "crn_winhdr.h"
+#endif
 
 #define CRNLIB_MEM_STATS 0
 
-#ifndef CRNLIB_USE_WIN32_API
+#if !CRNLIB_USE_WIN32_API
 #define _msize malloc_usable_size
 #endif
 
@@ -59,7 +60,7 @@ namespace crnlib
       return new_total_allocated;
    }
 #endif // CRNLIB_MEM_STATS
-   
+
    static void* crnlib_default_realloc(void* p, size_t size, size_t* pActual_size, bool movable, void* pUser_data)
    {
       pUser_data;
@@ -88,7 +89,6 @@ namespace crnlib
 #ifdef WIN32
          p_new = ::_expand(p, size);
 #else
-
          p_new = NULL;
 #endif
 
@@ -121,15 +121,96 @@ namespace crnlib
       return p ? _msize(p) : 0;
    }
 
+#if 0
+   static __declspec(thread) void *g_pBuf;
+   static __declspec(thread) size_t g_buf_size;
+   static __declspec(thread) size_t g_buf_ofs;
+
+   static size_t crnlib_nofree_msize(void* p, void* pUser_data)
+   {
+      pUser_data;
+      return p ? ((const size_t*)p)[-1] : 0;
+   }
+
+   static void* crnlib_nofree_realloc(void* p, size_t size, size_t* pActual_size, bool movable, void* pUser_data)
+   {
+      pUser_data;
+
+      void* p_new;
+
+      if (!p)
+      {
+         size = math::align_up_value(size, CRNLIB_MIN_ALLOC_ALIGNMENT);
+         size_t actual_size = sizeof(size_t)*2 + size;
+         size_t num_remaining = g_buf_size - g_buf_ofs;
+         if (num_remaining < actual_size)
+         {
+            g_buf_size = CRNLIB_MAX(actual_size, 32*1024*1024);
+            g_buf_ofs = 0;
+            g_pBuf = malloc(g_buf_size);
+            if (!g_pBuf)
+               return NULL;
+         }
+
+         p_new = (uint8*)g_pBuf + g_buf_ofs;
+         ((size_t*)p_new)[1] = size;
+         p_new = (size_t*)p_new + 2;
+         g_buf_ofs += actual_size;
+
+         if (pActual_size)
+            *pActual_size = size;
+
+         CRNLIB_ASSERT(crnlib_nofree_msize(p_new, NULL) == size);
+      }
+      else if (!size)
+      {
+         if (pActual_size)
+            *pActual_size = 0;
+         p_new = NULL;
+      }
+      else
+      {
+         size_t cur_size = crnlib_nofree_msize(p, NULL);
+         p_new = p;
+
+         if (!movable)
+            return NULL;
+
+         if (size > cur_size)
+         {
+            p_new = crnlib_nofree_realloc(NULL, size, NULL, true, NULL);
+            if (!p_new)
+               return NULL;
+
+            memcpy(p_new, p, cur_size);
+
+            cur_size = size;
+         }
+
+         if (pActual_size)
+            *pActual_size = cur_size;
+      }
+
+      return p_new;
+   }
+
+   static crn_realloc_func    g_pRealloc = crnlib_nofree_realloc;
+   static crn_msize_func      g_pMSize   = crnlib_nofree_msize;
+#else
    static crn_realloc_func    g_pRealloc = crnlib_default_realloc;
    static crn_msize_func      g_pMSize   = crnlib_default_msize;
+#endif
    static void*               g_pUser_data;
-   
+
    void crnlib_mem_error(const char* p_msg)
    {
       crnlib_assert(p_msg, __FILE__, __LINE__);
    }
-   
+   void* crnlib_malloc(size_t size)
+   {
+      return crnlib_malloc(size, NULL);
+   }
+
    void* crnlib_malloc(size_t size, size_t* pActual_size)
    {
       size = (size + sizeof(uint32) - 1U) & ~(sizeof(uint32) - 1U);
@@ -182,7 +263,7 @@ namespace crnlib
       size_t cur_size = p ? (*g_pMSize)(p, g_pUser_data) : 0;
       CRNLIB_ASSERT(!p || (cur_size >= sizeof(uint32)));
 #endif
-      if ((size) && (size < sizeof(uint32))) 
+      if ((size) && (size < sizeof(uint32)))
          size = sizeof(uint32);
 
       size_t actual_size = size;
@@ -253,19 +334,19 @@ namespace crnlib
 
       return (*g_pMSize)(p, g_pUser_data);
    }
-  
+
    void crnlib_print_mem_stats()
    {
 #if CRNLIB_MEM_STATS
       if (console::is_initialized())
       {
-         console::debug(L"crnlib_print_mem_stats:");
-         console::debug(L"Current blocks: %u, allocated: %I64u, max ever allocated: %I64i", g_total_blocks, (int64)g_total_allocated, (int64)g_max_allocated);
+         console::debug("crnlib_print_mem_stats:");
+         console::debug("Current blocks: %u, allocated: " CRNLIB_INT64_FORMAT_SPECIFIER ", max ever allocated: " CRNLIB_INT64_FORMAT_SPECIFIER, g_total_blocks, (int64)g_total_allocated, (int64)g_max_allocated);
       }
       else
       {
          printf("crnlib_print_mem_stats:\n");
-         printf("Current blocks: %u, allocated: %I64u, max ever allocated: %I64i\n", g_total_blocks, (int64)g_total_allocated, (int64)g_max_allocated);
+         printf("Current blocks: %u, allocated: " CRNLIB_INT64_FORMAT_SPECIFIER ", max ever allocated: " CRNLIB_INT64_FORMAT_SPECIFIER "\n", g_total_blocks, (int64)g_total_allocated, (int64)g_max_allocated);
       }
 #endif
    }

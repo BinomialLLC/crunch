@@ -12,14 +12,14 @@ namespace crnlib
       ~lzma_codec();
 
       // Always available, because we're statically linking in lzmalib now vs. dynamically loading the DLL.
-      const bool is_initialized() const { return true; }
+      bool is_initialized() const { return true; }
 
       bool pack(const void* p, uint n, crnlib::vector<uint8>& buf);
 
       bool unpack(const void* p, uint n, crnlib::vector<uint8>& buf);
 
    private:
-      typedef int (__stdcall *LzmaCompressFuncPtr)(unsigned char *dest, size_t *destLen, const unsigned char *src, size_t srcLen,
+      typedef int (CRNLIB_STDCALL *LzmaCompressFuncPtr)(unsigned char *dest, size_t *destLen, const unsigned char *src, size_t srcLen,
          unsigned char *outProps, size_t *outPropsSize, /* *outPropsSize must be = 5 */
          int level,      /* 0 <= level <= 9, default = 5 */
          unsigned dictSize,  /* default = (1 << 24) */
@@ -30,7 +30,7 @@ namespace crnlib
          int numThreads /* 1 or 2, default = 2 */
          );
 
-      typedef int (__stdcall  *LzmaUncompressFuncPtr)(unsigned char *dest, size_t *destLen, const unsigned char *src, size_t *srcLen,
+      typedef int (CRNLIB_STDCALL  *LzmaUncompressFuncPtr)(unsigned char *dest, size_t *destLen, const unsigned char *src, size_t *srcLen,
          const unsigned char *props, size_t propsSize);
 
       LzmaCompressFuncPtr     m_pCompress;

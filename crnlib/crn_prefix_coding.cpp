@@ -156,7 +156,7 @@ namespace crnlib
             uint c = pCodesizes[i];
             if (c)
             {
-               CRNLIB_ASSERT(next_code[c] <= UINT16_MAX);
+               CRNLIB_ASSERT(next_code[c] <= cUINT16_MAX);
                pCodes[i] = static_cast<uint16>(next_code[c]++);
                
                CRNLIB_ASSERT(math::total_bits(pCodes[i]) <= pCodesizes[i]);
@@ -300,7 +300,7 @@ namespace crnlib
                      
                      CRNLIB_ASSERT(t < (1U << table_bits));
                      
-                     CRNLIB_ASSERT(pTables->m_lookup[t] == UINT32_MAX);
+                     CRNLIB_ASSERT(pTables->m_lookup[t] == cUINT32_MAX);
                      
                      pTables->m_lookup[t] = sym_index | (codesize << 16U);
                   }

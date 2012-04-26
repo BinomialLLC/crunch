@@ -11,8 +11,8 @@ namespace crnlib
       {
          cSigned = false,
          cFloat = false,
-         cMin = UINT8_MIN,
-         cMax = UINT8_MAX
+         cMin = cUINT8_MIN,
+         cMax = cUINT8_MAX
       };
    };
 
@@ -22,8 +22,8 @@ namespace crnlib
       {
          cSigned = true,
          cFloat = false,
-         cMin = INT16_MIN,
-         cMax = INT16_MAX
+         cMin = cINT16_MIN,
+         cMax = cINT16_MAX
       };
    };
 
@@ -33,8 +33,8 @@ namespace crnlib
       {
          cSigned = false,
          cFloat = false,
-         cMin = UINT16_MIN,
-         cMax = UINT16_MAX
+         cMin = cUINT16_MIN,
+         cMax = cUINT16_MAX
       };
    };
 
@@ -44,8 +44,8 @@ namespace crnlib
       {
          cSigned = true,
          cFloat = false,
-         cMin = INT32_MIN,
-         cMax = INT32_MAX
+         cMin = cINT32_MIN,
+         cMax = cINT32_MAX
       };
    };
 
@@ -55,8 +55,8 @@ namespace crnlib
       {
          cSigned = false,
          cFloat = false,
-         cMin = UINT32_MIN,
-         cMax = UINT32_MAX
+         cMin = cUINT32_MIN,
+         cMax = cUINT32_MAX
       };
    };
 
@@ -66,8 +66,8 @@ namespace crnlib
       {
          cSigned = false,
          cFloat = true,
-         cMin = INT32_MIN,
-         cMax = INT32_MAX
+         cMin = cINT32_MIN,
+         cMax = cINT32_MAX
       };
    };
 
@@ -77,8 +77,8 @@ namespace crnlib
       {
          cSigned = false,
          cFloat = true,
-         cMin = INT32_MIN,
-         cMax = INT32_MAX
+         cMin = cINT32_MIN,
+         cMax = cINT32_MAX
       };
    };
 

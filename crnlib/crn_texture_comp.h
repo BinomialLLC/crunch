@@ -16,7 +16,7 @@ namespace crnlib
       itexture_comp() { }
       virtual ~itexture_comp() { }
 
-      virtual const wchar_t *get_ext() const = 0;
+      virtual const char *get_ext() const = 0;
 
       virtual bool compress_init(const crn_comp_params& params) = 0;
       virtual bool compress_pass(const crn_comp_params& params, float *pEffective_bitrate) = 0;

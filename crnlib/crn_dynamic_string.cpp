@@ -1,10 +1,7 @@
 // File: crn_dynamic_string.cpp
 // See Copyright Notice and license at the end of inc/crnlib.h
 #include "crn_core.h"
-#include "crn_dynamic_string.h"
-#include "crn_dynamic_wstring.h"
-#include "crn_winhdr.h"
-#include <stdio.h>
+#include "crn_strutils.h"
 
 namespace crnlib
 {
@@ -41,51 +38,6 @@ namespace crnlib
       m_buf_size(0), m_len(0), m_pStr(NULL)
    {
       set(other);
-   }
-
-   dynamic_string::dynamic_string(const wchar_t* pStr) :
-      m_buf_size(0), m_len(0), m_pStr(NULL)
-   {
-      set(pStr);
-   }
-
-   dynamic_string& dynamic_string::set(const wchar_t *pStr)
-   {
-      uint len = static_cast<uint>(wcslen(pStr));
-      if (!len)
-      {
-         clear();
-         return *this;
-      }
-
-      const uint num_needed = WideCharToMultiByte(CP_ACP, 0, pStr, len, NULL, 0, NULL, NULL);
-      if (num_needed <= 0)
-      {
-         clear();
-         return *this;
-      }
-
-      if (!ensure_buf(num_needed, false))
-      {
-         clear();
-         return *this;
-      }
-
-      const uint num_written = WideCharToMultiByte(CP_ACP, 0, pStr, len, get_ptr_raw(), num_needed, NULL, NULL);
-      CRNLIB_ASSERT(num_written == num_needed);
-
-      get_ptr_raw()[num_written] = 0;
-      m_len = static_cast<uint16>(num_written);
-
-      check();
-
-      return *this;
-   }
-
-   dynamic_wstring& dynamic_string::as_utf16(dynamic_wstring &buf)
-   {
-      buf.set(get_ptr());
-      return buf;
    }
 
    void dynamic_string::clear()
@@ -133,7 +85,7 @@ namespace crnlib
    {
       CRNLIB_ASSERT(p);
 
-      const int result = (case_sensitive ? strcmp : _stricmp)(get_ptr_priv(), p);
+      const int result = (case_sensitive ? strcmp : crn_stricmp)(get_ptr_priv(), p);
 
       if (result < 0)
          return -1;
@@ -153,9 +105,9 @@ namespace crnlib
       CRNLIB_ASSERT(p);
 
       const uint len = math::minimum<uint>(max_len, static_cast<uint>(strlen(p)));
-      CRNLIB_ASSERT(len < UINT16_MAX);
+      CRNLIB_ASSERT(len < cUINT16_MAX);
 
-      if ((!len) || (len >= UINT16_MAX))
+      if ((!len) || (len >= cUINT16_MAX))
          clear();
       else if ((m_pStr) && (p >= m_pStr) && (p < (m_pStr + m_buf_size)))
       {
@@ -206,8 +158,11 @@ namespace crnlib
 
    bool dynamic_string::set_len(uint new_len, char fill_char)
    {
-      if ((new_len >= UINT16_MAX) || (!fill_char))
+      if ((new_len >= cUINT16_MAX) || (!fill_char))
+      {
+         CRNLIB_ASSERT(0);
          return false;
+      }
 
       uint cur_len = m_len;
 
@@ -226,22 +181,41 @@ namespace crnlib
       return true;
    }
 
+   dynamic_string& dynamic_string::set_from_raw_buf_and_assume_ownership(char *pBuf, uint buf_size_in_chars, uint len_in_chars)
+   {
+      CRNLIB_ASSERT(buf_size_in_chars <= cUINT16_MAX);
+      CRNLIB_ASSERT(math::is_power_of_2(buf_size_in_chars) || (buf_size_in_chars == cUINT16_MAX));
+      CRNLIB_ASSERT((len_in_chars + 1) <= buf_size_in_chars);
+
+      clear();
+
+      m_pStr = pBuf;
+      m_buf_size = static_cast<uint16>(buf_size_in_chars);
+      m_len = static_cast<uint16>(len_in_chars);
+
+      check();
+
+      return *this;
+   }
+
    dynamic_string& dynamic_string::set_from_buf(const void* pBuf, uint buf_size)
    {
       CRNLIB_ASSERT(pBuf);
 
-      if (buf_size >= UINT16_MAX)
+      if (buf_size >= cUINT16_MAX)
       {
          clear();
          return *this;
       }
 
+#ifdef CRNLIB_BUILD_DEBUG
       if ((buf_size) && (memchr(pBuf, 0, buf_size) != NULL))
       {
          CRNLIB_ASSERT(0);
          clear();
          return *this;
       }
+#endif
 
       if (ensure_buf(buf_size, false))
       {
@@ -569,9 +543,12 @@ namespace crnlib
       else
       {
          CRNLIB_ASSERT(m_buf_size);
-         CRNLIB_ASSERT((m_buf_size == UINT16_MAX) || math::is_power_of_2((uint32)m_buf_size));
+         CRNLIB_ASSERT((m_buf_size == cUINT16_MAX) || math::is_power_of_2((uint32)m_buf_size));
          CRNLIB_ASSERT(m_len < m_buf_size);
+         CRNLIB_ASSERT(!m_pStr[m_len]);
+#if CRNLIB_SLOW_STRING_LEN_CHECKS
          CRNLIB_ASSERT(strlen(m_pStr) == m_len);
+#endif
       }
    }
 #endif
@@ -580,9 +557,9 @@ namespace crnlib
    {
       uint buf_size_needed = len + 1;
 
-      CRNLIB_ASSERT(buf_size_needed <= UINT16_MAX);
+      CRNLIB_ASSERT(buf_size_needed <= cUINT16_MAX);
 
-      if (buf_size_needed <= UINT16_MAX)
+      if (buf_size_needed <= cUINT16_MAX)
       {
          if (buf_size_needed > m_buf_size)
             expand_buf(buf_size_needed, preserve_contents);
@@ -593,7 +570,7 @@ namespace crnlib
 
    bool dynamic_string::expand_buf(uint new_buf_size, bool preserve_contents)
    {
-      new_buf_size = math::minimum<uint>(UINT16_MAX, math::next_pow2(math::maximum<uint>(m_buf_size, new_buf_size)));
+      new_buf_size = math::minimum<uint>(cUINT16_MAX, math::next_pow2(math::maximum<uint>(m_buf_size, new_buf_size)));
 
       if (new_buf_size != m_buf_size)
       {
@@ -625,8 +602,9 @@ namespace crnlib
    {
       uint buf_left = buf_size;
 
-      if (m_len > UINT16_MAX)
-         return -1;
+      //if (m_len > cUINT16_MAX)
+      //   return -1;
+      CRNLIB_ASSUME(sizeof(m_len) == sizeof(uint16));
 
       if (!utils::write_val((uint16)m_len, pBuf, buf_left, little_endian))
          return -1;
@@ -685,11 +663,6 @@ namespace crnlib
       }
 
       swap(tmp);
-   }
-
-   dynamic_string& dynamic_string::operator= (const dynamic_wstring& rhs)
-   {
-      return set(rhs.get_ptr());
    }
 
 } // namespace crnlib

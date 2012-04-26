@@ -26,7 +26,7 @@ namespace crnlib
       {
          if (local_params.get_flag(cCRNCompFlagPerceptual))
          {
-            //console::warning(L"Output pixel format is swizzled or not RGB, disabling perceptual color metrics");
+            console::info("Output pixel format is swizzled or not RGB, disabling perceptual color metrics");
 
             // Destination compressed pixel format is swizzled or not RGB at all, so be sure perceptual colorspace metrics are disabled.
             local_params.set_flag(cCRNCompFlagPerceptual, false);
@@ -53,6 +53,18 @@ namespace crnlib
            ((local_params.m_file_type == cCRNFileTypeCRN) && ((local_params.m_flags & cCRNCompFlagManualPaletteSizes) != 0))
           )
       {
+         if ( (local_params.m_file_type == cCRNFileTypeCRN) ||
+              ((local_params.m_file_type == cCRNFileTypeDDS) && (local_params.m_quality_level < cCRNMaxQualityLevel)) )
+         {
+            console::info("Compressing using quality level %i", local_params.m_quality_level);
+         }
+         if (local_params.m_format == cCRNFmtDXT3)
+         {
+            if (local_params.m_file_type == cCRNFileTypeCRN)
+               console::warning("CRN format doesn't support DXT3");
+            else if ((local_params.m_file_type == cCRNFileTypeDDS) && (local_params.m_quality_level < cCRNMaxQualityLevel))
+               console::warning("Clustered DDS compressor doesn't support DXT3");
+         }
          if (!pTexture_comp->compress_pass(local_params, pActual_bitrate))
          {
             crnlib_delete(pTexture_comp);
@@ -95,7 +107,7 @@ namespace crnlib
          {
             if (params.m_flags & cCRNCompFlagDebugging)
             {
-               console::debug(L"Quality level bracket: [%u, %u]", low_quality, high_quality);
+               console::debug("Quality level bracket: [%u, %u]", low_quality, high_quality);
             }
 
             int trial_quality = (low_quality + high_quality) / 2;
@@ -137,7 +149,7 @@ namespace crnlib
                }
             }
 
-            console::info(L"Compressing to quality level %u", trial_quality);
+            console::info("Compressing to quality level %u", trial_quality);
 
             float bitrate = 0.0f;
 
@@ -153,7 +165,7 @@ namespace crnlib
 
             highest_bitrate = math::maximum(highest_bitrate, bitrate);
 
-            console::info(L"\nTried quality level %u, bpp: %3.3f", trial_quality, bitrate);
+            console::info("\nTried quality level %u, bpp: %3.3f", trial_quality, bitrate);
 
             if ( (best_quality_level < 0) ||
                  ((bitrate <= local_params.m_target_bitrate) && (best_bitrate > local_params.m_target_bitrate)) ||
@@ -165,7 +177,7 @@ namespace crnlib
                best_quality_level = trial_quality;
                if (params.m_flags & cCRNCompFlagDebugging)
                {
-                  console::debug(L"Choose new best quality level");
+                  console::debug("Choose new best quality level");
                }
 
                if ((best_bitrate <= local_params.m_target_bitrate) && (fabs(best_bitrate - local_params.m_target_bitrate) < .005f))
@@ -188,7 +200,7 @@ namespace crnlib
             (highest_bitrate < local_params.m_target_bitrate) &&
             (fabs(best_bitrate - local_params.m_target_bitrate) >= .005f))
          {
-            console::info(L"Unable to achieve desired bitrate - disabling adaptive block sizes and retrying search.");
+            console::info("Unable to achieve desired bitrate - disabling adaptive block sizes and retrying search.");
 
             local_params.m_flags &= ~cCRNCompFlagHierarchical;
 
@@ -214,7 +226,7 @@ namespace crnlib
       if (pActual_quality_level) *pActual_quality_level = best_quality_level;
       if (pActual_bitrate) *pActual_bitrate = best_bitrate;
 
-      console::printf(L"Selected quality level %u bpp: %f", best_quality_level, best_bitrate);
+      console::printf("Selected quality level %u bpp: %f", best_quality_level, best_bitrate);
 
       return true;
    }
@@ -310,14 +322,14 @@ namespace crnlib
       {
          if (work_tex.get_num_faces() > 1)
          {
-            console::warning(L"Can't crop cubemap textures");
+            console::warning("Can't crop cubemap textures");
          }
          else
          {
-            console::info(L"Cropping input texture from window (%ux%u)-(%ux%u)", window_rect.get_left(), window_rect.get_top(), window_rect.get_right(), window_rect.get_bottom());
+            console::info("Cropping input texture from window (%ux%u)-(%ux%u)", window_rect.get_left(), window_rect.get_top(), window_rect.get_right(), window_rect.get_bottom());
 
             if (!work_tex.crop(window_rect.get_left(), window_rect.get_top(), window_rect.get_width(), window_rect.get_height()))
-               console::warning(L"Failed cropping window rect");
+               console::warning("Failed cropping window rect");
          }
       }
 
@@ -332,13 +344,13 @@ namespace crnlib
             {
                if (work_tex.get_num_faces() > 1)
                {
-                  console::warning(L"Can't crop cubemap textures");
+                  console::warning("Can't crop cubemap textures");
                }
                else
                {
                   new_width = math::minimum<uint>(mipmap_params.m_clamp_width, new_width);
                   new_height = math::minimum<uint>(mipmap_params.m_clamp_height, new_height);
-                  console::info(L"Clamping input texture to %ux%u", new_width, new_height);
+                  console::info("Clamping input texture to %ux%u", new_width, new_height);
                   work_tex.crop(0, 0, new_width, new_height);
                }
             }
@@ -420,7 +432,7 @@ namespace crnlib
 
       if ((new_width != (int)work_tex.get_width()) || (new_height != (int)work_tex.get_height()))
       {
-         console::info(L"Resampling input texture to %ux%u", new_width, new_height);
+         console::info("Resampling input texture to %ux%u", new_width, new_height);
 
          const char* pFilter = crn_get_mip_filter_name(mipmap_params.m_filter);
 
@@ -439,7 +451,7 @@ namespace crnlib
 
          if (!work_tex.resize(new_width, new_height, res_params))
          {
-            console::error(L"Failed resizing texture!");
+            console::error("Failed resizing texture!");
             return false;
          }
       }
@@ -461,18 +473,18 @@ namespace crnlib
          gen_params.m_max_mips = mipmap_params.m_max_levels;
          gen_params.m_min_mip_size = mipmap_params.m_min_mip_size;
 
-         console::info(L"Generating mipmaps using filter \"%S\"", pFilter);
+         console::info("Generating mipmaps using filter \"%s\"", pFilter);
 
          timer tm;
          tm.start();
          if (!work_tex.generate_mipmaps(gen_params, true))
          {
-            console::error(L"Failed generating mipmaps!");
+            console::error("Failed generating mipmaps!");
             return false;
          }
          double t = tm.get_elapsed_secs();
 
-         console::info(L"Generated %u mipmap levels in %3.3fs", work_tex.get_num_levels() - 1, t);
+         console::info("Generated %u mipmap levels in %3.3fs", work_tex.get_num_levels() - 1, t);
       }
 
       return true;
@@ -487,7 +499,7 @@ namespace crnlib
       dds_texture work_tex;
       if (!create_dds_tex(params, work_tex))
       {
-         console::error(L"Failed creating DDS texture from crn_comp_params!");
+         console::error("Failed creating DDS texture from crn_comp_params!");
          return false;
       }
 

@@ -1,4 +1,4 @@
-crunch/crnlib v1.01 - Advanced DXTn texture compression library
+crunch/crnlib v1.03 PRERELEASE - Advanced DXTn texture compression library
 Copyright (C) 2010-2012 Rich Geldreich and Tenacious Software LLC
 
 For bugs or support contact Rich Geldreich <richgel99@gmail.com>.
@@ -11,6 +11,14 @@ originally written by Igor Pavlov (LZMA) and RYG (crn_ryg_dxt*).
 
 If you use this software in a product, an acknowledgment in the product 
 documentation would be highly appreciated but is not required.
+
+New for v1.03 [4/26/12]: crnlib more portable, Linux Port
+------------------------------------------------
+
+v1.03 has been ported to Linux. It's still a work in progress. A few features 
+of the command line tool don't work under Linux yet (such as -timestamp), 
+but the core functionality (compression/decompression/transcoding) should work
+OK. I'm currently testing crnlib/crunch with Codeblocks 10.05 under Ubuntu x86.
 
 Overview
 --------

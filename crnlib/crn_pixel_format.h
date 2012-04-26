@@ -12,11 +12,9 @@ namespace crnlib
       uint get_num_formats();
       pixel_format get_pixel_format_by_index(uint index);
 
-      const wchar_t* get_pixel_format_string(pixel_format fmt);
-      const char* get_pixel_format_stringa(pixel_format fmt);
+      const char* get_pixel_format_string(pixel_format fmt);
 
-      const wchar_t* get_crn_format_string(crn_format fmt);
-      const char* get_crn_format_stringa(crn_format fmt);
+      const char* get_crn_format_string(crn_format fmt);
 
       inline bool is_grayscale(pixel_format fmt)
       {
