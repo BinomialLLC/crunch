@@ -16,18 +16,18 @@ namespace crnlib
          convert_stats();
 
          bool init(
-            const wchar_t* pSrc_filename,
-            const wchar_t* pDst_filename,
+            const char* pSrc_filename,
+            const char* pDst_filename,
             dds_texture& src_tex,
             texture_file_types::format dst_file_type,
             bool lzma_stats);
 
-         bool print(bool psnr_metrics, bool mip_stats, bool grayscale_sampling, const wchar_t *pCSVStatsFile = NULL) const;
+         bool print(bool psnr_metrics, bool mip_stats, bool grayscale_sampling, const char *pCSVStatsFile = NULL) const;
 
          void clear();
 
-         dynamic_wstring            m_src_filename;
-         dynamic_wstring            m_dst_filename;
+         dynamic_string            m_src_filename;
+         dynamic_string            m_dst_filename;
          texture_file_types::format m_dst_file_type;
 
          dds_texture*               m_pInput_tex;
@@ -58,10 +58,10 @@ namespace crnlib
             m_debugging(false),
             m_param_debugging(false),
             m_no_stats(false),
+            m_use_source_format(false),
             m_lzma_stats(false),
             m_status(false),
-            m_canceled(false),
-            m_use_source_format(false)
+            m_canceled(false)
          {
          }
 
@@ -77,7 +77,7 @@ namespace crnlib
 
          texture_type                  m_texture_type;
 
-         dynamic_wstring               m_dst_filename;
+         dynamic_string               m_dst_filename;
          texture_file_types::format    m_dst_file_type;
          pixel_format                  m_dst_format;
 
@@ -90,7 +90,7 @@ namespace crnlib
 
          // Return parameters
          dds_texture*                  m_pIntermediate_texture;
-         mutable dynamic_wstring       m_error_message;
+         mutable dynamic_string       m_error_message;
 
          bool                          m_write_mipmaps_to_multiple_files;
          bool                          m_quick;
@@ -98,7 +98,7 @@ namespace crnlib
          bool                          m_param_debugging;
          bool                          m_no_stats;
          bool                          m_use_source_format;
-         
+
          bool                          m_lzma_stats;
          mutable bool                  m_status;
          mutable bool                  m_canceled;

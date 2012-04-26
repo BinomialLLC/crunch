@@ -216,7 +216,7 @@ namespace crnlib
 
       if (m_pImage->is_grayscale())
          m_format = m_pImage->has_alpha() ? PIXEL_FMT_A8L8 : PIXEL_FMT_L8;
-      else 
+      else
          m_format = m_pImage->has_alpha() ? PIXEL_FMT_A8R8G8B8 : PIXEL_FMT_R8G8B8;
 
       return true;
@@ -380,7 +380,7 @@ namespace crnlib
       return *this;
    }
 
-   bool dds_texture::write_dds(const wchar_t* pFilename) const
+   bool dds_texture::write_dds(const char* pFilename) const
    {
       cfile_stream out_stream(pFilename, cDataStreamWritable | cDataStreamSeekable);
       if (!out_stream.is_opened())
@@ -390,7 +390,7 @@ namespace crnlib
       return write_dds(out_serializer);
    }
 
-   bool dds_texture::read_dds(const wchar_t* pFilename)
+   bool dds_texture::read_dds(const char* pFilename)
    {
       cfile_stream in_stream(pFilename);
       if (!in_stream.is_opened())
@@ -417,7 +417,7 @@ namespace crnlib
 
       clear();
 
-      set_last_error(L"Not a DDS file");
+      set_last_error("Not a DDS file");
 
       uint8 hdr[4];
       if (!serializer.read(hdr, sizeof(hdr)))
@@ -460,7 +460,7 @@ namespace crnlib
             const uint all_faces_mask = DDSCAPS2_CUBEMAP_POSITIVEX|DDSCAPS2_CUBEMAP_NEGATIVEX|DDSCAPS2_CUBEMAP_POSITIVEY|DDSCAPS2_CUBEMAP_NEGATIVEY|DDSCAPS2_CUBEMAP_POSITIVEZ|DDSCAPS2_CUBEMAP_NEGATIVEZ;
             if ((desc.ddsCaps.dwCaps2 & all_faces_mask) != all_faces_mask)
             {
-               set_last_error(L"Incomplete cubemaps unsupported");
+               set_last_error("Incomplete cubemaps unsupported");
                return false;
             }
 
@@ -468,7 +468,7 @@ namespace crnlib
          }
          else if (desc.ddsCaps.dwCaps2 & DDSCAPS2_VOLUME)
          {
-            set_last_error(L"Volume textures unsupported");
+            set_last_error("Volume textures unsupported");
             return false;
          }
       }
@@ -479,7 +479,7 @@ namespace crnlib
          // nvdxt just hangs
          // dxtex.exe just makes all-white textures
          // So screw it.
-         set_last_error(L"Palettized textures unsupported");
+         set_last_error("Palettized textures unsupported");
          return false;
       }
 
@@ -555,7 +555,7 @@ namespace crnlib
             }
             default:
             {
-               dynamic_wstring err_msg(cVarArg, L"Unsupported DDS FOURCC format: 0x%08X", desc.ddpfPixelFormat.dwFourCC);
+               dynamic_string err_msg(cVarArg, "Unsupported DDS FOURCC format: 0x%08X", desc.ddpfPixelFormat.dwFourCC);
                set_last_error(err_msg.get_ptr());
                return false;
             }
@@ -563,7 +563,7 @@ namespace crnlib
       }
       else if ((desc.ddpfPixelFormat.dwRGBBitCount < 8) || (desc.ddpfPixelFormat.dwRGBBitCount > 32) || (desc.ddpfPixelFormat.dwRGBBitCount & 7))
       {
-         set_last_error(L"Unsupported bit count");
+         set_last_error("Unsupported bit count");
          return false;
       }
       else if (desc.ddpfPixelFormat.dwFlags & DDPF_RGB)
@@ -597,7 +597,7 @@ namespace crnlib
       }
       else
       {
-         set_last_error(L"Unsupported format");
+         set_last_error("Unsupported format");
          return false;
       }
 
@@ -609,7 +609,7 @@ namespace crnlib
          //bits_per_pixel = ((m_format == PIXEL_FMT_DXT1) || (m_format == PIXEL_FMT_DXT5A)) ? 4 : 8;
          bits_per_pixel = pixel_format_helpers::get_bpp(m_format);
 
-      set_last_error(L"Load failed");
+      set_last_error("Load failed");
 
       uint default_pitch;
       if (desc.ddpfPixelFormat.dwFlags & DDPF_FOURCC)
@@ -620,19 +620,19 @@ namespace crnlib
       uint pitch = desc.lPitch;
       if (!pitch)
          pitch = default_pitch;
-#if 0      
+#if 0
       else if (pitch & 3)
       {
          // MS's DDS docs say the pitch must be DWORD aligned - but this isn't always the case.
          // ATI Compressonator writes images with non-DWORD aligned pitches, and the DDSWithoutD3DX sample from MS doesn't compute the proper DWORD aligned pitch when reading DDS
          // files, so the docs must be wrong/outdated.
-         console::warning(L"DDS file's pitch is not divisible by 4 - trying to load anyway.");
+         console::warning("DDS file's pitch is not divisible by 4 - trying to load anyway.");
       }
 #endif
       // Check for obviously wacky source pitches (probably a corrupted/invalid file).
       else if (pitch > default_pitch * 8)
       {
-         set_last_error(L"Invalid pitch");
+         set_last_error("Invalid pitch");
          return false;
       }
 
@@ -869,11 +869,11 @@ namespace crnlib
    {
       if (!m_width)
       {
-         set_last_error(L"Nothing to write");
+         set_last_error("Nothing to write");
          return false;
       }
 
-      set_last_error(L"Write_dds() failed");
+      set_last_error("Write_dds() failed");
 
       if (!serializer.write("DDS ", sizeof(uint32)))
          return false;
@@ -1017,7 +1017,7 @@ namespace crnlib
          desc.lPitch = (desc.dwWidth * bits_per_pixel) >> 3;
          desc.dwFlags |= DDSD_LINEARSIZE;
       }
-      
+
       if (!c_crnlib_little_endian_platform)
          utils::endian_switch_dwords(reinterpret_cast<uint32*>(&desc), sizeof(desc) / sizeof(uint32));
 
@@ -1257,7 +1257,7 @@ namespace crnlib
       CRNLIB_ASSERT(check());
    }
 
-   void dds_texture::init(uint width, uint height, uint levels, uint faces, pixel_format fmt, const wchar_t* pName)
+   void dds_texture::init(uint width, uint height, uint levels, uint faces, pixel_format fmt, const char* pName)
    {
       clear();
 
@@ -2029,7 +2029,7 @@ namespace crnlib
       {
          dxt1_blocks.resize(state.m_pixel_blocks.size());
          float pow_mul = 1.0f;
-         
+
          if (state.m_fmt == PIXEL_FMT_DXT5_CCxY)
          {
             // use a "deeper" codebook size curves when compressing chroma into DXT1, because it's not as important
@@ -2099,7 +2099,7 @@ namespace crnlib
       return true;
    }
 
-   bool dds_texture::load_from_file(const wchar_t* pFilename, texture_file_types::format file_format)
+   bool dds_texture::load_from_file(const char* pFilename, texture_file_types::format file_format)
    {
       clear();
 
@@ -2108,11 +2108,11 @@ namespace crnlib
 
       if (file_format == texture_file_types::cFormatInvalid)
       {
-         set_last_error(L"Unrecognized image format extension");
+         set_last_error("Unrecognized image format extension");
          return false;
       }
 
-      set_last_error(L"Image file load failed");
+      set_last_error("Image file load failed");
 
       bool success = false;
       switch (file_format)
@@ -2143,7 +2143,7 @@ namespace crnlib
       return success;
    }
 
-   bool dds_texture::load_regular(const wchar_t* pFilename, texture_file_types::format file_format)
+   bool dds_texture::load_regular(const char* pFilename, texture_file_types::format file_format)
    {
       file_format;
 
@@ -2153,7 +2153,7 @@ namespace crnlib
       {
          crnlib_delete(pImg);
 
-         set_last_error(L"Failed loading image file");
+         set_last_error("Failed loading image file");
          return false;
       }
 
@@ -2166,12 +2166,12 @@ namespace crnlib
       return true;
    }
 
-   bool dds_texture::load_dds(const wchar_t* pFilename)
+   bool dds_texture::load_dds(const char* pFilename)
    {
       cfile_stream in_stream;
       if (!in_stream.open(pFilename))
       {
-         set_last_error(L"Failed opening file");
+         set_last_error("Failed opening file");
          return false;
       }
 
@@ -2188,11 +2188,11 @@ namespace crnlib
       return true;
    }
 
-   bool dds_texture::load_crn_from_memory(const wchar_t* pFilename, const void *pData, uint data_size)
+   bool dds_texture::load_crn_from_memory(const char* pFilename, const void *pData, uint data_size)
    {
       clear();
 
-      set_last_error(L"Image file load failed");
+      set_last_error("Image file load failed");
 
       if ((!pData) || (data_size < 1)) return false;
 
@@ -2200,14 +2200,14 @@ namespace crnlib
       tex_info.m_struct_size = sizeof(crnd::crn_texture_info);
       if (!crnd_get_texture_info(pData, data_size, &tex_info))
       {
-         set_last_error(L"crnd_get_texture_info() failed");
+         set_last_error("crnd_get_texture_info() failed");
          return false;
       }
 
       const pixel_format dds_fmt = (pixel_format)crnd::crnd_crn_format_to_fourcc(tex_info.m_format);
       if (dds_fmt == PIXEL_FMT_INVALID)
       {
-         set_last_error(L"Unsupported DXT format");
+         set_last_error("Unsupported DXT format");
          return false;
       }
 
@@ -2229,7 +2229,7 @@ namespace crnlib
       // Create temp buffer big enough to hold the largest mip level, and all faces if it's a cubemap.
       dxt_data.resize(tex_info.m_bytes_per_block * tex_num_blocks_x * tex_num_blocks_y * tex_info.m_faces);
 
-      set_last_error(L"CRN unpack failed");
+      set_last_error("CRN unpack failed");
 
       timer t;
       double total_time = 0.0f;
@@ -2305,7 +2305,7 @@ namespace crnlib
 #if 0
       if (total_pixels)
       {
-         console::info(L"load_crn: Total pixels: %u, ms: %3.3fms, megapixels/sec: %3.3f",
+         console::info("load_crn: Total pixels: %u, ms: %3.3fms, megapixels/sec: %3.3f",
             total_pixels, total_time * 1000.0f, total_pixels / total_time);
       }
 #endif
@@ -2321,19 +2321,19 @@ namespace crnlib
       return true;
    }
 
-   bool dds_texture::load_crn(const wchar_t* pFilename)
+   bool dds_texture::load_crn(const char* pFilename)
    {
       cfile_stream in_stream;
       if (!in_stream.open(pFilename))
       {
-         set_last_error(L"Failed opening CRN file");
+         set_last_error("Failed opening CRN file");
          return false;
       }
 
       crnlib::vector<uint8> crn_data;
       if (!in_stream.read_array(crn_data))
       {
-         set_last_error(L"Failed reading CRN file");
+         set_last_error("Failed reading CRN file");
          return false;
       }
 
@@ -2343,7 +2343,7 @@ namespace crnlib
    }
 
    bool dds_texture::write_to_file(
-      const wchar_t* pFilename,
+      const char* pFilename,
       texture_file_types::format file_format,
       crn_comp_params* pCRN_comp_params,
       uint32 *pActual_quality_level, float *pActual_bitrate)
@@ -2353,7 +2353,7 @@ namespace crnlib
 
       if (!is_valid())
       {
-         set_last_error(L"Unable to save empty texture");
+         set_last_error("Unable to save empty texture");
          return false;
       }
 
@@ -2386,26 +2386,26 @@ namespace crnlib
       return success;
    }
 
-   bool dds_texture::save_regular(const wchar_t* pFilename)
+   bool dds_texture::save_regular(const char* pFilename)
    {
       image_u8 tmp;
       image_u8* pLevel_image = get_level_image(0, 0, tmp);
 
       if (!image_utils::save_to_file(pFilename, *pLevel_image, 0))
       {
-         set_last_error(L"File write failed");
+         set_last_error("File write failed");
          return false;
       }
 
       return true;
    }
 
-   bool dds_texture::save_dds(const wchar_t* pFilename)
+   bool dds_texture::save_dds(const char* pFilename)
    {
       cfile_stream out_stream;
       if (!out_stream.open(pFilename, cDataStreamWritable | cDataStreamSeekable))
       {
-         set_last_error(L"Unable to open file");
+         set_last_error("Unable to open file");
          return false;
       }
 
@@ -2413,7 +2413,7 @@ namespace crnlib
 
       if (!write_dds(serializer))
       {
-         set_last_error(L"File write failed");
+         set_last_error("File write failed");
          return false;
       }
 
@@ -2422,34 +2422,34 @@ namespace crnlib
 
    void dds_texture::print_crn_comp_params(const crn_comp_params& p)
    {
-      console::debug(L"CRN compression params:");
-      console::debug(L"      File Type: %s", crn_get_file_type_ext(p.m_file_type));
-      console::debug(L"  Quality level: %u", p.m_quality_level);
-      console::debug(L" Target Bitrate: %f", p.m_target_bitrate);
-      console::debug(L"          Faces: %u", p.m_faces);
-      console::debug(L"          Width: %u", p.m_width);
-      console::debug(L"         Height: %u", p.m_height);
-      console::debug(L"         Levels: %u", p.m_levels);
-      console::debug(L"   Pixel Format: %s", crn_get_format_string(p.m_format));
-      console::debug(L"Use manual CRN palette sizes: %u", p.get_flag(cCRNCompFlagManualPaletteSizes));
-      console::debug(L"Color endpoints: %u", p.m_crn_color_endpoint_palette_size);
-      console::debug(L"Color selectors: %u", p.m_crn_color_selector_palette_size);
-      console::debug(L"Alpha endpoints: %u", p.m_crn_alpha_endpoint_palette_size);
-      console::debug(L"Alpha selectors: %u", p.m_crn_alpha_selector_palette_size);
-      console::debug(L"Flags:");
-      console::debug(L"    Perceptual: %u", p.get_flag(cCRNCompFlagPerceptual));
-      console::debug(L"  Hierarchical: %u", p.get_flag(cCRNCompFlagHierarchical));
-      console::debug(L"  UseBothBlockTypes: %u", p.get_flag(cCRNCompFlagUseBothBlockTypes));
-      console::debug(L"  UseTransparentIndicesForBlack: %u", p.get_flag(cCRNCompFlagUseTransparentIndicesForBlack));
-      console::debug(L"  DisableEndpointCaching: %u", p.get_flag(cCRNCompFlagDisableEndpointCaching));
-      console::debug(L"GrayscaleSampling: %u", p.get_flag(cCRNCompFlagGrayscaleSampling));
-      console::debug(L"  UseDXT1ATransparency: %u", p.get_flag(cCRNCompFlagDXT1AForTransparency));
-      console::debug(L"AdaptiveTileColorPSNRDerating: %2.2fdB", p.m_crn_adaptive_tile_color_psnr_derating);
-      console::debug(L"AdaptiveTileAlphaPSNRDerating: %2.2fdB", p.m_crn_adaptive_tile_alpha_psnr_derating);
-      console::debug(L"NumHelperThreads: %u", p.m_num_helper_threads);
+      console::debug("CRN compression params:");
+      console::debug("      File Type: %s", crn_get_file_type_ext(p.m_file_type));
+      console::debug("  Quality level: %u", p.m_quality_level);
+      console::debug(" Target Bitrate: %f", p.m_target_bitrate);
+      console::debug("          Faces: %u", p.m_faces);
+      console::debug("          Width: %u", p.m_width);
+      console::debug("         Height: %u", p.m_height);
+      console::debug("         Levels: %u", p.m_levels);
+      console::debug("   Pixel Format: %s", crn_get_format_string(p.m_format));
+      console::debug("Use manual CRN palette sizes: %u", p.get_flag(cCRNCompFlagManualPaletteSizes));
+      console::debug("Color endpoints: %u", p.m_crn_color_endpoint_palette_size);
+      console::debug("Color selectors: %u", p.m_crn_color_selector_palette_size);
+      console::debug("Alpha endpoints: %u", p.m_crn_alpha_endpoint_palette_size);
+      console::debug("Alpha selectors: %u", p.m_crn_alpha_selector_palette_size);
+      console::debug("Flags:");
+      console::debug("    Perceptual: %u", p.get_flag(cCRNCompFlagPerceptual));
+      console::debug("  Hierarchical: %u", p.get_flag(cCRNCompFlagHierarchical));
+      console::debug("  UseBothBlockTypes: %u", p.get_flag(cCRNCompFlagUseBothBlockTypes));
+      console::debug("  UseTransparentIndicesForBlack: %u", p.get_flag(cCRNCompFlagUseTransparentIndicesForBlack));
+      console::debug("  DisableEndpointCaching: %u", p.get_flag(cCRNCompFlagDisableEndpointCaching));
+      console::debug("GrayscaleSampling: %u", p.get_flag(cCRNCompFlagGrayscaleSampling));
+      console::debug("  UseDXT1ATransparency: %u", p.get_flag(cCRNCompFlagDXT1AForTransparency));
+      console::debug("AdaptiveTileColorPSNRDerating: %2.2fdB", p.m_crn_adaptive_tile_color_psnr_derating);
+      console::debug("AdaptiveTileAlphaPSNRDerating: %2.2fdB", p.m_crn_adaptive_tile_alpha_psnr_derating);
+      console::debug("NumHelperThreads: %u", p.m_num_helper_threads);
    }
 
-   bool dds_texture::save_comp_texture(const wchar_t* pFilename, const crn_comp_params &orig_comp_params, uint32 *pActual_quality_level, float *pActual_bitrate)
+   bool dds_texture::save_comp_texture(const char* pFilename, const crn_comp_params &orig_comp_params, uint32 *pActual_quality_level, float *pActual_bitrate)
    {
       crn_comp_params comp_params(orig_comp_params);
 
@@ -2458,7 +2458,7 @@ namespace crnlib
 
       if (math::maximum(get_height(), get_width()) > cCRNMaxLevelResolution)
       {
-         set_last_error(L"Texture resolution is too big!");
+         set_last_error("Texture resolution is too big!");
          return false;
       }
 
@@ -2487,32 +2487,32 @@ namespace crnlib
       crnlib::vector<uint8> comp_data;
       if (!create_compressed_texture(comp_params, comp_data, pActual_quality_level, pActual_bitrate))
       {
-         set_last_error(L"CRN compression failed");
+         set_last_error("CRN compression failed");
          return false;
       }
 
       double total_time = t.get_elapsed_secs();
       if (comp_params.get_flag(cCRNCompFlagDebugging))
       {
-         console::debug(L"\nTotal compression time: %3.3fs", total_time);
+         console::debug("\nTotal compression time: %3.3fs", total_time);
       }
 
       cfile_stream out_stream;
       if (!out_stream.open(pFilename, cDataStreamWritable | cDataStreamSeekable))
       {
-         set_last_error(L"Failed opening file");
+         set_last_error("Failed opening file");
          return false;
       }
 
       if (out_stream.write(comp_data.get_ptr(), comp_data.size()) != comp_data.size())
       {
-         set_last_error(L"Failed writing to file");
+         set_last_error("Failed writing to file");
          return false;
       }
 
       if (!out_stream.close())
       {
-         set_last_error(L"Failed writing to file");
+         set_last_error("Failed writing to file");
          return false;
       }
 

@@ -8,18 +8,21 @@
 #define CRNLIB_ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
 
 #ifdef _MSC_VER
-extern "C" unsigned long __cdecl _lrotl(unsigned long, int);
-#pragma intrinsic(_lrotl)
+   // Need to explictly extern these with MSVC, but not MinGW.
+   extern "C" unsigned long __cdecl _lrotl(unsigned long, int);
+   #pragma intrinsic(_lrotl)
 
-extern "C" unsigned long __cdecl _lrotr(unsigned long, int);
-#pragma intrinsic(_lrotr)
+   extern "C" unsigned long __cdecl _lrotr(unsigned long, int);
+   #pragma intrinsic(_lrotr)
 #endif
 
-//#define CRNLIB_ROTATE_LEFT(x, k) (((x) << (k)) | ((x) >> (32-(k))))
-#define CRNLIB_ROTATE_LEFT(x, k) _lrotl(x, k)
-
-//#define CRNLIB_ROTATE_RIGHT(x, k) (((x) >> (k)) | ((x) << (32-(k))))
-#define CRNLIB_ROTATE_RIGHT(x, k) _lrotr(x, k)
+#ifdef WIN32
+   #define CRNLIB_ROTATE_LEFT(x, k) _lrotl(x, k)
+   #define CRNLIB_ROTATE_RIGHT(x, k) _lrotr(x, k)
+#else
+   #define CRNLIB_ROTATE_LEFT(x, k) (((x) << (k)) | ((x) >> (32-(k))))
+   #define CRNLIB_ROTATE_RIGHT(x, k) (((x) >> (k)) | ((x) << (32-(k))))
+#endif
 
 template<class T, size_t N> T decay_array_to_subtype(T (&a)[N]);
 #define CRNLIB_ARRAY_SIZE(X) (sizeof(X) / sizeof(decay_array_to_subtype(X)))
@@ -39,12 +42,12 @@ namespace crnlib
 
       template<typename T> inline void zero_object(T& obj)
       {
-         memset(&obj, 0, sizeof(obj));
+         memset((void*)&obj, 0, sizeof(obj));
       }
 
       template<typename T> inline void zero_this(T* pObj)
       {
-         memset(pObj, 0, sizeof(*pObj));
+         memset((void*)pObj, 0, sizeof(*pObj));
       }
 
       inline bool is_bit_set(uint bits, uint mask)
@@ -225,7 +228,8 @@ namespace crnlib
       void endian_switch_words(uint16* p, uint num);
       void endian_switch_dwords(uint32* p, uint num);
       void copy_words(uint16* pDst, const uint16* pSrc, uint num, bool endian_switch);
-      
+      void copy_dwords(uint32* pDst, const uint32* pSrc, uint num, bool endian_switch);
+
       uint compute_max_mips(uint width, uint height);
 
    }   // namespace utils

@@ -4,6 +4,15 @@
 
 namespace crnlib
 {
+   template<typename T> struct int_traits { enum { cMin = crnlib::cINT32_MIN, cMax = crnlib::cINT32_MAX, cSigned = true }; };
+
+   template<> struct int_traits<int8> { enum { cMin = crnlib::cINT8_MIN, cMax = crnlib::cINT8_MAX, cSigned = true }; };
+   template<> struct int_traits<int16> { enum { cMin = crnlib::cINT16_MIN, cMax = crnlib::cINT16_MAX, cSigned = true }; };
+   template<> struct int_traits<int32> { enum { cMin = crnlib::cINT32_MIN, cMax = crnlib::cINT32_MAX, cSigned = true }; };
+
+   template<> struct int_traits<uint8> { enum { cMin = 0, cMax = crnlib::cUINT8_MAX, cSigned = false }; };
+   template<> struct int_traits<uint16> { enum { cMin = 0, cMax = crnlib::cUINT16_MAX, cSigned = false }; };
+   template<> struct int_traits<uint32> { enum { cMin = 0, cMax = crnlib::cUINT32_MAX, cSigned = false }; };
    template<typename T>
    struct scalar_type
    {
@@ -43,8 +52,13 @@ namespace crnlib
    CRNLIB_DEFINE_BUILT_IN_TYPE(unsigned int)
    CRNLIB_DEFINE_BUILT_IN_TYPE(long)
    CRNLIB_DEFINE_BUILT_IN_TYPE(unsigned long)
+#ifdef __GNUC__
+   CRNLIB_DEFINE_BUILT_IN_TYPE(long long)
+   CRNLIB_DEFINE_BUILT_IN_TYPE(unsigned long long)
+#else
    CRNLIB_DEFINE_BUILT_IN_TYPE(__int64)
    CRNLIB_DEFINE_BUILT_IN_TYPE(unsigned __int64)
+#endif
    CRNLIB_DEFINE_BUILT_IN_TYPE(float)
    CRNLIB_DEFINE_BUILT_IN_TYPE(double)
    CRNLIB_DEFINE_BUILT_IN_TYPE(long double)
@@ -69,7 +83,7 @@ namespace crnlib
 
 #define CRNLIB_IS_SCALAR_TYPE(T) (scalar_type<T>::cFlag)
 
-#define CRNLIB_IS_BITWISE_COPYABLE(T) ((scalar_type<T>::cFlag) || (bitwise_copyable<T>::cFlag) || CRNLIB_IS_POD(T))
+#define CRNLIB_IS_BITWISE_COPYABLE(T) (CRNLIB_IS_SCALAR_TYPE(T) || CRNLIB_IS_POD(T) || (bitwise_copyable<T>::cFlag))
 
 #define CRNLIB_IS_BITWISE_MOVABLE(T) (CRNLIB_IS_BITWISE_COPYABLE(T) || (bitwise_movable<T>::cFlag))
 

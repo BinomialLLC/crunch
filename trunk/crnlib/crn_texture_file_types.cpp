@@ -2,48 +2,48 @@
 // See Copyright Notice and license at the end of inc/crnlib.h
 #include "crn_core.h"
 #include "crn_texture_file_types.h"
-#include "crn_strutils.h"
+#include "crn_file_utils.h"
 
 namespace crnlib
 {
-   const wchar_t* texture_file_types::get_extension(format fmt)
+   const char* texture_file_types::get_extension(format fmt)
    {
       CRNLIB_ASSERT(fmt < cNumFileFormats);
       if (fmt >= cNumFileFormats)
          return NULL;
 
-      static const wchar_t* extensions[cNumFileFormats] =
+      static const char* extensions[cNumFileFormats] =
       {
-         L"tga",
-         L"png",
-         L"jpg",
-         L"jpeg",
-         L"bmp",
-         L"gif",
-         L"tif",
-         L"tiff",
-         L"ppm",
-         L"pgm",
-         L"dds",
-         L"psd",
-         L"jp2",
-         L"crn",
-         L"<clipboard>",
-         L"<dragdrop>"
+         "tga",
+         "png",
+         "jpg",
+         "jpeg",
+         "bmp",
+         "gif",
+         "tif",
+         "tiff",
+         "ppm",
+         "pgm",
+         "dds",
+         "psd",
+         "jp2",
+         "crn",
+         "<clipboard>",
+         "<dragdrop>"
       };
       return extensions[fmt];
    }
 
-   texture_file_types::format texture_file_types::determine_file_format(const wchar_t* pFilename)
+   texture_file_types::format texture_file_types::determine_file_format(const char* pFilename)
    {
-      dynamic_wstring ext;
-      if (!split_path(pFilename, NULL, NULL, NULL, &ext))
+      dynamic_string ext;
+      if (!file_utils::split_path(pFilename, NULL, NULL, NULL, &ext))
          return cFormatInvalid;
 
       if (ext.is_empty())
          return cFormatInvalid;
 
-      if (ext[0] == L'.')
+      if (ext[0] == '.')
          ext.right(1);
 
       for (uint i = 0; i < cNumFileFormats; i++)
@@ -81,21 +81,21 @@ namespace crnlib
       return true;
    }
 
-   const wchar_t* get_texture_type_desc(texture_type t)
+   const char* get_texture_type_desc(texture_type t)
    {
       switch (t)
       {
-         case cTextureTypeUnknown:                 return L"Unknown";
-         case cTextureTypeRegularMap:              return L"2D map";
-         case cTextureTypeNormalMap:               return L"Normal map";
-         case cTextureTypeVerticalCrossCubemap:    return L"Vertical Cross Cubemap";
-         case cTextureTypeCubemap:                 return L"Cubemap";
+         case cTextureTypeUnknown:                 return "Unknown";
+         case cTextureTypeRegularMap:              return "2D map";
+         case cTextureTypeNormalMap:               return "Normal map";
+         case cTextureTypeVerticalCrossCubemap:    return "Vertical Cross Cubemap";
+         case cTextureTypeCubemap:                 return "Cubemap";
          default: break;
       }
 
       CRNLIB_ASSERT(false);
 
-      return L"?";
+      return "?";
    }
 
 } // namespace crnlib

@@ -258,7 +258,7 @@ namespace crnlib
 
       struct potential_solution
       {
-         potential_solution() : m_coords(), m_error(UINT64_MAX), m_alpha_block(false), m_valid(false)
+         potential_solution() : m_coords(), m_error(cUINT64_MAX), m_alpha_block(false), m_valid(false)
          {
          }
 
@@ -272,7 +272,7 @@ namespace crnlib
          {
             m_coords.clear();
             m_selectors.resize(0);
-            m_error = UINT64_MAX;
+            m_error = cUINT64_MAX;
             m_alpha_block = false;
             m_valid = false;
          }

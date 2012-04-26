@@ -507,7 +507,7 @@ namespace crnlib
       
       static void refine_endpoints2(uint n, const color_quad_u8* pBlock, uint& low16, uint& high16, uint8* pSelectors, float axis[3])
       {
-         uint64 orig_error = determine_error(n, pBlock, low16, high16, UINT64_MAX);
+         uint64 orig_error = determine_error(n, pBlock, low16, high16, cUINT64_MAX);
          if (!orig_error)
             return;
                            
@@ -623,7 +623,7 @@ namespace crnlib
             {
                improved = true;
                
-               uint64 cur_error = determine_error(n, pBlock, low16, high16, UINT64_MAX);
+               uint64 cur_error = determine_error(n, pBlock, low16, high16, cUINT64_MAX);
                if (!cur_error)
                   return;
             }

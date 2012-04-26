@@ -193,9 +193,13 @@ typedef unsigned char stbi_uc;
 // (you must include the appropriate extension in the filename).
 // returns TRUE on success, FALSE if couldn't open file, error writing file
 extern int      stbi_write_bmp     (char const *filename,     int x, int y, int comp, const void *data);
+#ifdef _MSC_VER
 extern int      stbi_write_bmp_w   (wchar_t const *filename,     int x, int y, int comp, const void *data);
+#endif
 extern int      stbi_write_tga     (char const *filename,     int x, int y, int comp, const void *data);
+#ifdef _MSC_VER
 extern int      stbi_write_tga_w   (wchar_t const *filename,     int x, int y, int comp, const void *data);
+#endif
 #endif
 
 // PRIMARY API - works on images of any type
@@ -203,7 +207,9 @@ extern int      stbi_write_tga_w   (wchar_t const *filename,     int x, int y, i
 // load image by filename, open file, or memory buffer
 #ifndef STBI_NO_STDIO
 extern stbi_uc *stbi_load            (char const *filename,     int *x, int *y, int *comp, int req_comp);
+#ifdef _MSC_VER
 extern stbi_uc *stbi_load_w          (wchar_t const *filename,  int *x, int *y, int *comp, int req_comp);
+#endif
 extern stbi_uc *stbi_load_from_file  (FILE *f,                  int *x, int *y, int *comp, int req_comp);
 extern int      stbi_info_from_file  (FILE *f,                  int *x, int *y, int *comp);
 #endif
@@ -227,7 +233,7 @@ extern void   stbi_ldr_to_hdr_scale(float scale);
 
 // get a VERY brief reason for failure
 // NOT THREADSAFE
-extern char    *stbi_failure_reason  (void);
+extern const char *stbi_failure_reason  (void);
 
 // free the loaded image -- this is just stb_free()
 extern void     stbi_image_free      (void *retval_from_stbi_load);
@@ -418,14 +424,14 @@ typedef unsigned char validate_uint32[sizeof(uint32)==4];
 //
 
 // this is not threadsafe
-static char *failure_reason;
+static const char *failure_reason;
 
-char *stbi_failure_reason(void)
+const char *stbi_failure_reason(void)
 {
    return failure_reason;
 }
 
-static int e(char *str)
+static int e(const char *str)
 {
    failure_reason = str;
    return 0;
@@ -485,6 +491,7 @@ unsigned char *stbi_load(char const *filename, int *x, int *y, int *comp, int re
    return result;
 }
 
+#ifdef _MSC_VER
 unsigned char *stbi_load_w(wchar_t const *filename, int *x, int *y, int *comp, int req_comp)
 {
    FILE *f = _wfopen(filename, L"rb");
@@ -494,6 +501,7 @@ unsigned char *stbi_load_w(wchar_t const *filename, int *x, int *y, int *comp, i
    fclose(f);
    return result;
 }
+#endif
 
 unsigned char *stbi_load_from_file(FILE *f, int *x, int *y, int *comp, int req_comp)
 {
@@ -748,7 +756,7 @@ static void getn(stbi *s, stbi_uc *buffer, int n)
 {
 #ifndef STBI_NO_STDIO
    if (s->img_file) {
-      fread(buffer, 1, n, s->img_file);
+      size_t nr = fread(buffer, 1, n, s->img_file); nr;
       return;
    }
 #endif
@@ -1615,11 +1623,13 @@ typedef uint8 *(*resample_row_func)(uint8 *out, uint8 *in0, uint8 *in1,
 
 static uint8 *resample_row_1(uint8 *out, uint8 *in_near, uint8 *in_far, int w, int hs)
 {
+   out, in_far, w, hs;
    return in_near;
 }
 
 static uint8* resample_row_v_2(uint8 *out, uint8 *in_near, uint8 *in_far, int w, int hs)
 {
+   hs;
    // need to generate two samples vertically for every one in input
    int i;
    for (i=0; i < w; ++i)
@@ -1629,6 +1639,7 @@ static uint8* resample_row_v_2(uint8 *out, uint8 *in_near, uint8 *in_far, int w,
 
 static uint8*  resample_row_h_2(uint8 *out, uint8 *in_near, uint8 *in_far, int w, int hs)
 {
+   hs, in_far;
    // need to generate two samples horizontally for every one in input
    int i;
    uint8 *input = in_near;
@@ -1654,6 +1665,7 @@ static uint8*  resample_row_h_2(uint8 *out, uint8 *in_near, uint8 *in_far, int w
 
 static uint8 *resample_row_hv_2(uint8 *out, uint8 *in_near, uint8 *in_far, int w, int hs)
 {
+   hs;
    // need to generate 2x2 samples for every one in input
    int i,t0,t1;
    if (w == 1) {
@@ -1675,6 +1687,7 @@ static uint8 *resample_row_hv_2(uint8 *out, uint8 *in_near, uint8 *in_far, int w
 
 static uint8 *resample_row_generic(uint8 *out, uint8 *in_near, uint8 *in_far, int w, int hs)
 {
+   in_far;
    // resample with nearest-neighbor
    int i,j;
    for (i=0; i < w; ++i)
@@ -2395,10 +2408,14 @@ static int create_png_image_raw(png *a, uint8 *raw, uint32 raw_len, int out_n, u
    a->out = (uint8 *) stb_malloc(x * y * out_n);
    if (!a->out) return e("outofmem", "Out of memory");
    if (!stbi_png_partial) {
-      if (s->img_x == x && s->img_y == y)
+      if ((s->img_x == x) && (s->img_y == y))
+      {
          if (raw_len != (img_n * x + 1) * y) return e("not enough pixels","Corrupt PNG");
+      }
       else // interlaced:
+      {
          if (raw_len < (img_n * x + 1) * y) return e("not enough pixels","Corrupt PNG");
+      }
    }
    for (j=0; j < y; ++j) {
       uint8 *cur = a->out + stride*j;
@@ -2528,6 +2545,7 @@ static int compute_transparency(png *z, uint8 tc[3], int out_n)
 
 static int expand_palette(png *a, uint8 *palette, int len, int pal_img_n)
 {
+   len;
    uint32 i, pixel_count = a->s.img_x * a->s.img_y;
    uint8 *p, *temp_out, *orig = a->out;
 
@@ -3164,7 +3182,7 @@ static stbi_uc *tga_load(stbi *s, int *x, int *y, int *comp, int req_comp)
 	unsigned char *tga_palette = NULL;
 	int i, j;
 	unsigned char raw_data[4];
-	unsigned char trans_data[4];
+	unsigned char trans_data[4] = { 0, 0, 0, 0 };
 	int RLE_count = 0;
 	int RLE_repeating = 0;
 	int read_next_pixel = 1;
@@ -3402,6 +3420,7 @@ int stbi_psd_test_file(FILE *f)
 {
    stbi s;
    int r,n = ftell(f);
+   memset(&s, 0, sizeof(s));
    start_file(&s, f);
    r = psd_test(&s);
    fseek(f,n,SEEK_SET);
@@ -3608,7 +3627,7 @@ stbi_uc *stbi_psd_load_from_memory (stbi_uc const *buffer, int len, int *x, int 
 #ifndef STBI_NO_HDR
 static int hdr_test(stbi *s)
 {
-   char *signature = "#?RADIANCE\n";
+   const char *signature = "#?RADIANCE\n";
    int i;
    for (i=0; signature[i]; ++i)
       if (get8(s) != signature[i])
@@ -3628,6 +3647,7 @@ int stbi_hdr_test_file(FILE *f)
 {
    stbi s;
    int r,n = ftell(f);
+   memset(&s, 0, sizeof(s));
    start_file(&s, f);
    r = hdr_test(&s);
    fseek(f,n,SEEK_SET);
@@ -3639,7 +3659,8 @@ int stbi_hdr_test_file(FILE *f)
 static char *hdr_gettoken(stbi *z, char *buffer)
 {
    int len=0;
-	char *s = buffer, c = '\0';
+	//char *s = buffer;
+	char c = '\0';
 
    c = get8(z);
 
@@ -3859,18 +3880,18 @@ static void write_pixels(FILE *f, int rgb_dir, int vdir, int x, int y, int comp,
             fwrite(&d[comp-1], 1, 1, f);
          switch (comp) {
             case 1:
-            case 2: writef(f, "111", d[0],d[0],d[0]);
+            case 2: writef(f, (char*)"111", d[0],d[0],d[0]);
                     break;
             case 4:
                if (!write_alpha) {
                   for (k=0; k < 3; ++k)
                      px[k] = bg[k] + ((d[k] - bg[k]) * d[3])/255;
-                  writef(f, "111", px[1-rgb_dir],px[1],px[1+rgb_dir]);
+                  writef(f, (char*)"111", px[1-rgb_dir],px[1],px[1+rgb_dir]);
                   break;
                }
                /* FALLTHROUGH */
             case 3:
-               writef(f, "111", d[1-rgb_dir],d[1],d[1+rgb_dir]);
+               writef(f, (char*)"111", d[1-rgb_dir],d[1],d[1+rgb_dir]);
                break;
          }
          if (write_alpha > 0)
@@ -3894,6 +3915,7 @@ static int outfile(char const *filename, int rgb_dir, int vdir, int x, int y, in
    return f != NULL;
 }
 
+#ifdef _MSC_VER
 static int outfile_w(wchar_t const *filename, int rgb_dir, int vdir, int x, int y, int comp, const void *data, int alpha, int pad, char *fmt, ...)
 {
    FILE *f = _wfopen(filename, L"wb");
@@ -3907,38 +3929,43 @@ static int outfile_w(wchar_t const *filename, int rgb_dir, int vdir, int x, int 
    }
    return f != NULL;
 }
+#endif
 
 int stbi_write_bmp(char const *filename, int x, int y, int comp, const void *data)
 {
    int pad = (-x*3) & 3;
    return outfile(filename,-1,-1,x,y,comp,data,0,pad,
-           "11 4 22 4" "4 44 22 444444",
+           (char*)"11 4 22 4" "4 44 22 444444",
            'B', 'M', 14+40+(x*3+pad)*y, 0,0, 14+40,  // file header
             40, x,y, 1,24, 0,0,0,0,0,0);             // bitmap header
 }
 
+#ifdef _MSC_VER
 int stbi_write_bmp_w(wchar_t const *filename, int x, int y, int comp, const void *data)
 {
    int pad = (-x*3) & 3;
    return outfile_w(filename,-1,-1,x,y,comp,data,0,pad,
-      "11 4 22 4" "4 44 22 444444",
+      (char*)"11 4 22 4" "4 44 22 444444",
       'B', 'M', 14+40+(x*3+pad)*y, 0,0, 14+40,  // file header
       40, x,y, 1,24, 0,0,0,0,0,0);             // bitmap header
 }
+#endif
 
 int stbi_write_tga(char const *filename, int x, int y, int comp, const void *data)
 {
    int has_alpha = !(comp & 1);
    return outfile(filename, -1,-1, x, y, comp, data, has_alpha, 0,
-                  "111 221 2222 11", 0,0,2, 0,0,0, 0,0,x,y, 24+8*has_alpha, 8*has_alpha);
+                  (char*)"111 221 2222 11", 0,0,2, 0,0,0, 0,0,x,y, 24+8*has_alpha, 8*has_alpha);
 }
 
+#ifdef _MSC_VER
 int stbi_write_tga_w(wchar_t const *filename, int x, int y, int comp, const void *data)
 {
    int has_alpha = !(comp & 1);
    return outfile_w(filename, -1,-1, x, y, comp, data, has_alpha, 0,
-      "111 221 2222 11", 0,0,2, 0,0,0, 0,0,x,y, 24+8*has_alpha, 8*has_alpha);
+      (char*)"111 221 2222 11", 0,0,2, 0,0,0, 0,0,x,y, 24+8*has_alpha, 8*has_alpha);
 }
+#endif
 
 // any other image formats that do interleaved rgb data?
 //    PNG: requires adler32,crc32 -- significant amount of code

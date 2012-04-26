@@ -1,4 +1,4 @@
-// File: crnlib.cpp 
+// File: crnlib.cpp
 // See Copyright Notice and license at the end of inc/crnlib.h
 #include "crn_core.h"
 #include "../inc/crnlib.h"
@@ -7,8 +7,6 @@
 #include "crn_dynamic_stream.h"
 #include "crn_buffer_stream.h"
 #include "crn_ryg_dxt.hpp"
-
-#include "crn_winhdr.h"
 
 #define CRND_HEADER_FILE_ONLY
 #include "../inc/crn_decomp.h"
@@ -32,14 +30,9 @@ namespace crnlib
    public:
       crnlib_global_initializer()
       {
+         crn_threading_init();
+
          ryg_dxt::sInitDXT();
-
-#ifdef CRNLIB_PLATFORM_PC
-         SYSTEM_INFO g_system_info;
-         GetSystemInfo(&g_system_info);
-
-         g_number_of_processors = math::maximum<uint>(1U, g_system_info.dwNumberOfProcessors);
-#endif
 
          crnlib_enable_fail_exceptions(true);
 
@@ -49,16 +42,11 @@ namespace crnlib
    };
 
    crnlib_global_initializer g_crnlib_initializer;
-}
+} // namespace crnlib
 
 using namespace crnlib;
 
-const char* crn_get_format_stringa(crn_format fmt)
-{
-   return pixel_format_helpers::get_crn_format_stringa(fmt);
-}
-
-const wchar_t* crn_get_format_string(crn_format fmt)
+const char* crn_get_format_string(crn_format fmt)
 {
    return pixel_format_helpers::get_crn_format_string(fmt);
 }
@@ -83,18 +71,7 @@ crn_format crn_get_fundamental_dxt_format(crn_format fmt)
    return crnd::crnd_get_fundamental_dxt_format(fmt);
 }
 
-const wchar_t* crn_get_file_type_ext(crn_file_type file_type)
-{
-   switch (file_type)
-   {
-      case cCRNFileTypeDDS: return L"dds";
-      case cCRNFileTypeCRN: return L"crn";
-      default: break;
-   }
-   return L"?";
-}
-
-const char* crn_get_file_type_exta(crn_file_type file_type)
+const char* crn_get_file_type_ext(crn_file_type file_type)
 {
    switch (file_type)
    {
@@ -105,30 +82,30 @@ const char* crn_get_file_type_exta(crn_file_type file_type)
    return "?";
 }
 
-const wchar_t* crn_get_mip_mode_desc(crn_mip_mode m)
+const char* crn_get_mip_mode_desc(crn_mip_mode m)
 {
    switch (m)
    {
-      case cCRNMipModeUseSourceOrGenerateMips:  return L"Use source/generate if none";
-      case cCRNMipModeUseSourceMips:            return L"Only use source MIP maps (if any)";
-      case cCRNMipModeGenerateMips:             return L"Always generate new MIP maps";
-      case cCRNMipModeNoMips:                   return L"No MIP maps";
+      case cCRNMipModeUseSourceOrGenerateMips:  return "Use source/generate if none";
+      case cCRNMipModeUseSourceMips:            return "Only use source MIP maps (if any)";
+      case cCRNMipModeGenerateMips:             return "Always generate new MIP maps";
+      case cCRNMipModeNoMips:                   return "No MIP maps";
       default: break;
    }
-   return L"?";
+   return "?";
 }
 
-const wchar_t* crn_get_mip_mode_name(crn_mip_mode m)
+const char* crn_get_mip_mode_name(crn_mip_mode m)
 {
    switch (m)
    {
-      case cCRNMipModeUseSourceOrGenerateMips:  return L"UseSourceOrGenerate";
-      case cCRNMipModeUseSourceMips:            return L"UseSource";
-      case cCRNMipModeGenerateMips:             return L"Generate";
-      case cCRNMipModeNoMips:                   return L"None";
+      case cCRNMipModeUseSourceOrGenerateMips:  return "UseSourceOrGenerate";
+      case cCRNMipModeUseSourceMips:            return "UseSource";
+      case cCRNMipModeGenerateMips:             return "Generate";
+      case cCRNMipModeNoMips:                   return "None";
       default: break;
    }
-   return L"?";
+   return "?";
 }
 
 const char* crn_get_mip_filter_name(crn_mip_filter f)
@@ -145,37 +122,22 @@ const char* crn_get_mip_filter_name(crn_mip_filter f)
    return "?";
 }
 
-const wchar_t* crn_get_scale_mode_desc(crn_scale_mode sm)
+const char* crn_get_scale_mode_desc(crn_scale_mode sm)
 {
    switch (sm)
    {
-      case cCRNSMDisabled:       return L"disabled";
-      case cCRNSMAbsolute:       return L"absolute";
-      case cCRNSMRelative:       return L"relative";
-      case cCRNSMLowerPow2:      return L"lowerpow2";
-      case cCRNSMNearestPow2:    return L"nearestpow2";
-      case cCRNSMNextPow2:       return L"nextpow2";
+      case cCRNSMDisabled:       return "disabled";
+      case cCRNSMAbsolute:       return "absolute";
+      case cCRNSMRelative:       return "relative";
+      case cCRNSMLowerPow2:      return "lowerpow2";
+      case cCRNSMNearestPow2:    return "nearestpow2";
+      case cCRNSMNextPow2:       return "nextpow2";
       default: break;
    }
-   return L"?";
+   return "?";
 }
 
-const wchar_t* crn_get_dxt_quality_string(crn_dxt_quality q)
-{
-   switch (q)
-   {
-      case cCRNDXTQualitySuperFast: return L"SuperFast";
-      case cCRNDXTQualityFast:      return L"Fast";
-      case cCRNDXTQualityNormal:    return L"Normal";
-      case cCRNDXTQualityBetter:    return L"Better";
-      case cCRNDXTQualityUber:      return L"Uber";
-      default: break;
-   }
-   CRNLIB_ASSERT(false);
-   return L"?";
-}
-
-const char* crn_get_dxt_quality_stringa(crn_dxt_quality q)
+const char* crn_get_dxt_quality_string(crn_dxt_quality q)
 {
    switch (q)
    {
@@ -233,7 +195,7 @@ void *crn_compress(const crn_comp_params &comp_params, const crn_mipmap_params &
 void *crn_decompress_crn_to_dds(const void *pCRN_file_data, crn_uint32 &file_size)
 {
    dds_texture tex;
-   if (!tex.load_crn_from_memory(L"from_memory.crn", pCRN_file_data, file_size))
+   if (!tex.load_crn_from_memory("from_memory.crn", pCRN_file_data, file_size))
    {
       file_size = 0;
       return NULL;
@@ -277,9 +239,9 @@ bool crn_decompress_dds_to_images(const void *pDDS_file_data, crn_uint32 dds_fil
    tex_desc.m_levels = tex.get_num_levels();
    tex_desc.m_fmt_fourcc = (crn_uint32)tex.get_format();
 
-   for (uint f = 0; f < tex.get_num_faces(); f++)
+   for (uint32 f = 0; f < tex.get_num_faces(); f++)
    {
-      for (uint l = 0; l < tex.get_num_levels(); l++)
+      for (uint32 l = 0; l < tex.get_num_levels(); l++)
       {
          mip_level *pLevel = tex.get_level(f, l);
          image_u8 *pImg = pLevel->get_image();
@@ -292,8 +254,8 @@ bool crn_decompress_dds_to_images(const void *pDDS_file_data, crn_uint32 dds_fil
 
 void crn_free_all_images(crn_uint32 **ppImages, const crn_texture_desc &desc)
 {
-   for (uint f = 0; f < desc.m_faces; f++)
-      for (uint l = 0; l < desc.m_levels; l++)
+   for (uint32 f = 0; f < desc.m_faces; f++)
+      for (uint32 l = 0; l < desc.m_levels; l++)
          crn_free_block(ppImages[l + desc.m_levels * f]);
 }
 

@@ -61,7 +61,7 @@ namespace crnlib
 
       CRNLIB_ASSERT(n && pBlocks);
 
-      m_main_thread_id = get_current_thread_id();
+      m_main_thread_id = crn_get_current_thread_id();
 
       m_num_blocks = n;
       m_pBlocks = pBlocks;
@@ -99,6 +99,11 @@ namespace crnlib
             if (debugging)
                debug_img.resize(num_chunks_x * cChunkPixelWidth, num_chunks_y * cChunkPixelHeight);
 
+            float adaptive_tile_color_psnr_derating = 1.5f; // was 2.4f
+            if ((level) && (adaptive_tile_color_psnr_derating > .25f))
+            {
+               adaptive_tile_color_psnr_derating = math::maximum(.25f, adaptive_tile_color_psnr_derating / powf(3.1f, static_cast<float>(level))); // was 3.0f
+            }
             for (uint chunk_y = 0; chunk_y < num_chunks_y; chunk_y++)
             {
                for (uint chunk_x = 0; chunk_x < num_chunks_x; chunk_x++)
@@ -197,13 +202,8 @@ namespace crnlib
                      if (mean_squared)
                         peak_snr = math::clamp<double>(log10(255.0f / root_mean_squared) * 20.0f, 0.0f, 500.0f);
 
-                     float adaptive_tile_color_psnr_derating = 2.4f;
                      //if (level)
                      //   adaptive_tile_color_psnr_derating = math::lerp(adaptive_tile_color_psnr_derating * .5f, .3f, math::maximum((level - 1) / float(m_params.m_num_mips - 2), 1.0f));
-                     if ((level) && (adaptive_tile_color_psnr_derating > .25f))
-                     {
-                        adaptive_tile_color_psnr_derating = math::maximum(.25f, adaptive_tile_color_psnr_derating / powf(3.0f, static_cast<float>(level)));
-                     }
 
                      float color_derating = math::lerp( 0.0f, adaptive_tile_color_psnr_derating, (g_chunk_encodings[e].m_num_tiles - 1) / 3.0f );
                      peak_snr = peak_snr - color_derating;
@@ -306,7 +306,7 @@ namespace crnlib
 
 #if GENERATE_DEBUG_IMAGES
             if (debugging)
-               image_utils::save_to_file_stb(dynamic_wstring(cVarArg, L"debug_%u.tga", level).get_ptr(), debug_img, image_utils::cSaveIgnoreAlpha);
+               image_utils::save_to_file_stb(dynamic_string(cVarArg, "debug_%u.tga", level).get_ptr(), debug_img, image_utils::cSaveIgnoreAlpha);
 #endif
 
          } // level
@@ -440,7 +440,7 @@ namespace crnlib
 
          if ((cluster_index & cluster_index_progress_mask) == 0)
          {
-            if (get_current_thread_id() == m_main_thread_id)
+            if (crn_get_current_thread_id() == m_main_thread_id)
             {
                if (!update_progress(cluster_index, m_endpoint_cluster_indices.size() - 1))
                   return;
@@ -547,7 +547,8 @@ namespace crnlib
             {
                const uint block_index = indices[block_iter];
 
-               const color_quad_u8* pSrc_pixels = &m_pBlocks[block_index].m_pixels[0][0];
+               //const color_quad_u8* pSrc_pixels = &m_pBlocks[block_index].m_pixels[0][0];
+               const color_quad_u8* pSrc_pixels = (const color_quad_u8*)m_pBlocks[block_index].m_pixels;
 
                for (uint i = 0; i < cDXTBlockSize * cDXTBlockSize; i++)
                {
@@ -646,7 +647,7 @@ namespace crnlib
 
          if ((cluster_index & 255) == 0)
          {
-            if (get_current_thread_id() == m_main_thread_id)
+            if (crn_get_current_thread_id() == m_main_thread_id)
             {
                if (!update_progress(cluster_index, task_params.m_selector_cluster_indices.size() - 1))
                   return;
@@ -681,7 +682,7 @@ namespace crnlib
 
                if (m_params.m_dxt1a_alpha_threshold > 0)
                {
-                  const color_quad_u8* pSrc_pixels = &m_pBlocks[block_index].m_pixels[0][0];
+                  const color_quad_u8* pSrc_pixels = (const color_quad_u8*)m_pBlocks[block_index].m_pixels;
 
                   for (uint i = 0; i < cDXTBlockSize * cDXTBlockSize; i++)
                   {
@@ -809,7 +810,7 @@ namespace crnlib
    {
       CRNLIB_ASSERT(m_num_blocks);
 
-      m_main_thread_id = get_current_thread_id();
+      m_main_thread_id = crn_get_current_thread_id();
       m_canceled = false;
 
       m_pDst_elements = pDst_elements;
@@ -824,7 +825,7 @@ namespace crnlib
       const float quality = m_params.m_quality_level / (float)qdxt1_params::cMaxQuality;
       const float endpoint_quality = powf(quality, 1.8f * quality_power_mul);
       const float selector_quality = powf(quality, 1.65f * quality_power_mul);
-      
+
       //const uint max_endpoint_clusters = math::clamp<uint>(static_cast<uint>(m_endpoint_clusterizer.get_codebook_size() * endpoint_quality), 128U, m_endpoint_clusterizer.get_codebook_size());
       //const uint max_selector_clusters = math::clamp<uint>(static_cast<uint>(m_max_selector_clusters * selector_quality), 150U, m_max_selector_clusters);
       const uint max_endpoint_clusters = math::clamp<uint>(static_cast<uint>(m_endpoint_clusterizer.get_codebook_size() * endpoint_quality), 96U, m_endpoint_clusterizer.get_codebook_size());

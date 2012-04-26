@@ -13,8 +13,8 @@ namespace crnlib
       m_pParams(NULL),
       m_pResults(NULL),
       m_pSolutions(NULL),
-      m_has_color_weighting(false),
       m_perceptual(false),
+      m_has_color_weighting(false),
       m_all_pixels_grayscale(false)
    {
       m_low_coords.reserve(512);
@@ -26,7 +26,7 @@ namespace crnlib
 
       m_norm_unique_colors.reserve(512);
       m_norm_unique_colors_weighted.reserve(512);
-      
+
       m_lo_cells.reserve(128);
       m_hi_cells.reserve(128);
    }
@@ -41,10 +41,10 @@ namespace crnlib
          m_unique_color_hash_map.clear();
       else
          m_unique_color_hash_map.reset();
-      
+
       if (m_solutions_tried.get_table_size() > 8192)
          m_solutions_tried.clear();
-                  
+
       m_unique_colors.resize(0);
 
       m_has_transparent_pixels = false;
@@ -57,7 +57,7 @@ namespace crnlib
       m_mean_norm_color_weighted.clear();
 
       m_principle_axis.clear();
-      
+
       m_total_evals = 0;
       m_all_pixels_grayscale = false;
       m_has_color_weighting = false;
@@ -107,7 +107,7 @@ namespace crnlib
          high_color = (ryg_dxt::OMatch5_3[ave_r][1]<<11) | (ryg_dxt::OMatch6_3[ave_g][1]<<5) | ryg_dxt::OMatch5_3[ave_b][1];
          improved |= evaluate_solution(dxt1_solution_coordinates((uint16)low_color, (uint16)high_color), true, &m_best_solution);
       }
-      
+
       if (m_pParams->m_quality == cCRNDXTQualityUber)
       {
          for (uint i = 0; i < m_unique_colors.size(); i++)
@@ -121,7 +121,7 @@ namespace crnlib
             uint low_color = (ryg_dxt::OMatch5[r][0]<<11) | (ryg_dxt::OMatch6[g][0]<<5) | ryg_dxt::OMatch5[b][0];
             uint high_color = (ryg_dxt::OMatch5[r][1]<<11) | (ryg_dxt::OMatch6[g][1]<<5) | ryg_dxt::OMatch5[b][1];
             improved |= evaluate_solution(dxt1_solution_coordinates((uint16)low_color, (uint16)high_color), true, &m_best_solution);
-            
+
             if ((m_pParams->m_use_alpha_blocks) && (m_best_solution.m_error))
             {
                low_color = (ryg_dxt::OMatch5_3[r][0]<<11) | (ryg_dxt::OMatch6_3[g][0]<<5) | ryg_dxt::OMatch5_3[b][0];
@@ -130,7 +130,7 @@ namespace crnlib
             }
          }
       }
-      
+
       return improved;
    }
 
@@ -142,18 +142,18 @@ namespace crnlib
 
       //uint packed_color = dxt1_block::pack_color(r, g, b, true);
       //evaluate_solution(dxt1_solution_coordinates((uint16)packed_color, (uint16)packed_color), false, &m_best_solution);
-      
+
       uint low_color = (ryg_dxt::OMatch5[r][0]<<11) | (ryg_dxt::OMatch6[g][0]<<5) | ryg_dxt::OMatch5[b][0];
       uint high_color = (ryg_dxt::OMatch5[r][1]<<11) | (ryg_dxt::OMatch6[g][1]<<5) | ryg_dxt::OMatch5[b][1];
       evaluate_solution(dxt1_solution_coordinates((uint16)low_color, (uint16)high_color), false, &m_best_solution);
-      
+
       if ((m_pParams->m_use_alpha_blocks) && (m_best_solution.m_error))
       {
          low_color = (ryg_dxt::OMatch5_3[r][0]<<11) | (ryg_dxt::OMatch6_3[g][0]<<5) | ryg_dxt::OMatch5_3[b][0];
          high_color = (ryg_dxt::OMatch5_3[r][1]<<11) | (ryg_dxt::OMatch6_3[g][1]<<5) | ryg_dxt::OMatch5_3[b][1];
          evaluate_solution(dxt1_solution_coordinates((uint16)low_color, (uint16)high_color), true, &m_best_solution);
       }
-      
+
       return_solution(*m_pResults, m_best_solution);
 
       return true;
@@ -221,35 +221,35 @@ namespace crnlib
             axis[0] += (x * v);
             axis[1] += (y * v);
             axis[2] += (z * v);
-         }            
+         }
       }
 
       axis.normalize(&def);
 #else
       double cov[6] = { 0, 0, 0, 0, 0, 0 };
-      
+
       //vec3F lo(math::cNearlyInfinite);
       //vec3F hi(-math::cNearlyInfinite);
 
       for(uint i = 0; i < norm_colors.size(); i++)
       {
          const vec3F& v = norm_colors[i];
-         
+
          //if (v[0] < lo[0]) lo[0] = v[0];
          //if (v[1] < lo[1]) lo[1] = v[1];
          //if (v[2] < lo[2]) lo[2] = v[2];
          //if (v[0] > hi[0]) hi[0] = v[0];
          //if (v[1] > hi[1]) hi[1] = v[1];
          //if (v[2] > hi[2]) hi[2] = v[2];
-         
+
          float r = v[0];
          float g = v[1];
          float b = v[2];
-         
+
          if (m_unique_colors[i].m_weight > 1)
          {
             const double weight = m_unique_colors[i].m_weight;
-                     
+
             cov[0] += r*r*weight;
             cov[1] += r*g*weight;
             cov[2] += r*b*weight;
@@ -265,7 +265,7 @@ namespace crnlib
             cov[3] += g*g;
             cov[4] += g*b;
             cov[5] += b*b;
-         }            
+         }
       }
 
       double vfr, vfg, vfb;
@@ -277,7 +277,7 @@ namespace crnlib
       vfb = .7f;
 
       const uint cNumIters = 8;
-                  
+
       for (uint iter = 0; iter < cNumIters; iter++)
       {
          double r = vfr*cov[0] + vfg*cov[1] + vfb*cov[2];
@@ -292,19 +292,19 @@ namespace crnlib
             g *= m;
             b *= m;
          }
-         
+
          double delta = math::square(vfr-r) + math::square(vfg-g) + math::square(vfb-b);
-            
+
          vfr = r;
          vfg = g;
          vfb = b;
-            
+
          if ((iter > 2) && (delta < 1e-8))
             break;
       }
-            
+
       double len = vfr*vfr + vfg*vfg + vfb*vfb;
-      
+
       if (len < 1e-10)
       {
          axis = def;
@@ -315,12 +315,12 @@ namespace crnlib
          vfr *= len;
          vfg *= len;
          vfb *= len;
-         
+
          axis.set(static_cast<float>(vfr), static_cast<float>(vfg), static_cast<float>(vfb));
-      }      
-#endif      
+      }
+#endif
    }
-   
+
    static const uint8 g_invTableNull[4] = { 0, 1, 2, 3 };
    static const uint8 g_invTableAlpha[4] = { 1, 0, 2, 3 };
    static const uint8 g_invTableColor[4] = { 1, 0, 3, 2 };
@@ -328,10 +328,10 @@ namespace crnlib
    void dxt1_endpoint_optimizer::return_solution(results& res, const potential_solution& solution)
    {
       bool invert_selectors;
-      
+
       if (solution.m_alpha_block)
          invert_selectors = (solution.m_coords.m_low_color > solution.m_coords.m_high_color);
-      else 
+      else
       {
          CRNLIB_ASSERT(solution.m_coords.m_low_color != solution.m_coords.m_high_color);
 
@@ -352,18 +352,18 @@ namespace crnlib
       const uint8* pInvert_table = g_invTableNull;
       if (invert_selectors)
          pInvert_table = solution.m_alpha_block ? g_invTableAlpha : g_invTableColor;
-      
+
       const uint alpha_thresh = m_pParams->m_pixels_have_alpha ? (m_pParams->m_dxt1a_alpha_threshold << 24U) : 0;
-      
+
       const uint32* pSrc_pixels = reinterpret_cast<const uint32*>(m_pParams->m_pPixels);
       uint8* pDst_selectors = res.m_pSelectors;
-            
+
       if ((m_unique_colors.size() == 1) && (!m_pParams->m_pixels_have_alpha))
       {
          uint32 c = utils::read_le32(pSrc_pixels);
-         
+
          CRNLIB_ASSERT(c >= alpha_thresh);
-         
+
          c |= 0xFF000000U;
 
          unique_color_hash_map::const_iterator it(m_unique_color_hash_map.find(c));
@@ -378,10 +378,10 @@ namespace crnlib
       else
       {
          uint8* pDst_selectors_end = pDst_selectors + m_pParams->m_num_pixels;
-         
+
          uint8 prev_selector = 0;
          uint32 prev_color = 0;
-         
+
          do
          {
             uint32 c = utils::read_le32(pSrc_pixels);
@@ -392,28 +392,28 @@ namespace crnlib
             if (c >= alpha_thresh)
             {
                c |= 0xFF000000U;
-               
+
                if (c == prev_color)
                   selector = prev_selector;
                else
                {
                   unique_color_hash_map::const_iterator it(m_unique_color_hash_map.find(c));
-                  
+
                   CRNLIB_ASSERT(it != m_unique_color_hash_map.end());
-                  
+
                   uint unique_color_index = it->second;
-                  
+
                   selector = pInvert_table[solution.m_selectors[unique_color_index]];
-                  
+
                   prev_color = c;
                   prev_selector = selector;
-               }               
+               }
             }
 
             *pDst_selectors++ = selector;
-         
-         } while (pDst_selectors != pDst_selectors_end);    
-      }         
+
+         } while (pDst_selectors != pDst_selectors_end);
+      }
 
       res.m_alpha_block = solution.m_alpha_block;
       res.m_error = solution.m_error;
@@ -425,7 +425,7 @@ namespace crnlib
 
       return vec3F(c.r * 1.0f/31.0f, c.g * 1.0f/63.0f, c.b * 1.0f/31.0f);
    }
-   
+
    inline vec3F dxt1_endpoint_optimizer::unpack_to_vec3F_raw(uint16 packed_color)
    {
       color_quad_u8 c(dxt1_block::unpack_color(packed_color, false));
@@ -437,7 +437,7 @@ namespace crnlib
    {
       if ((m_best_solution.m_alpha_block) || (!m_best_solution.m_error))
          return;
-         
+
       //color_quad_u8 orig_l(dxt1_block::unpack_color(m_best_solution.m_coords.m_low_color, false));
       //color_quad_u8 orig_h(dxt1_block::unpack_color(m_best_solution.m_coords.m_high_color, false));
       //uint orig_error = m_best_solution.m_error;
@@ -548,18 +548,18 @@ namespace crnlib
                      h[comp_index] = static_cast<uint8>(p);
 
                      bool better = evaluate_solution(
-                        dxt1_solution_coordinates(dxt1_block::pack_color(l, false), dxt1_block::pack_color(h, false)), 
+                        dxt1_solution_coordinates(dxt1_block::pack_color(l, false), dxt1_block::pack_color(h, false)),
                         true, &m_best_solution);
                      better;
 
                      if (better)
                      {
 #if 0
-                        printf("comp: %u, orig: %u %u, new: %u %u, orig_error: %u, new_error: %u\n", comp_index, 
+                        printf("comp: %u, orig: %u %u, new: %u %u, orig_error: %u, new_error: %u\n", comp_index,
                            orig_l[comp_index], orig_h[comp_index],
                            l[comp_index], h[comp_index],
-                           orig_error, m_best_solution.m_error);               
-#endif                               
+                           orig_error, m_best_solution.m_error);
+#endif
                         if (!m_best_solution.m_error)
                            return;
 
@@ -576,13 +576,13 @@ namespace crnlib
                   } // if (trial_error < error_to_beat)
 
                } // for (uint p = 0; p <= m; p++)
-            }                     
+            }
 
          } // for (uint o = 0; o <= m; o++)
 
       } // comp_index
    }
-         
+
    static const struct adjacent_coords
    {
       int8 x, y, z;
@@ -595,7 +595,7 @@ namespace crnlib
       {1, 0, -1},
       {-1, 1, -1},
       {0, 1, -1},
-      
+
       {1, 1, -1},
       {-1, -1, 0},
       {0, -1, 0},
@@ -604,7 +604,7 @@ namespace crnlib
       {1, 0, 0},
       {-1, 1, 0},
       {0, 1, 0},
-      
+
       {1, 1, 0},
       {-1, -1, 1},
       {0, -1, 1},
@@ -613,15 +613,15 @@ namespace crnlib
       {0, 0, 1},
       {1, 0, 1},
       {-1, 1, 1},
-      
+
       {0, 1, 1},
       {1, 1, 1}
    };
-   
+
    bool dxt1_endpoint_optimizer::refine_solution(int refinement_level)
    {
       CRNLIB_ASSERT(m_best_solution.m_valid);
-      
+
       static const int w1Tab[4] = { 3,0,2,1 };
 
       static const int prods_0[4] = { 0x00,0x00,0x02,0x02 };
@@ -640,7 +640,7 @@ namespace crnlib
       {
          const color_quad_u8& c = m_unique_colors[i].m_color;
          const double weight = m_unique_colors[i].m_weight;
-         
+
          double r = c.r*weight;
          double g = c.g*weight;
          double b = c.b*weight;
@@ -675,7 +675,7 @@ namespace crnlib
       double fg = frb * (63.0f / 31.0f);
 
       bool improved = false;
-      
+
       if (refinement_level == 0)
       {
          uint max16;
@@ -687,7 +687,7 @@ namespace crnlib
          min16 =   math::clamp<int>(static_cast<int>((At2_r*xx - At1_r*xy)*frb+0.5f),0,31) << 11;
          min16 |=  math::clamp<int>(static_cast<int>((At2_g*xx - At1_g*xy)*fg +0.5f),0,63) << 5;
          min16 |=  math::clamp<int>(static_cast<int>((At2_b*xx - At1_b*xy)*frb+0.5f),0,31) << 0;
-         
+
          dxt1_solution_coordinates nc((uint16)min16, (uint16)max16);
          nc.canonicalize();
          improved |= evaluate_solution(nc, true, &m_best_solution, false);
@@ -701,8 +701,8 @@ namespace crnlib
 
          e[1][0] = (uint8)math::clamp<int>(static_cast<int>((At2_r*xx - At1_r*xy)*frb+0.5f),0,31);
          e[1][1] = (uint8)math::clamp<int>(static_cast<int>((At2_g*xx - At1_g*xy)*fg +0.5f),0,63);
-         e[1][2] = (uint8)math::clamp<int>(static_cast<int>((At2_b*xx - At1_b*xy)*frb+0.5f),0,31); 
-               
+         e[1][2] = (uint8)math::clamp<int>(static_cast<int>((At2_b*xx - At1_b*xy)*frb+0.5f),0,31);
+
          for (uint i = 0; i < 2; i++)
          {
             for (int rr = -1; rr <= 1; rr++)
@@ -712,28 +712,28 @@ namespace crnlib
                   for (int br = -1; br <= 1; br++)
                   {
                      dxt1_solution_coordinates nc;
-                     
+
                      color_quad_u8 c[2];
                      c[0] = e[0];
                      c[1] = e[1];
-                     
+
                      c[i][0] = (uint8)math::clamp<int>(c[i][0] + rr, 0, 31);
                      c[i][1] = (uint8)math::clamp<int>(c[i][1] + gr, 0, 63);
                      c[i][2] = (uint8)math::clamp<int>(c[i][2] + br, 0, 31);
-                     
+
                      nc.m_low_color = dxt1_block::pack_color(c[0], false);
                      nc.m_high_color = dxt1_block::pack_color(c[1], false);
-                     
+
                      nc.canonicalize();
-                     
+
                      if ((nc.m_low_color != m_best_solution.m_coords.m_low_color) || (nc.m_high_color != m_best_solution.m_coords.m_high_color))
                      {
                         improved |= evaluate_solution(nc, true, &m_best_solution, false);
-                     }         
+                     }
                   }
                }
             }
-         }         
+         }
       }
       else
       {
@@ -744,8 +744,8 @@ namespace crnlib
 
          e[1][0] = (uint8)math::clamp<int>(static_cast<int>((At2_r*xx - At1_r*xy)*frb+0.5f),0,31);
          e[1][1] = (uint8)math::clamp<int>(static_cast<int>((At2_g*xx - At1_g*xy)*fg +0.5f),0,63);
-         e[1][2] = (uint8)math::clamp<int>(static_cast<int>((At2_b*xx - At1_b*xy)*frb+0.5f),0,31); 
-         
+         e[1][2] = (uint8)math::clamp<int>(static_cast<int>((At2_b*xx - At1_b*xy)*frb+0.5f),0,31);
+
          for (int orr = -1; orr <= 1; orr++)
          {
             for (int ogr = -1; ogr <= 1; ogr++)
@@ -753,15 +753,15 @@ namespace crnlib
                for (int obr = -1; obr <= 1; obr++)
                {
                   dxt1_solution_coordinates nc;
-                  
+
                   color_quad_u8 c[2];
                   c[0] = e[0];
                   c[1] = e[1];
-                  
+
                   c[0][0] = (uint8)math::clamp<int>(c[0][0] + orr, 0, 31);
                   c[0][1] = (uint8)math::clamp<int>(c[0][1] + ogr, 0, 63);
                   c[0][2] = (uint8)math::clamp<int>(c[0][2] + obr, 0, 31);
-                                                
+
                   for (int rr = -1; rr <= 1; rr++)
                   {
                      for (int gr = -1; gr <= 1; gr++)
@@ -771,7 +771,7 @@ namespace crnlib
                            c[1][0] = (uint8)math::clamp<int>(c[1][0] + rr, 0, 31);
                            c[1][1] = (uint8)math::clamp<int>(c[1][1] + gr, 0, 63);
                            c[1][2] = (uint8)math::clamp<int>(c[1][2] + br, 0, 31);
-                           
+
                            nc.m_low_color = dxt1_block::pack_color(c[0], false);
                            nc.m_high_color = dxt1_block::pack_color(c[1], false);
                            nc.canonicalize();
@@ -781,15 +781,15 @@ namespace crnlib
                      }
                   }
                }
-            }               
-         }               
-      }         
-                 
+            }
+         }
+      }
+
       return improved;
-   }      
-   
+   }
+
    //-----------------------------------------------------------------------------------------------------------------------------------------
-   
+
    static int16 g_fast_probe_table[] =
    {
       0,
@@ -797,8 +797,8 @@ namespace crnlib
       2,
       3
    };
-   const uint cFastProbeTableSize = sizeof(g_fast_probe_table) / sizeof(g_fast_probe_table[0]);  
-   
+   const uint cFastProbeTableSize = sizeof(g_fast_probe_table) / sizeof(g_fast_probe_table[0]);
+
    static int16 g_normal_probe_table[] =
    {
       0,
@@ -807,7 +807,7 @@ namespace crnlib
       5,
       7
    };
-   const uint cNormalProbeTableSize = sizeof(g_normal_probe_table) / sizeof(g_normal_probe_table[0]);  
+   const uint cNormalProbeTableSize = sizeof(g_normal_probe_table) / sizeof(g_normal_probe_table[0]);
 
    static int16 g_better_probe_table[] =
    {
@@ -815,17 +815,17 @@ namespace crnlib
       1,
       2,
       3,
-      
+
       5,
       9,
       15,
       19,
-      
+
       27,
       43
    };
-   const uint cBetterProbeTableSize = sizeof(g_better_probe_table) / sizeof(g_better_probe_table[0]);  
-   
+   const uint cBetterProbeTableSize = sizeof(g_better_probe_table) / sizeof(g_better_probe_table[0]);
+
    static int16 g_uber_probe_table[] =
    {
       0,
@@ -844,21 +844,21 @@ namespace crnlib
       59,
       91
    };
-  
-   const uint cUberProbeTableSize = sizeof(g_uber_probe_table) / sizeof(g_uber_probe_table[0]);  
-   
+
+   const uint cUberProbeTableSize = sizeof(g_uber_probe_table) / sizeof(g_uber_probe_table[0]);
+
    bool dxt1_endpoint_optimizer::optimize_endpoints(vec3F& low_color, vec3F& high_color)
    {
       vec3F orig_low_color(low_color);
       vec3F orig_high_color(high_color);
-      
+
       m_trial_solution.clear();
-      
+
       uint num_passes;
       int16* pProbe_table = g_uber_probe_table;
       uint probe_range;
       float dist_per_trial = .015625f;
-      
+
       switch (m_pParams->m_quality)
       {
          case cCRNDXTQualitySuperFast:
@@ -895,7 +895,7 @@ namespace crnlib
 
       if (m_pParams->m_endpoint_caching)
       {
-         const uint num_prev_results = math::minimum<uint>(cMaxPrevResults, m_num_prev_results); 
+         const uint num_prev_results = math::minimum<uint>(cMaxPrevResults, m_num_prev_results);
          for (uint i = 0; i < num_prev_results; i++)
          {
             const dxt1_solution_coordinates& coords = m_prev_results[i];
@@ -904,7 +904,7 @@ namespace crnlib
             if (!solution_res.second)
                continue;
 
-            evaluate_solution(coords, true, &m_best_solution);           
+            evaluate_solution(coords, true, &m_best_solution);
          }
 
          if (!m_best_solution.m_error)
@@ -918,22 +918,22 @@ namespace crnlib
       {
          //evaluate_solution(dxt1_solution_coordinates(low_color, high_color), true, &m_best_solution);
          //refine_solution();
-         
+
          try_median4(orig_low_color, orig_high_color);
       }
 
       uint probe_low[cUberProbeTableSize * 2 + 1];
       uint probe_high[cUberProbeTableSize * 2 + 1];
-      
+
       vec3F scaled_principle_axis[2];
-      
+
       scaled_principle_axis[1] = m_principle_axis * dist_per_trial;
       scaled_principle_axis[1][0] *= 31.0f;
       scaled_principle_axis[1][1] *= 63.0f;
       scaled_principle_axis[1][2] *= 31.0f;
-      
+
       scaled_principle_axis[0] = -scaled_principle_axis[1];
-      
+
       //vec3F initial_ofs(scaled_principle_axis * (float)-probe_range);
       //initial_ofs[0] += .5f;
       //initial_ofs[1] += .5f;
@@ -958,7 +958,7 @@ namespace crnlib
          const uint64 prev_best_error = m_best_solution.m_error;
          if (!prev_best_error)
             break;
-         
+
          int prev_packed_color[2] = { -1, -1 };
          uint num_low_trials = 0;
          vec3F initial_probe_low_color(low_color + vec3F(.5f));
@@ -966,11 +966,11 @@ namespace crnlib
          {
             const int ls = i ? 0 : 1;
             int x = pProbe_table[i];
-            
+
             for (int s = ls; s < 2; s++)
             {
                vec3F probe_low_color(initial_probe_low_color + scaled_principle_axis[s] * (float)x);
-                              
+
                int r = math::clamp((int)floor(probe_low_color[0]), 0, 31);
                int g = math::clamp((int)floor(probe_low_color[1]), 0, 63);
                int b = math::clamp((int)floor(probe_low_color[2]), 0, 31);
@@ -981,23 +981,23 @@ namespace crnlib
                   probe_low[num_low_trials++] = packed_color;
                   prev_packed_color[s] = packed_color;
                }
-            }               
+            }
          }
-         
+
          prev_packed_color[0] = -1;
          prev_packed_color[1] = -1;
-         
+
          uint num_high_trials = 0;
          vec3F initial_probe_high_color(high_color + vec3F(.5f));
          for (uint i = 0; i < probe_range; i++)
          {
             const int ls = i ? 0 : 1;
             int x = pProbe_table[i];
-            
+
             for (int s = ls; s < 2; s++)
             {
                vec3F probe_high_color(initial_probe_high_color + scaled_principle_axis[s] * (float)x);
-            
+
                int r = math::clamp((int)floor(probe_high_color[0]), 0, 31);
                int g = math::clamp((int)floor(probe_high_color[1]), 0, 63);
                int b = math::clamp((int)floor(probe_high_color[2]), 0, 31);
@@ -1008,7 +1008,7 @@ namespace crnlib
                   probe_high[num_high_trials++] = packed_color;
                   prev_packed_color[s] = packed_color;
                }
-            }               
+            }
          }
 
          for (uint i = 0; i < num_low_trials; i++)
@@ -1031,7 +1031,7 @@ namespace crnlib
             color_quad_u8 lc(dxt1_block::unpack_color(m_best_solution.m_coords.m_low_color, false));
 
             for (int i = 0; i < 26; i++)
-            {  
+            {
                int r = lc.r + g_adjacency[i].x;
                if ((r < 0) || (r > 31)) continue;
 
@@ -1073,12 +1073,12 @@ namespace crnlib
                         evaluate_solution(coords, true, &m_best_solution);
                   }
                }
-            }               
+            }
 
             color_quad_u8 hc(dxt1_block::unpack_color(m_best_solution.m_coords.m_high_color, false));
 
             for (int i = 0; i < 26; i++)
-            {  
+            {
                int r = hc.r + g_adjacency[i].x;
                if ((r < 0) || (r > 31)) continue;
 
@@ -1120,7 +1120,7 @@ namespace crnlib
                         evaluate_solution(coords, true, &m_best_solution);
                   }
                }
-            }               
+            }
          }
 
          if ((!m_best_solution.m_error) || ((pass) && (m_best_solution.m_error == prev_best_error)))
@@ -1128,7 +1128,7 @@ namespace crnlib
 
          if (m_pParams->m_quality >= cCRNDXTQualityUber)
             refine_solution(1);
-      }            
+      }
 
       if (m_pParams->m_quality >= cCRNDXTQualityNormal)
       {
@@ -1144,10 +1144,10 @@ namespace crnlib
 
          if (m_pParams->m_quality == cCRNDXTQualityUber)
          {
-            if (m_best_solution.m_error) 
+            if (m_best_solution.m_error)
                try_combinatorial_encoding();
-         }            
-      }         
+         }
+      }
 
       return_solution(*m_pResults, m_best_solution);
 
@@ -1157,9 +1157,9 @@ namespace crnlib
          m_num_prev_results++;
       }
 
-      return true;   
+      return true;
    }
-   
+
    static inline int mul_8bit(int a, int b)
    {
       int t = a * b + 128;
@@ -1170,7 +1170,7 @@ namespace crnlib
    {
       uint num_passes = 1;
       vec3F perceptual_weights(1.0f);
-      
+
       if (m_perceptual)
       {
          float ave_redness = 0;
@@ -1185,24 +1185,24 @@ namespace crnlib
             int l = mul_8bit(c.r + c.g + c.b, 0x55); // /3
             ave_l += l;
             l = math::maximum(1, l);
-            
+
             float scale = weight / static_cast<float>(l);
 
             ave_redness += scale * c.r;
             ave_blueness += scale * c.b;
-         }   
-         
+         }
+
          ave_redness /= m_total_unique_color_weight;
          ave_blueness /= m_total_unique_color_weight;
          ave_l /= m_total_unique_color_weight;
-         
+
          ave_l = math::minimum(1.0f, ave_l * 16.0f / 255.0f);
 
          //float r = ave_l * powf(math::saturate(ave_redness / 3.0f), 5.0f);
          //float b = ave_l * powf(math::saturate(ave_blueness / 3.0f), 5.0f);
-         
+
          float p = ave_l * powf(math::saturate(math::maximum(ave_redness, ave_blueness) * 1.0f/3.0f), 2.75f);
-                  
+
          if (p >= 1.0f)
             num_passes = 1;
          else
@@ -1211,14 +1211,14 @@ namespace crnlib
             perceptual_weights = vec3F::lerp(vec3F(.212f, .72f, .072f), perceptual_weights, p);
          }
       }
-                     
+
       for (uint pass_index = 0; pass_index < num_passes; pass_index++)
       {
          compute_vectors(perceptual_weights);
-        
+
          compute_pca(m_principle_axis, m_norm_unique_colors_weighted, vec3F(.2837149f, 0.9540631f, 0.096277453f));
 
-#if 0 
+#if 0
          matrix44F m(matrix44F::make_scale_matrix(perceptual_weights[0], perceptual_weights[1], perceptual_weights[2]));
          matrix44F im(m.get_inverse());
          im.transpose_in_place();
@@ -1227,8 +1227,8 @@ namespace crnlib
          m_principle_axis[0] /= perceptual_weights[0];
          m_principle_axis[1] /= perceptual_weights[1];
          m_principle_axis[2] /= perceptual_weights[2];
-#endif         
-         m_principle_axis.normalize_in_place();    
+#endif
+         m_principle_axis.normalize_in_place();
 
          if (num_passes > 1)
          {
@@ -1238,7 +1238,7 @@ namespace crnlib
                perceptual_weights.set(.212f, .6f, .212f);
             else
                break;
-         }               
+         }
       }
 
       float l = 1e+9;
@@ -1253,7 +1253,7 @@ namespace crnlib
 
       vec3F low_color(m_mean_norm_color + l * m_principle_axis);
       vec3F high_color(m_mean_norm_color + h * m_principle_axis);
-            
+
       if (!low_color.is_within_bounds(0.0f, 1.0f))
       {
          vec3F coord;
@@ -1262,8 +1262,8 @@ namespace crnlib
          intersection::result res = intersection::ray_aabb(coord, t, ray3F(low_color, m_principle_axis), bounds);
          if (res == intersection::cSuccess)
             low_color = coord;
-      }           
-      
+      }
+
       if (!high_color.is_within_bounds(0.0f, 1.0f))
       {
          vec3F coord;
@@ -1272,7 +1272,7 @@ namespace crnlib
          intersection::result res = intersection::ray_aabb(coord, t, ray3F(high_color, -m_principle_axis), bounds);
          if (res == intersection::cSuccess)
             high_color = coord;
-      }  
+      }
 
       if (!optimize_endpoints(low_color, high_color))
          return false;
@@ -1285,11 +1285,11 @@ namespace crnlib
       // TODO
       return true;
    }
-   
+
    bool dxt1_endpoint_optimizer::try_median4(const vec3F& low_color, const vec3F& high_color)
    {
       vec3F means[4];
-      
+
       if (m_unique_colors.size() <= 4)
       {
          for (uint i = 0; i < 4; i++)
@@ -1301,19 +1301,19 @@ namespace crnlib
          means[3] = high_color - m_mean_norm_color;
          means[1] = vec3F::lerp(means[0], means[3], 1.0f/3.0f);
          means[2] = vec3F::lerp(means[0], means[3], 2.0f/3.0f);
-         
+
          fast_random rm;
 
          const uint cMaxIters = 8;
          uint reassign_rover = 0;
          float prev_total_dist = math::cNearlyInfinite;
-         for (uint iter = 0; iter < cMaxIters; iter++)      
+         for (uint iter = 0; iter < cMaxIters; iter++)
          {
             vec3F new_means[4];
             float new_weights[4];
             utils::zero_object(new_means);
             utils::zero_object(new_weights);
-            
+
             float total_dist = 0;
 
             for (uint i = 0; i < m_unique_colors.size(); i++)
@@ -1322,7 +1322,7 @@ namespace crnlib
 
                float best_dist = means[0].squared_distance(v);
                int best_index = 0;
-               
+
                for (uint j = 1; j < 4; j++)
                {
                   float dist = means[j].squared_distance(v);
@@ -1332,7 +1332,7 @@ namespace crnlib
                      best_index = j;
                   }
                }
-               
+
                total_dist += best_dist;
 
                new_means[best_index] += v * (float)m_unique_colors[i].m_weight;
@@ -1356,12 +1356,12 @@ namespace crnlib
                else
                   empty_cell = true;
             }
-            
+
             if (!empty_cell)
             {
                if (fabs(total_dist - prev_total_dist) < .00001f)
                   break;
-                  
+
                prev_total_dist = total_dist;
             }
             else
@@ -1379,13 +1379,13 @@ namespace crnlib
                      means[j] = means[ri];
                      means[j] += vec3F::make_random(rm, -.00196f, .00196f);
                   }
-               }         
-            }            
+               }
+            }
          }
-      }         
+      }
 
       bool improved = false;
-      
+
       for (uint i = 0; i < 3; i++)
       {
          for (uint j = i + 1; j < 4; j++)
@@ -1407,15 +1407,15 @@ namespace crnlib
 
       return improved;
    }
-   
+
    bool dxt1_endpoint_optimizer::evaluate_solution(
-      const dxt1_solution_coordinates& coords, 
+      const dxt1_solution_coordinates& coords,
       bool early_out,
       potential_solution* pBest_solution,
       bool alternate_rounding)
    {
       m_total_evals++;
-      
+
       if ((!m_pSolutions) || (alternate_rounding))
       {
          if (m_pParams->m_quality >= cCRNDXTQualityBetter)
@@ -1423,26 +1423,26 @@ namespace crnlib
          else
             return evaluate_solution_fast(m_trial_solution, coords, early_out, pBest_solution, alternate_rounding);
       }
-      
+
       evaluate_solution_uber(m_trial_solution, coords, false, NULL, alternate_rounding);
-      
+
       CRNLIB_ASSERT(m_trial_solution.m_valid);
-            
+
       m_pSolutions->resize(m_pSolutions->size() + 1);
       solution& new_solution = m_pSolutions->back();
       new_solution.m_selectors.resize(m_pParams->m_num_pixels);
       new_solution.m_results.m_pSelectors = &new_solution.m_selectors[0];
-      
+
       return_solution(new_solution.m_results, m_trial_solution);
-      
+
       if ((pBest_solution) && (m_trial_solution.m_error < m_best_solution.m_error))
       {
          *pBest_solution = m_trial_solution;
          return true;
       }
-      
+
       return false;
-   }      
+   }
 
    inline uint dxt1_endpoint_optimizer::color_distance(bool perceptual, const color_quad_u8& e1, const color_quad_u8& e2, bool alpha)
    {
@@ -1481,7 +1481,7 @@ namespace crnlib
          {
             int da = (int)e1[3] - (int)e2[3];
             da = (da * da) * (m_pParams->m_color_weights[0] + m_pParams->m_color_weights[1] + m_pParams->m_color_weights[2]);
-            return dr + dg + db + da; 
+            return dr + dg + db + da;
          }
          else
          {
@@ -1495,20 +1495,20 @@ namespace crnlib
    }
 
    bool dxt1_endpoint_optimizer::evaluate_solution_uber(
-      potential_solution& solution, 
-      const dxt1_solution_coordinates& coords, 
+      potential_solution& solution,
+      const dxt1_solution_coordinates& coords,
       bool early_out,
       potential_solution* pBest_solution,
       bool alternate_rounding)
    {
       solution.m_coords = coords;
       solution.m_selectors.resize(m_unique_colors.size());
-                  
+
       if ((pBest_solution) && (early_out))
          solution.m_error = pBest_solution->m_error;
       else
-         solution.m_error = UINT64_MAX;
-      
+         solution.m_error = cUINT64_MAX;
+
       solution.m_alpha_block = false;
       solution.m_valid = false;
 
@@ -1523,19 +1523,19 @@ namespace crnlib
       m_trial_selectors.resize(m_unique_colors.size());
 
       color_quad_u8 colors[cDXT1SelectorValues];
-      
+
       colors[0] = dxt1_block::unpack_color(coords.m_low_color, true);
       colors[1] = dxt1_block::unpack_color(coords.m_high_color, true);
-      
+
       for (uint block_type = first_block_type; block_type <= last_block_type; block_type++)
       {
          uint64 trial_error = 0;
-         
+
          if (!block_type)
          {
             colors[2].set_noclamp_rgba( (colors[0].r * 2 + colors[1].r + alternate_rounding) / 3, (colors[0].g * 2 + colors[1].g + alternate_rounding) / 3, (colors[0].b * 2 + colors[1].b + alternate_rounding) / 3, 0);
             colors[3].set_noclamp_rgba( (colors[1].r * 2 + colors[0].r + alternate_rounding) / 3, (colors[1].g * 2 + colors[0].g + alternate_rounding) / 3, (colors[1].b * 2 + colors[0].b + alternate_rounding) / 3, 0);
-               
+
             if (m_perceptual)
             {
                for (int unique_color_index = (int)m_unique_colors.size() - 1; unique_color_index >= 0; unique_color_index--)
@@ -1566,31 +1566,31 @@ namespace crnlib
                for (int unique_color_index = (int)m_unique_colors.size() - 1; unique_color_index >= 0; unique_color_index--)
                {
                   const color_quad_u8& c = m_unique_colors[unique_color_index].m_color;
-                  
+
                   uint best_error = color_distance(false, c, colors[0], false);
                   uint best_color_index = 0;
-                  
+
                   uint err = color_distance(false, c, colors[1], false);
                   if (err < best_error) { best_error = err; best_color_index = 1; }
-                  
+
                   err = color_distance(false, c, colors[2], false);
                   if (err < best_error) { best_error = err; best_color_index = 2; }
-                  
+
                   err = color_distance(false, c, colors[3], false);
                   if (err < best_error) { best_error = err; best_color_index = 3; }
-                  
+
                   trial_error += best_error * m_unique_colors[unique_color_index].m_weight;
                   if (trial_error >= solution.m_error)
                      break;
 
                   m_trial_selectors[unique_color_index] = static_cast<uint8>(best_color_index);
                }
-            }               
+            }
          }
          else
          {
             colors[2].set_noclamp_rgba( (colors[0].r + colors[1].r + alternate_rounding) >> 1, (colors[0].g + colors[1].g + alternate_rounding) >> 1, (colors[0].b + colors[1].b + alternate_rounding) >> 1, 255U);
-            
+
             if (m_perceptual)
             {
                for (int unique_color_index = (int)m_unique_colors.size() - 1; unique_color_index >= 0; unique_color_index--)
@@ -1618,7 +1618,7 @@ namespace crnlib
                for (int unique_color_index = (int)m_unique_colors.size() - 1; unique_color_index >= 0; unique_color_index--)
                {
                   const color_quad_u8& c = m_unique_colors[unique_color_index].m_color;
-                  
+
                   uint best_error = color_distance(false, c, colors[0], false);
                   uint best_color_index = 0;
 
@@ -1634,9 +1634,9 @@ namespace crnlib
 
                   m_trial_selectors[unique_color_index] = static_cast<uint8>(best_color_index);
                }
-            }               
+            }
          }
-         
+
          if (trial_error < solution.m_error)
          {
             solution.m_error = trial_error;
@@ -1670,12 +1670,12 @@ namespace crnlib
          return true;
       }
 
-      return false;  
+      return false;
    }
-   
+
    bool dxt1_endpoint_optimizer::evaluate_solution_fast(
-      potential_solution& solution, 
-      const dxt1_solution_coordinates& coords, 
+      potential_solution& solution,
+      const dxt1_solution_coordinates& coords,
       bool early_out,
       potential_solution* pBest_solution,
       bool alternate_rounding)
@@ -1686,7 +1686,7 @@ namespace crnlib
       if ((pBest_solution) && (early_out))
          solution.m_error = pBest_solution->m_error;
       else
-         solution.m_error = UINT64_MAX;
+         solution.m_error = cUINT64_MAX;
 
       solution.m_alpha_block = false;
       solution.m_valid = false;
@@ -1698,9 +1698,9 @@ namespace crnlib
          first_block_type = 1;
       else if (!m_pParams->m_use_alpha_blocks)
          last_block_type = 0;
-         
+
       m_trial_selectors.resize(m_unique_colors.size());
-      
+
       color_quad_u8 colors[cDXT1SelectorValues];
       colors[0] = dxt1_block::unpack_color(coords.m_low_color, true);
       colors[1] = dxt1_block::unpack_color(coords.m_high_color, true);
@@ -1717,11 +1717,11 @@ namespace crnlib
       int stops[4];
       stops[0] = colors[0].r*vr + colors[0].g*vg + colors[0].b*vb;
       stops[1] = colors[1].r*vr + colors[1].g*vg + colors[1].b*vb;
-      
+
       int dirr = vr * 2;
       int dirg = vg * 2;
       int dirb = vb * 2;
-      
+
       for (uint block_type = first_block_type; block_type <= last_block_type; block_type++)
       {
          uint64 trial_error = 0;
@@ -1730,10 +1730,10 @@ namespace crnlib
          {
             colors[2].set_noclamp_rgba( (colors[0].r * 2 + colors[1].r + alternate_rounding) / 3, (colors[0].g * 2 + colors[1].g + alternate_rounding) / 3, (colors[0].b * 2 + colors[1].b + alternate_rounding) / 3, 255U);
             colors[3].set_noclamp_rgba( (colors[1].r * 2 + colors[0].r + alternate_rounding) / 3, (colors[1].g * 2 + colors[0].g + alternate_rounding) / 3, (colors[1].b * 2 + colors[0].b + alternate_rounding) / 3, 255U);
-            
+
             stops[2] = colors[2].r*vr + colors[2].g*vg + colors[2].b*vb;
             stops[3] = colors[3].r*vr + colors[3].g*vg + colors[3].b*vb;
-            
+
             // 0 2 3 1
             int c0Point = stops[1] + stops[3];
             int halfPoint = stops[3] + stops[2];
@@ -1750,9 +1750,9 @@ namespace crnlib
                   best_color_index = (dot < c3Point) ? 0 : 2;
                else
                   best_color_index = (dot < c0Point) ? 3 : 1;
-                  
+
                uint best_error = color_distance(m_perceptual, c, colors[best_color_index], false);
-               
+
                trial_error += best_error * m_unique_colors[unique_color_index].m_weight;
                if (trial_error >= solution.m_error)
                   break;
@@ -1765,11 +1765,11 @@ namespace crnlib
             colors[2].set_noclamp_rgba( (colors[0].r + colors[1].r + alternate_rounding) >> 1, (colors[0].g + colors[1].g + alternate_rounding) >> 1, (colors[0].b + colors[1].b + alternate_rounding) >> 1, 255U);
 
             stops[2] = colors[2].r*vr + colors[2].g*vg + colors[2].b*vb;
-            
+
             // 0 2 1
             int c02Point = stops[0] + stops[2];
             int c21Point = stops[2] + stops[1];
-            
+
             for (int unique_color_index = (int)m_unique_colors.size() - 1; unique_color_index >= 0; unique_color_index--)
             {
                const color_quad_u8& c = m_unique_colors[unique_color_index].m_color;
@@ -1783,7 +1783,7 @@ namespace crnlib
                   best_color_index = 2;
                else
                   best_color_index = 1;
-                  
+
                uint best_error = color_distance(m_perceptual, c, colors[best_color_index], false);
 
                trial_error += best_error * m_unique_colors[unique_color_index].m_weight;
@@ -1827,19 +1827,19 @@ namespace crnlib
          return true;
       }
 
-      return false;  
+      return false;
    }
-   
+
    unique_color dxt1_endpoint_optimizer::lerp_color(const color_quad_u8& a, const color_quad_u8& b, float f, int rounding)
    {
       color_quad_u8 res;
-      
+
       float r = rounding ? 1.0f : 0.0f;
       res[0] = static_cast<uint8>(math::clamp(math::float_to_int(r + math::lerp<float>(a[0], b[0], f)), 0, 255));
       res[1] = static_cast<uint8>(math::clamp(math::float_to_int(r + math::lerp<float>(a[1], b[1], f)), 0, 255));
       res[2] = static_cast<uint8>(math::clamp(math::float_to_int(r + math::lerp<float>(a[2], b[2], f)), 0, 255));
       res[3] = 255;
-      
+
       return unique_color(res, 1);
    }
 
@@ -1847,9 +1847,9 @@ namespace crnlib
    {
       if ((m_unique_colors.size() < 2) || (m_unique_colors.size() > 4))
          return;
-         
+
       m_temp_unique_colors = m_unique_colors;
-      
+
       if (m_temp_unique_colors.size() == 2)
       {
          // a    b    c   d
@@ -1860,17 +1860,17 @@ namespace crnlib
             for (uint q = 0; q < 2; q++)
             {
                const uint r = q ^ 1;
-               
+
                // a b
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, 2.0f, k));
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, 3.0f, k));
-               
+
                // a c
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, .5f, k));
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, 1.5f, k));
-               
+
                // a d
-               
+
                // b c
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, -1.0f, k));
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, 2.0f, k));
@@ -1878,41 +1878,41 @@ namespace crnlib
                // b d
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, -.5f, k));
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, .5f, k));
-               
+
                // c d
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, -2.0f, k));
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[q].m_color, m_temp_unique_colors[r].m_color, -1.0f, k));
-            }            
-         }            
+            }
+         }
       }
       else if (m_temp_unique_colors.size() == 3)
       {
          // a    b    c   d
          // 0.0  1/3 2/3  1.0
-         
+
          for (uint i = 0; i <= 2; i++)
          {
             for (uint j = 0; j <= 2; j++)
             {
-               if (i == j) 
+               if (i == j)
                   continue;
-               
-               // a b c 
+
+               // a b c
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[i].m_color, m_temp_unique_colors[j].m_color, 1.5f));
-               
+
                // a b d
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[i].m_color, m_temp_unique_colors[j].m_color, 2.0f/3.0f));
-               
+
                // a c d
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[i].m_color, m_temp_unique_colors[j].m_color, 1.0f/3.0f));
-               
+
                // b c d
                m_temp_unique_colors.push_back(lerp_color(m_temp_unique_colors[i].m_color, m_temp_unique_colors[j].m_color, -.5f));
-            }               
-         }            
+            }
+         }
       }
 
-      m_unique_packed_colors.resize(0);      
+      m_unique_packed_colors.resize(0);
 
       for (uint i = 0; i < m_temp_unique_colors.size(); i++)
       {
@@ -1927,7 +1927,7 @@ namespace crnlib
 
       if (m_unique_packed_colors.size() < 2)
          return;
-            
+
       for (uint alt_rounding = 0; alt_rounding < 2; alt_rounding++)
       {
          for (uint i = 0; i < m_unique_packed_colors.size() - 1; i++)
@@ -1935,66 +1935,66 @@ namespace crnlib
             for (uint j = i + 1; j < m_unique_packed_colors.size(); j++)
             {
                evaluate_solution(
-                  dxt1_solution_coordinates(m_unique_packed_colors[i], m_unique_packed_colors[j]), 
-                  true, 
-                  (alt_rounding == 0) ? &m_best_solution : NULL, 
+                  dxt1_solution_coordinates(m_unique_packed_colors[i], m_unique_packed_colors[j]),
+                  true,
+                  (alt_rounding == 0) ? &m_best_solution : NULL,
                   (alt_rounding != 0));
-               
+
                if (m_trial_solution.m_error == 0)
                {
                   if (alt_rounding)
                      m_best_solution = m_trial_solution;
-                     
+
                   return;
                }
             }
          }
       }
-            
+
       return;
    }
-   
+
    bool dxt1_endpoint_optimizer::try_alpha_as_black_optimization()
    {
       const params*  pOrig_params = m_pParams;
       pOrig_params;
       results*       pOrig_results = m_pResults;
-      
+
       uint num_dark_colors = 0;
-            
+
       for (uint i = 0; i < m_unique_colors.size(); i++)
          if ( (m_unique_colors[i].m_color[0] <= 4) && (m_unique_colors[i].m_color[1] <= 4) && (m_unique_colors[i].m_color[2] <= 4) )
             num_dark_colors++;
-      
+
       if ( (!num_dark_colors) || (num_dark_colors == m_unique_colors.size()) )
          return true;
-       
-      params trial_params(*m_pParams);               
+
+      params trial_params(*m_pParams);
       crnlib::vector<color_quad_u8> trial_colors;
       trial_colors.insert(0, m_pParams->m_pPixels, m_pParams->m_num_pixels);
-      
+
       trial_params.m_pPixels = trial_colors.get_ptr();
       trial_params.m_pixels_have_alpha = true;
-                        
+
       for (uint i = 0; i < trial_colors.size(); i++)
          if ( (trial_colors[i][0] <= 4) && (trial_colors[i][1] <= 4) && (trial_colors[i][2] <= 4) )
             trial_colors[i][3] = 0;
 
       results trial_results;
-      
+
       crnlib::vector<uint8> trial_selectors(m_pParams->m_num_pixels);
       trial_results.m_pSelectors = trial_selectors.get_ptr();
-            
+
       if (!compute_internal(trial_params, trial_results, NULL))
-         return false;      
-      
+         return false;
+
       CRNLIB_ASSERT(trial_results.m_alpha_block);
-      
+
       color_quad_u8 c[4];
       dxt1_block::get_block_colors3(c, trial_results.m_low_color, trial_results.m_high_color);
-      
+
       uint64 trial_error = 0;
-                     
+
       for (uint i = 0; i < trial_colors.size(); i++)
       {
          if (trial_colors[i][3] == 0)
@@ -2005,23 +2005,23 @@ namespace crnlib
          {
             CRNLIB_ASSERT(trial_selectors[i] != 3);
          }
-         
+
          trial_error += color_distance(m_perceptual, trial_colors[i], c[trial_selectors[i]], false);
       }
-      
+
       if (trial_error < pOrig_results->m_error)
       {
          pOrig_results->m_error = trial_error;
-         
+
          pOrig_results->m_low_color = trial_results.m_low_color;
          pOrig_results->m_high_color = trial_results.m_high_color;
-                  
+
          if (pOrig_results->m_pSelectors)
             memcpy(pOrig_results->m_pSelectors, trial_results.m_pSelectors, m_pParams->m_num_pixels);
-         
+
          pOrig_results->m_alpha_block = true;
       }
-            
+
       return true;
    }
 
@@ -2039,26 +2039,26 @@ namespace crnlib
       find_unique_colors();
 
       m_best_solution.clear();
-      
+
       if (m_unique_colors.empty())
          return handle_all_transparent_block();
       else if ((m_unique_colors.size() == 1) && (!m_has_transparent_pixels))
          return handle_solid_block();
-      else 
+      else
       {
          if (!handle_multicolor_block())
             return false;
-         
+
          if ((m_all_pixels_grayscale) && (m_best_solution.m_error))
          {
             if (!handle_grayscale_block())
                return false;
          }
       }
-      
+
       return true;
    }
-   
+
    bool dxt1_endpoint_optimizer::compute(const params& p, results& r, solution_vec* pSolutions)
    {
       if (!p.m_pPixels)
@@ -2067,37 +2067,37 @@ namespace crnlib
       bool status = compute_internal(p, r, pSolutions);
       if (!status)
          return false;
-   
+
       if ( (m_pParams->m_use_alpha_blocks) && (m_pParams->m_use_transparent_indices_for_black) && (!m_pParams->m_pixels_have_alpha) && (!pSolutions) )
       {
          if (!try_alpha_as_black_optimization())
             return false;
-      }      
-         
+      }
+
       return true;
    }
-      
+
    void dxt1_endpoint_optimizer::find_unique_colors()
    {
       m_has_transparent_pixels = false;
 
       uint num_opaque_pixels = 0;
-      
+
       const uint alpha_thresh = m_pParams->m_pixels_have_alpha ? (m_pParams->m_dxt1a_alpha_threshold << 24U) : 0;
 
       const uint32* pSrc_pixels = reinterpret_cast<const uint32*>(m_pParams->m_pPixels);
       const uint32* pSrc_pixels_end = pSrc_pixels + m_pParams->m_num_pixels;
-      
+
       m_unique_colors.resize(m_pParams->m_num_pixels);
       uint num_unique_colors = 0;
-      
+
       m_all_pixels_grayscale = true;
-      
+
       do
       {
          uint32 c = utils::read_le32(pSrc_pixels);
          pSrc_pixels++;
-                  
+
          if (c < alpha_thresh)
          {
             m_has_transparent_pixels = true;
@@ -2114,9 +2114,9 @@ namespace crnlib
          }
 
          c |= 0xFF000000U;
-         
+
          unique_color_hash_map::insert_result ins_result(m_unique_color_hash_map.insert(c, num_unique_colors));
-         
+
          if (ins_result.second)
          {
             utils::write_le32(&m_unique_colors[num_unique_colors].m_color.m_u32, c);
@@ -2125,13 +2125,13 @@ namespace crnlib
          }
          else
             m_unique_colors[ins_result.first->second].m_weight++;
-         
+
          num_opaque_pixels++;
-         
+
       } while (pSrc_pixels != pSrc_pixels_end);
-      
+
       m_unique_colors.resize(num_unique_colors);
-      
+
       m_total_unique_color_weight = num_opaque_pixels;
    }
 

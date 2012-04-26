@@ -3,7 +3,7 @@
 #include "crn_core.h"
 #include "crn_texture_conversion.h"
 #include "crn_console.h"
-#include "crn_win32_file_utils.h"
+#include "crn_file_utils.h"
 #include "crn_cfile_stream.h"
 #include "crn_image_utils.h"
 #include "crn_texture_comp.h"
@@ -26,8 +26,8 @@ namespace crnlib
       }
 
       bool convert_stats::init(
-         const wchar_t* pSrc_filename,
-         const wchar_t* pDst_filename,
+         const char* pSrc_filename,
+         const char* pDst_filename,
          dds_texture& src_tex,
          texture_file_types::format dst_file_type,
          bool lzma_stats)
@@ -38,8 +38,8 @@ namespace crnlib
 
          m_pInput_tex = &src_tex;
 
-         win32_file_utils::get_file_size(pSrc_filename, m_input_file_size);
-         win32_file_utils::get_file_size(pDst_filename, m_output_file_size);
+         file_utils::get_file_size(pSrc_filename, m_input_file_size);
+         file_utils::get_file_size(pDst_filename, m_output_file_size);
 
          m_total_input_pixels = 0;
          for (uint i = 0; i < src_tex.get_num_levels(); i++)
@@ -58,12 +58,12 @@ namespace crnlib
             vector<uint8> dst_tex_bytes;
             if (!cfile_stream::read_file_into_array(pDst_filename, dst_tex_bytes))
             {
-               console::error(L"Failed loading output file: %s", pDst_filename);
+               console::error("Failed loading output file: %s", pDst_filename);
                return false;
             }
             if (!dst_tex_bytes.size())
             {
-               console::error(L"Output file is empty: %s", pDst_filename);
+               console::error("Output file is empty: %s", pDst_filename);
                return false;
             }
             vector<uint8> cmp_tex_bytes;
@@ -76,7 +76,7 @@ namespace crnlib
 
          if (!m_output_tex.load_from_file(pDst_filename, m_dst_file_type))
          {
-            console::error(L"Failed loading output file: %s", pDst_filename);
+            console::error("Failed loading output file: %s", pDst_filename);
             return false;
          }
 
@@ -91,12 +91,12 @@ namespace crnlib
          return true;
       }
 
-      bool convert_stats::print(bool psnr_metrics, bool mip_stats, bool grayscale_sampling, const wchar_t *pCSVStatsFile) const
+      bool convert_stats::print(bool psnr_metrics, bool mip_stats, bool grayscale_sampling, const char *pCSVStatsFile) const
       {
          if (!m_pInput_tex)
             return false;
 
-         console::info(L"Input texture: %ux%u, Levels: %u, Faces: %u, Format: %s",
+         console::info("Input texture: %ux%u, Levels: %u, Faces: %u, Format: %s",
             m_pInput_tex->get_width(),
             m_pInput_tex->get_height(),
             m_pInput_tex->get_num_levels(),
@@ -104,29 +104,29 @@ namespace crnlib
             pixel_format_helpers::get_pixel_format_string(m_pInput_tex->get_format()));
 
          // Just casting the uint64's filesizes to uint32 here to work around gcc issues - it's not even possible to have files that large anyway.
-         console::info(L"Input pixels: %u, Input file size: %u, Input bits/pixel: %1.3f",
+         console::info("Input pixels: %u, Input file size: %u, Input bits/pixel: %1.3f",
             m_total_input_pixels, (uint32)m_input_file_size, (m_input_file_size * 8.0f) / m_total_input_pixels);
 
-         console::info(L"Output texture: %ux%u, Levels: %u, Faces: %u, Format: %s",
+         console::info("Output texture: %ux%u, Levels: %u, Faces: %u, Format: %s",
             m_output_tex.get_width(),
             m_output_tex.get_height(),
             m_output_tex.get_num_levels(),
             m_output_tex.get_num_faces(),
             pixel_format_helpers::get_pixel_format_string(m_output_tex.get_format()));
 
-         console::info(L"Output pixels: %u, Output file size: %u, Output bits/pixel: %1.3f",
+         console::info("Output pixels: %u, Output file size: %u, Output bits/pixel: %1.3f",
             m_total_output_pixels, (uint32)m_output_file_size, (m_output_file_size * 8.0f) / m_total_output_pixels);
 
          if (m_output_comp_file_size)
          {
-            console::info(L"LZMA compressed output file size: %u bytes, %1.3f bits/pixel",
+            console::info("LZMA compressed output file size: %u bytes, %1.3f bits/pixel",
                (uint32)m_output_comp_file_size, (m_output_comp_file_size * 8.0f) / m_total_output_pixels);
          }
          if (psnr_metrics)
          {
             if ( (m_pInput_tex->get_width() != m_output_tex.get_width()) || (m_pInput_tex->get_height() != m_output_tex.get_height()) || (m_pInput_tex->get_num_faces() != m_output_tex.get_num_faces()) )
             {
-               console::warning(L"Unable to compute image statistics - input/output texture dimensions are different.");
+               console::warning("Unable to compute image statistics - input/output texture dimensions are different.");
             }
             else
             {
@@ -155,7 +155,7 @@ namespace crnlib
                         pB = &grayscale_b;
                      }
 
-                     console::info(L"Mipmap level %u statistics:", level);
+                     console::info("Mipmap level %u statistics:", level);
                      image_utils::print_image_metrics(*pA, *pB);
 
                      if ((pA->has_rgb()) || (pB->has_rgb()))
@@ -187,23 +187,22 @@ namespace crnlib
                      image_utils::error_metrics luma_error;
                      if (rgb_error.compute(*pA, *pB, 0, 3, false) && luma_error.compute(*pA, *pB, 0, 0, true))
                      {
-                        FILE *pFile = NULL;
-#ifdef _MSC_VER
-                        _wfopen_s(&pFile, pCSVStatsFile, L"a");
-#else
-                        pFile = _wfopen(pCSVStatsFile, L"a");
-#endif
+                        bool bCSVStatsFileExists = file_utils::does_file_exist(pCSVStatsFile);
+                        FILE* pFile;
+                        crn_fopen(&pFile, pCSVStatsFile, "a");
                         if (!pFile)
-                           console::warning(L"Unable to append to CSV stats file: %s\n", pCSVStatsFile);
+                           console::warning("Unable to append to CSV stats file: %s\n", pCSVStatsFile);
                         else
                         {
-                           dynamic_wstring filename;
-                           split_path(m_src_filename.get_ptr(), NULL, NULL, &filename, NULL);
-                           dynamic_string filenamea;
+                           if (!bCSVStatsFileExists)
+                              fprintf(pFile, "name,width,height,miplevels,rgb_rms,luma_rms,effective_output_size,effective_bitrate\n");
+                           dynamic_string filename;
+                           file_utils::split_path(m_src_filename.get_ptr(), NULL, NULL, &filename, NULL);
+
                            uint64 effective_output_size = m_output_comp_file_size ? m_output_comp_file_size : m_output_file_size;
                            float bitrate = (effective_output_size * 8.0f) / m_total_output_pixels;
                            fprintf(pFile, "%s,%u,%u,%u,%f,%f,%u,%f\n",
-                              filename.as_ansi(filenamea).get_ptr(),
+                              filename.get_ptr(),
                               pB->get_width(), pB->get_height(), m_output_tex.get_num_levels(),
                               rgb_error.mRootMeanSquared, luma_error.mRootMeanSquared,
                               (uint32)effective_output_size, bitrate);
@@ -283,12 +282,12 @@ namespace crnlib
          return true;
       }
 
-      static bool convert_error(const convert_params& params, const wchar_t* pError_msg)
+      static bool convert_error(const convert_params& params, const char* pError_msg)
       {
          params.m_status = false;
          params.m_error_message = pError_msg;
 
-         _wremove(params.m_dst_filename.get_ptr());
+         remove(params.m_dst_filename.get_ptr());
 
          return false;
       }
@@ -369,55 +368,55 @@ namespace crnlib
 
       static void print_comp_params(const crn_comp_params &comp_params)
       {
-         console::debug(L"\nTexture conversion compression parameters:");
-         console::debug(L"          Desired bitrate: %3.3f", comp_params.m_target_bitrate);
-         console::debug(L"              CRN Quality: %i", comp_params.m_quality_level);
-         console::debug(L"CRN C endpoints/selectors: %u %u", comp_params.m_crn_color_endpoint_palette_size, comp_params.m_crn_color_selector_palette_size);
-         console::debug(L"CRN A endpoints/selectors: %u %u", comp_params.m_crn_alpha_endpoint_palette_size, comp_params.m_crn_alpha_selector_palette_size);
-         console::debug(L"     DXT both block types: %u, Alpha threshold: %u", comp_params.get_flag(cCRNCompFlagUseBothBlockTypes), comp_params.m_dxt1a_alpha_threshold);
-         console::debug(L"  DXT compression quality: %s", crn_get_dxt_quality_string(comp_params.m_dxt_quality));
-         console::debug(L"               Perceptual: %u, Large Blocks: %u", comp_params.get_flag(cCRNCompFlagPerceptual), comp_params.get_flag(cCRNCompFlagHierarchical));
-         console::debug(L"               Compressor: %s", get_dxt_compressor_name(comp_params.m_dxt_compressor_type));
-         console::debug(L" Disable endpoint caching: %u", comp_params.get_flag(cCRNCompFlagDisableEndpointCaching));
-         console::debug(L"       Grayscale sampling: %u", comp_params.get_flag(cCRNCompFlagGrayscaleSampling));
-         console::debug(L"       Max helper threads: %u", comp_params.m_num_helper_threads);
-         console::debug(L"");
+         console::debug("\nTexture conversion compression parameters:");
+         console::debug("          Desired bitrate: %3.3f", comp_params.m_target_bitrate);
+         console::debug("              CRN Quality: %i", comp_params.m_quality_level);
+         console::debug("CRN C endpoints/selectors: %u %u", comp_params.m_crn_color_endpoint_palette_size, comp_params.m_crn_color_selector_palette_size);
+         console::debug("CRN A endpoints/selectors: %u %u", comp_params.m_crn_alpha_endpoint_palette_size, comp_params.m_crn_alpha_selector_palette_size);
+         console::debug("     DXT both block types: %u, Alpha threshold: %u", comp_params.get_flag(cCRNCompFlagUseBothBlockTypes), comp_params.m_dxt1a_alpha_threshold);
+         console::debug("  DXT compression quality: %s", crn_get_dxt_quality_string(comp_params.m_dxt_quality));
+         console::debug("               Perceptual: %u, Large Blocks: %u", comp_params.get_flag(cCRNCompFlagPerceptual), comp_params.get_flag(cCRNCompFlagHierarchical));
+         console::debug("               Compressor: %s", get_dxt_compressor_name(comp_params.m_dxt_compressor_type));
+         console::debug(" Disable endpoint caching: %u", comp_params.get_flag(cCRNCompFlagDisableEndpointCaching));
+         console::debug("       Grayscale sampling: %u", comp_params.get_flag(cCRNCompFlagGrayscaleSampling));
+         console::debug("       Max helper threads: %u", comp_params.m_num_helper_threads);
+         console::debug("");
       }
 
       static void print_mipmap_params(const crn_mipmap_params &mipmap_params)
       {
-         console::debug(L"\nTexture conversion MIP-map parameters:");
-         console::debug(L"           Mode: %s", crn_get_mip_mode_name(mipmap_params.m_mode));
-         console::debug(L"         Filter: %S", crn_get_mip_filter_name(mipmap_params.m_filter));
-         console::debug(L"Gamma filtering: %u, Gamma: %2.2f", mipmap_params.m_gamma_filtering, mipmap_params.m_gamma);
-         console::debug(L"     Blurriness: %2.2f", mipmap_params.m_blurriness);
-         console::debug(L"    Renormalize: %u", mipmap_params.m_renormalize);
-         console::debug(L"          Tiled: %u", mipmap_params.m_tiled);
-         console::debug(L"     Max Levels: %u", mipmap_params.m_max_levels);
-         console::debug(L" Min level size: %u", mipmap_params.m_min_mip_size);
-         console::debug(L"       window: %u %u %u %u", mipmap_params.m_window_left, mipmap_params.m_window_top, mipmap_params.m_window_right, mipmap_params.m_window_bottom);
-         console::debug(L"   scale mode: %s", crn_get_scale_mode_desc(mipmap_params.m_scale_mode));
-         console::debug(L"        scale: %f %f", mipmap_params.m_scale_x, mipmap_params.m_scale_y);
-         console::debug(L"        clamp: %u %u, clamp_scale: %u", mipmap_params.m_clamp_width, mipmap_params.m_clamp_height, mipmap_params.m_clamp_scale);
-         console::debug(L"");
+         console::debug("\nTexture conversion MIP-map parameters:");
+         console::debug("           Mode: %s", crn_get_mip_mode_name(mipmap_params.m_mode));
+         console::debug("         Filter: %s", crn_get_mip_filter_name(mipmap_params.m_filter));
+         console::debug("Gamma filtering: %u, Gamma: %2.2f", mipmap_params.m_gamma_filtering, mipmap_params.m_gamma);
+         console::debug("     Blurriness: %2.2f", mipmap_params.m_blurriness);
+         console::debug("    Renormalize: %u", mipmap_params.m_renormalize);
+         console::debug("          Tiled: %u", mipmap_params.m_tiled);
+         console::debug("     Max Levels: %u", mipmap_params.m_max_levels);
+         console::debug(" Min level size: %u", mipmap_params.m_min_mip_size);
+         console::debug("       window: %u %u %u %u", mipmap_params.m_window_left, mipmap_params.m_window_top, mipmap_params.m_window_right, mipmap_params.m_window_bottom);
+         console::debug("   scale mode: %s", crn_get_scale_mode_desc(mipmap_params.m_scale_mode));
+         console::debug("        scale: %f %f", mipmap_params.m_scale_x, mipmap_params.m_scale_y);
+         console::debug("        clamp: %u %u, clamp_scale: %u", mipmap_params.m_clamp_width, mipmap_params.m_clamp_height, mipmap_params.m_clamp_scale);
+         console::debug("");
       }
 
       void convert_params::print()
       {
-         console::debug(L"\nTexture conversion parameters:");
-         console::debug(L"   Resolution: %ux%u, Faces: %u, Levels: %u, Format: %s",
+         console::debug("\nTexture conversion parameters:");
+         console::debug("   Resolution: %ux%u, Faces: %u, Levels: %u, Format: %s",
             m_pInput_texture->get_width(),
             m_pInput_texture->get_height(),
             m_pInput_texture->get_num_faces(),
             m_pInput_texture->get_num_levels(),
             pixel_format_helpers::get_pixel_format_string(m_pInput_texture->get_format()));
 
-         console::debug(L"      texture_type: %s", get_texture_type_desc(m_texture_type));
-         console::debug(L"      dst_filename: %s", m_dst_filename.get_ptr());
-         console::debug(L"     dst_file_type: %s", texture_file_types::get_extension(m_dst_file_type));
-         console::debug(L"        dst_format: %s", pixel_format_helpers::get_pixel_format_string(m_dst_format));
-         console::debug(L"             quick: %u", m_quick);
-         console::debug(L" use_source_format: %u", m_use_source_format);
+         console::debug("      texture_type: %s", get_texture_type_desc(m_texture_type));
+         console::debug("      dst_filename: %s", m_dst_filename.get_ptr());
+         console::debug("     dst_file_type: %s", texture_file_types::get_extension(m_dst_file_type));
+         console::debug("        dst_format: %s", pixel_format_helpers::get_pixel_format_string(m_dst_format));
+         console::debug("             quick: %u", m_quick);
+         console::debug(" use_source_format: %u", m_use_source_format);
       }
 
       static bool write_compressed_texture(
@@ -432,19 +431,19 @@ namespace crnlib
          crn_format crn_fmt = pixel_format_helpers::convert_pixel_format_to_best_crn_format(dst_format);
          comp_params.m_format = crn_fmt;
 
-         console::message(L"Writing %s texture to file: \"%s\"", crn_get_format_string(crn_fmt), params.m_dst_filename.get_ptr());
+         console::message("Writing %s texture to file: \"%s\"", crn_get_format_string(crn_fmt), params.m_dst_filename.get_ptr());
 
          uint32 actual_quality_level;
          float actual_bitrate;
          bool status = work_tex.write_to_file(params.m_dst_filename.get_ptr(), params.m_dst_file_type, &comp_params, &actual_quality_level, &actual_bitrate);
          if (!status)
-            return convert_error(params, L"Failed writing output file!");
+            return convert_error(params, "Failed writing output file!");
 
          if (!params.m_no_stats)
          {
             if (!stats.init(params.m_pInput_texture->get_source_filename().get_ptr(), params.m_dst_filename.get_ptr(), *params.m_pIntermediate_texture, params.m_dst_file_type, params.m_lzma_stats))
             {
-               console::warning(L"Unable to compute output statistics for file: %s", params.m_pInput_texture->get_source_filename().get_ptr());
+               console::warning("Unable to compute output statistics for file: %s", params.m_pInput_texture->get_source_filename().get_ptr());
             }
          }
 
@@ -471,7 +470,7 @@ namespace crnlib
             pack_params.m_num_helper_threads = comp_params.m_num_helper_threads;
             pack_params.m_use_transparent_indices_for_black = comp_params.get_flag(cCRNCompFlagUseTransparentIndicesForBlack);
 
-            console::info(L"Converting texture format from %s to %s", pixel_format_helpers::get_pixel_format_string(work_tex.get_format()), pixel_format_helpers::get_pixel_format_string(dst_format));
+            console::info("Converting texture format from %s to %s", pixel_format_helpers::get_pixel_format_string(work_tex.get_format()), pixel_format_helpers::get_pixel_format_string(dst_format));
 
             timer tm;
             tm.start();
@@ -480,7 +479,7 @@ namespace crnlib
 
             double t = tm.get_elapsed_secs();
 
-            console::info(L"");
+            console::info("");
 
             if (!status)
             {
@@ -491,11 +490,11 @@ namespace crnlib
                }
                else
                {
-                  return convert_error(params, L"Failed converting texture to output format!");
+                  return convert_error(params, "Failed converting texture to output format!");
                }
             }
 
-            console::info(L"Texture format conversion took %3.3fs", t);
+            console::info("Texture format conversion took %3.3fs", t);
          }
 
          if (params.m_write_mipmaps_to_multiple_files)
@@ -504,13 +503,13 @@ namespace crnlib
             {
                for (uint l = 0; l < work_tex.get_num_levels(); l++)
                {
-                  dynamic_wstring filename(params.m_dst_filename.get_ptr());
+                  dynamic_string filename(params.m_dst_filename.get_ptr());
 
-                  dynamic_wstring drv, dir, fn, ext;
-                  if (!split_path(params.m_dst_filename.get_ptr(), &drv, &dir, &fn, &ext))
+                  dynamic_string drv, dir, fn, ext;
+                  if (!file_utils::split_path(params.m_dst_filename.get_ptr(), &drv, &dir, &fn, &ext))
                      return false;
 
-                  fn += dynamic_wstring(cVarArg, L"_face%u_mip%u", f, l).get_ptr();
+                  fn += dynamic_string(cVarArg, "_face%u_mip%u", f, l).get_ptr();
                   filename = drv + dir + fn + ext;
 
                   mip_level *pLevel = work_tex.get_level(f, l);
@@ -521,25 +520,25 @@ namespace crnlib
                   dds_texture new_tex;
                   new_tex.assign(face);
 
-                  console::info(L"Writing texture face %u mip level %u to file %s", f, l, filename.get_ptr());
+                  console::info("Writing texture face %u mip level %u to file %s", f, l, filename.get_ptr());
 
                   if (!new_tex.write_to_file(filename.get_ptr(), params.m_dst_file_type, NULL, NULL, NULL))
-                     return convert_error(params, L"Failed writing output file!");
+                     return convert_error(params, "Failed writing output file!");
                }
             }
          }
          else
          {
-            console::message(L"Writing texture to file: \"%s\"", params.m_dst_filename.get_ptr());
+            console::message("Writing texture to file: \"%s\"", params.m_dst_filename.get_ptr());
 
             if (!work_tex.write_to_file(params.m_dst_filename.get_ptr(), params.m_dst_file_type, NULL, NULL, NULL))
-               return convert_error(params, L"Failed writing output file!");
+               return convert_error(params, "Failed writing output file!");
 
             if (!params.m_no_stats)
             {
                if (!stats.init(params.m_pInput_texture->get_source_filename().get_ptr(), params.m_dst_filename.get_ptr(), *params.m_pIntermediate_texture, params.m_dst_file_type, params.m_lzma_stats))
                {
-                  console::warning(L"Unable to compute output statistics for file: %s", params.m_pInput_texture->get_source_filename().get_ptr());
+                  console::warning("Unable to compute output statistics for file: %s", params.m_pInput_texture->get_source_filename().get_ptr());
                }
             }
          }
@@ -576,7 +575,7 @@ namespace crnlib
          {
             if ((work_tex.get_comp_flags() & pixel_format_helpers::cCompFlagAValid) == 0)
             {
-               console::warning(L"Output format is alpha-only, but input doesn't have alpha, so setting alpha to luminance.");
+               console::warning("Output format is alpha-only, but input doesn't have alpha, so setting alpha to luminance.");
 
                work_tex.convert(PIXEL_FMT_A8, crnlib::dxt_image::pack_params());
 
@@ -586,6 +585,15 @@ namespace crnlib
          }
 
          pixel_format dst_format = params.m_dst_format;
+         if (pixel_format_helpers::is_dxt(dst_format))
+         {
+            if ((params.m_dst_file_type != texture_file_types::cFormatCRN) &&
+                (params.m_dst_file_type != texture_file_types::cFormatDDS))
+            {
+               console::warning("Output file format does not support DXT - automatically choosing pixel format.");
+               dst_format = PIXEL_FMT_INVALID;
+            }
+         }
 
          if (dst_format == PIXEL_FMT_INVALID)
          {
@@ -611,15 +619,15 @@ namespace crnlib
          {
             if (perceptual)
             {
-               //console::warning(L"Output pixel format is swizzled or not RGB, disabling perceptual color metrics");
+               console::message("Output pixel format is swizzled or not RGB, disabling perceptual color metrics");
                perceptual = false;
             }
          }
 
          if (pixel_format_helpers::is_normal_map(dst_format))
          {
-            //if (perceptual)
-               //console::warning(L"Output pixel format is intended for normal maps, disabling perceptual color metrics");
+            if (perceptual)
+               console::message("Output pixel format is intended for normal maps, disabling perceptual color metrics");
 
             perceptual = false;
          }
@@ -639,7 +647,7 @@ namespace crnlib
          }
 
          if (!create_texture_mipmaps(work_tex, comp_params, mipmap_params, generate_mipmaps))
-            return convert_error(params, L"Failed creating texture mipmaps!");
+            return convert_error(params, "Failed creating texture mipmaps!");
 
          bool formats_differ = work_tex.get_format() != dst_format;
          if (formats_differ)
@@ -666,7 +674,7 @@ namespace crnlib
             status = convert_and_write_normal_texture(work_tex, params, comp_params, dst_format, progress_state, formats_differ, perceptual, stats);
          }
 
-         console::progress(L"");
+         console::progress("");
 
          if (progress_state.m_canceled)
          {
@@ -679,18 +687,18 @@ namespace crnlib
          if (status)
          {
             if (params.m_param_debugging)
-               console::info(L"Work texture format: %s, desired destination format: %s", pixel_format_helpers::get_pixel_format_string(work_tex.get_format()), pixel_format_helpers::get_pixel_format_string(dst_format));
+               console::info("Work texture format: %s, desired destination format: %s", pixel_format_helpers::get_pixel_format_string(work_tex.get_format()), pixel_format_helpers::get_pixel_format_string(dst_format));
 
-            console::message(L"Texture successfully written in %3.3fs", total_write_time);
+            console::message("Texture successfully written in %3.3fs", total_write_time);
          }
          else
          {
-            dynamic_wstring str;
+            dynamic_string str;
 
             if (work_tex.get_last_error().is_empty())
-               str.format(L"Failed writing texture to file \"%s\"", params.m_dst_filename.get_ptr());
+               str.format("Failed writing texture to file \"%s\"", params.m_dst_filename.get_ptr());
             else
-               str.format(L"Failed writing texture to file \"%s\", Reason: %s", params.m_dst_filename.get_ptr(), work_tex.get_last_error().get_ptr());
+               str.format("Failed writing texture to file \"%s\", Reason: %s", params.m_dst_filename.get_ptr(), work_tex.get_last_error().get_ptr());
 
             return convert_error(params, str.get_ptr());
          }

@@ -3,7 +3,6 @@
 // Ported from the PowerView DOS image viewer, a product I wrote back in 1993. Not currently used in the open source release of crnlib.
 #include "crn_core.h"
 #include "crn_arealist.h"
-#include <stdio.h>
 
 #define RECT_DEBUG
 
@@ -20,7 +19,7 @@ namespace crnlib
 #ifdef _MSC_VER
       _vsnprintf_s(buf, sizeof(buf), pMsg, args);
 #else
-      _vsnprintf(buf, sizeof(buf), pMsg, args);
+      vsnprintf(buf, sizeof(buf), pMsg, args);
 #endif
 
       va_end(args);

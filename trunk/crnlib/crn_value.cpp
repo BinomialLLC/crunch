@@ -5,17 +5,17 @@
 
 namespace crnlib
 {
-   const wchar_t* gValueDataTypeStrings[cDTTotal + 1] = 
+   const char* gValueDataTypeStrings[cDTTotal + 1] =
    {
-      L"invalid",
-      L"string",
-      L"bool",
-      L"int",
-      L"uint",
-      L"float",
-      L"vec3f",
-      L"vec3i",
-      
+      "invalid",
+      "string",
+      "bool",
+      "int",
+      "uint",
+      "float",
+      "vec3f",
+      "vec3i",
+
       NULL,
    };
 

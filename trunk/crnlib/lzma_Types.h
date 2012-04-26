@@ -4,16 +4,11 @@
 #ifndef __7Z_TYPES_H
 #define __7Z_TYPES_H
 
-#define COMPRESS_MF_MT
-
 #include <stddef.h>
 
-#ifdef _XBOX
-#include <xtl.h>
-#elif defined( _WIN32 )
+#if defined( _WIN32 )
 #include <windows.h>
-#else
-#error Unknown platform
+#define COMPRESS_MF_MT
 #endif
 
 namespace crnlib {

@@ -62,7 +62,7 @@ namespace crnlib
 
       CRNLIB_ASSERT(n && pBlocks);
 
-      m_main_thread_id = get_current_thread_id();
+      m_main_thread_id = crn_get_current_thread_id();
 
       m_num_blocks = n;
       m_pBlocks = pBlocks;
@@ -286,7 +286,7 @@ namespace crnlib
 
 #if QDXT5_DEBUGGING
             if (debugging)
-               image_utils::save_to_file_stb(dynamic_wstring(cVarArg, L"debug_%u.tga", level).get_ptr(), debug_img, image_utils::cSaveIgnoreAlpha);
+               image_utils::save_to_file_stb(dynamic_wstring(cVarArg, "debug_%u.tga", level).get_ptr(), debug_img, image_utils::cSaveIgnoreAlpha);
 #endif
 
          } // level
@@ -419,7 +419,7 @@ namespace crnlib
 
          if ((cluster_index & cluster_index_progress_mask) == 0)
          {
-            if (get_current_thread_id() == m_main_thread_id)
+            if (crn_get_current_thread_id() == m_main_thread_id)
             {
                if (!update_progress(cluster_index, m_endpoint_cluster_indices.size() - 1))
                   return;
@@ -444,7 +444,8 @@ namespace crnlib
          {
             const uint block_index = cluster_indices[block_iter];
 
-            const color_quad_u8* pSrc_pixels = &m_pBlocks[block_index].m_pixels[0][0];
+            //const color_quad_u8* pSrc_pixels = &m_pBlocks[block_index].m_pixels[0][0];
+            const color_quad_u8* pSrc_pixels = (const color_quad_u8*)m_pBlocks[block_index].m_pixels;
 
             for (uint i = 0; i < cDXTBlockSize * cDXTBlockSize; i++)
             {
@@ -521,7 +522,7 @@ namespace crnlib
 
          if ((cluster_index & 255) == 0)
          {
-            if (get_current_thread_id() == m_main_thread_id)
+            if (crn_get_current_thread_id() == m_main_thread_id)
             {
                if (!update_progress(cluster_index, task_params.m_selector_cluster_indices.size() - 1))
                   return;
@@ -735,7 +736,7 @@ namespace crnlib
    {
       CRNLIB_ASSERT(m_num_blocks);
 
-      m_main_thread_id = get_current_thread_id();
+      m_main_thread_id = crn_get_current_thread_id();
       m_canceled = false;
 
       m_pDst_elements = pDst_elements;

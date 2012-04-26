@@ -174,6 +174,13 @@ namespace crnlib
       return m_kiss99.next() ^ (m_ranctx.next() + m_well512.next());
    }
 
+   uint64 random::urand64()
+   {
+      uint64 result = urand32();
+      result <<= 32ULL;
+      result |= urand32();
+      return result;
+   }
    uint32 random::fast_urand32()
    {
       return m_well512.next();
@@ -317,6 +324,13 @@ namespace crnlib
       return SHR3 ^ CONG;
    }
 
+   uint64 fast_random::urand64()
+   {
+      uint64 result = urand32();
+      result <<= 32ULL;
+      result |= urand32();
+      return result;
+   }
    int fast_random::irand(int l, int h)
    {
       CRNLIB_ASSERT(l < h);

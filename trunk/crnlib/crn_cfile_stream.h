@@ -2,7 +2,6 @@
 // See Copyright Notice and license at the end of inc/crnlib.h
 #pragma once
 #include "crn_data_stream.h"
-#include <stdio.h>
 
 namespace crnlib
 {
@@ -13,13 +12,13 @@ namespace crnlib
       {
       }
 
-      cfile_stream(FILE* pFile, const wchar_t* pFilename, uint attribs, bool has_ownership) :
+      cfile_stream(FILE* pFile, const char* pFilename, uint attribs, bool has_ownership) :
          data_stream(), m_pFile(NULL), m_size(0), m_ofs(0), m_has_ownership(false)
       {
          open(pFile, pFilename, attribs, has_ownership);
       }
 
-      cfile_stream(const wchar_t* pFilename, uint attribs = cDataStreamReadable | cDataStreamSeekable, bool open_existing = false) :
+      cfile_stream(const char* pFilename, uint attribs = cDataStreamReadable | cDataStreamSeekable, bool open_existing = false) :
          data_stream(), m_pFile(NULL), m_size(0), m_ofs(0), m_has_ownership(false)
       {
          open(pFilename, attribs, open_existing);
@@ -55,7 +54,7 @@ namespace crnlib
          return false;
       }
 
-      bool open(FILE* pFile, const wchar_t* pFilename, uint attribs, bool has_ownership)
+      bool open(FILE* pFile, const char* pFilename, uint attribs, bool has_ownership)
       {
          CRNLIB_ASSERT(pFile);
          CRNLIB_ASSERT(pFilename);
@@ -67,17 +66,17 @@ namespace crnlib
          m_has_ownership = has_ownership;
          m_attribs = static_cast<uint16>(attribs);
 
-         m_ofs = _ftelli64(m_pFile);
-         _fseeki64(m_pFile, 0, SEEK_END);
-         m_size = _ftelli64(m_pFile);
-         _fseeki64(m_pFile, m_ofs, SEEK_SET);
+         m_ofs = crn_ftell(m_pFile);
+         crn_fseek(m_pFile, 0, SEEK_END);
+         m_size = crn_ftell(m_pFile);
+         crn_fseek(m_pFile, m_ofs, SEEK_SET);
 
          m_opened = true;
 
          return true;
       }
 
-      bool open(const wchar_t* pFilename, uint attribs = cDataStreamReadable | cDataStreamSeekable, bool open_existing = false)
+      bool open(const char* pFilename, uint attribs = cDataStreamReadable | cDataStreamSeekable, bool open_existing = false)
       {
          CRNLIB_ASSERT(pFilename);
 
@@ -85,13 +84,13 @@ namespace crnlib
 
          m_attribs = static_cast<uint16>(attribs);
 
-         const wchar_t* pMode;
+         const char* pMode;
          if ((is_readable()) && (is_writable()))
-            pMode = open_existing ? L"r+b" : L"w+b";
+            pMode = open_existing ? "r+b" : "w+b";
          else if (is_writable())
-            pMode = open_existing ? L"ab" : L"wb";
+            pMode = open_existing ? "ab" : "wb";
          else if (is_readable())
-            pMode = L"rb";
+            pMode = "rb";
          else
          {
             set_error();
@@ -99,11 +98,7 @@ namespace crnlib
          }
 
          FILE* pFile = NULL;
-#ifdef _MSC_VER
-         _wfopen_s(&pFile, pFilename, pMode);
-#else
-         pFile = _wfopen(pFilename, pMode);
-#endif
+         crn_fopen(&pFile, pFilename, pMode);
          m_has_ownership = true;
 
          if (!pFile)
@@ -209,7 +204,7 @@ namespace crnlib
 
          if (static_cast<uint64>(new_ofs) != m_ofs)
          {
-            if (_fseeki64(m_pFile, new_ofs, SEEK_SET) != 0)
+            if (crn_fseek(m_pFile, new_ofs, SEEK_SET) != 0)
             {
                set_error();
                return false;
@@ -221,7 +216,7 @@ namespace crnlib
          return true;
       }
 
-      static bool read_file_into_array(const wchar_t* pFilename, vector<uint8>& buf)
+      static bool read_file_into_array(const char* pFilename, vector<uint8>& buf)
       {
          cfile_stream in_stream(pFilename);
          if (!in_stream.is_opened())
@@ -229,7 +224,7 @@ namespace crnlib
          return in_stream.read_array(buf);
       }
 
-      static bool write_array_to_file(const wchar_t* pFilename, const vector<uint8>& buf)
+      static bool write_array_to_file(const char* pFilename, const vector<uint8>& buf)
       {
          cfile_stream out_stream(pFilename, cDataStreamWritable|cDataStreamSeekable);
          if (!out_stream.is_opened())

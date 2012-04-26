@@ -137,7 +137,7 @@ namespace crnlib
          return m_codebook;
       }
 
-      const uint find_best_codebook_entry(const VectorType& v) const
+      uint find_best_codebook_entry(const VectorType& v) const
       {
          uint cur_node_index = 0;
 
@@ -161,7 +161,7 @@ namespace crnlib
          }
       }
 
-      const uint find_best_codebook_entry_fs(const VectorType& v) const
+      uint find_best_codebook_entry_fs(const VectorType& v) const
       {
          float best_dist = math::cNearlyInfinite;
          uint best_index = 0;
@@ -222,7 +222,7 @@ namespace crnlib
          if (parent_node.m_vectors.size() == 1)
             return;
 
-         VectorType furthest;
+         VectorType furthest(0);
          double furthest_dist = -1.0f;
 
          for (uint i = 0; i < parent_node.m_vectors.size(); i++)
@@ -272,9 +272,13 @@ namespace crnlib
                      covar[x][y] = covar[x][y] + v[x] * w[y];
             }
 
-            for (uint x = 0; x < N - 1; x++)
-               for (uint y = x + 1; y < N; y++)
-                  covar[y][x] = covar[x][y];
+            if (N > 1)
+            {
+               //for (uint x = 0; x < (N - 1); x++)
+               for (uint x = 0; x != (N - 1); x++)
+                  for (uint y = x + 1; y < N; y++)
+                     covar[y][x] = covar[x][y];
+            }
 
             covar /= float(parent_node.m_total_weight);
 

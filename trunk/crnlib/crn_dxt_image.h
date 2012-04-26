@@ -61,8 +61,8 @@ namespace crnlib
          uint get_le_word(uint index) const { CRNLIB_ASSERT(index < 4); return m_bytes[index*2] | (m_bytes[index * 2 + 1] << 8); }
          uint get_be_word(uint index) const { CRNLIB_ASSERT(index < 4); return m_bytes[index*2 + 1] | (m_bytes[index * 2] << 8); }
          
-         void set_le_word(uint index, uint val) { CRNLIB_ASSERT((index < 4) && (val <= UINT16_MAX)); m_bytes[index*2] = static_cast<uint8>(val & 0xFF); m_bytes[index * 2 + 1] = static_cast<uint8>((val >> 8) & 0xFF); }
-         void set_be_word(uint index, uint val) { CRNLIB_ASSERT((index < 4) && (val <= UINT16_MAX)); m_bytes[index*2+1] = static_cast<uint8>(val & 0xFF); m_bytes[index * 2] = static_cast<uint8>((val >> 8) & 0xFF); }
+         void set_le_word(uint index, uint val) { CRNLIB_ASSERT((index < 4) && (val <= cUINT16_MAX)); m_bytes[index*2] = static_cast<uint8>(val & 0xFF); m_bytes[index * 2 + 1] = static_cast<uint8>((val >> 8) & 0xFF); }
+         void set_be_word(uint index, uint val) { CRNLIB_ASSERT((index < 4) && (val <= cUINT16_MAX)); m_bytes[index*2+1] = static_cast<uint8>(val & 0xFF); m_bytes[index * 2] = static_cast<uint8>((val >> 8) & 0xFF); }
          
          void clear()
          {

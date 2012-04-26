@@ -4,12 +4,9 @@
 
 namespace crnlib
 {
-   class dynamic_wstring;
-
+   enum { cMaxDynamicStringLen = cUINT16_MAX - 1 };
    class dynamic_string
    {
-      friend class dynamic_wstring;
-
    public:
       inline dynamic_string() : m_buf_size(0), m_len(0), m_pStr(NULL) { }
       dynamic_string(eVarArg dummy, const char* p, ...);
@@ -19,24 +16,25 @@ namespace crnlib
 
       inline ~dynamic_string() { if (m_pStr) crnlib_delete_array(m_pStr); }
 
-      explicit dynamic_string(const wchar_t* pStr);
-      dynamic_string& set(const wchar_t *pStr);
-      dynamic_wstring& as_utf16(dynamic_wstring &buf);
-
       // Truncates the string to 0 chars and frees the buffer.
       void clear();
       void optimize();
 
       // Truncates the string to 0 chars, but does not free the buffer.
       void empty();
+      inline const char *assume_ownership() { const char *p = m_pStr; m_pStr = NULL; m_len = 0; m_buf_size = 0; return p; }
 
       inline uint get_len() const { return m_len; }
       inline bool is_empty() const { return !m_len; }
 
       inline const char* get_ptr() const { return m_pStr ? m_pStr : ""; }
+      inline const char* c_str() const { return get_ptr(); }
 
       inline const char* get_ptr_raw() const { return m_pStr; }
       inline       char* get_ptr_raw()       { return m_pStr; }
+
+      inline char front() const { return m_len ? m_pStr[0] : '\0'; }
+      inline char back() const { return m_len ? m_pStr[m_len - 1] : '\0'; }
 
       inline char operator[] (uint i) const { CRNLIB_ASSERT(i <= m_len); return get_ptr()[i]; }
 
@@ -74,7 +72,6 @@ namespace crnlib
       dynamic_string& set_from_buf(const void* pBuf, uint buf_size);
 
       dynamic_string& operator= (const dynamic_string& rhs) { return set(rhs); }
-      dynamic_string& operator= (const dynamic_wstring& rhs);
       dynamic_string& operator= (const char* p) { return set(p); }
 
       dynamic_string& set_char(uint index, char c);
@@ -130,6 +127,9 @@ namespace crnlib
 
       void translate_lf_to_crlf();
 
+      static inline char *create_raw_buffer(uint& buf_size_in_chars);
+      static inline void free_raw_buffer(char *p) { crnlib_delete_array(p); }
+      dynamic_string& set_from_raw_buf_and_assume_ownership(char *pBuf, uint buf_size_in_chars, uint len_in_chars);
    private:
       uint16      m_buf_size;
       uint16      m_len;
@@ -160,4 +160,14 @@ namespace crnlib
       a.swap(b);
    }
 
+   inline char *dynamic_string::create_raw_buffer(uint& buf_size_in_chars)
+   {
+      if (buf_size_in_chars > cUINT16_MAX)
+      {
+         CRNLIB_ASSERT(0);
+         return NULL;
+      }
+      buf_size_in_chars = math::minimum<uint>(cUINT16_MAX, math::next_pow2(buf_size_in_chars));
+      return crnlib_new_array<char>(buf_size_in_chars);
+   }
 } // namespace crnlib

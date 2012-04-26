@@ -296,7 +296,10 @@ namespace crnlib
          const uint num_to_move = orig_size - index;
 
          if (CRNLIB_IS_BITWISE_COPYABLE(T))
+         {
+            // This overwrites the destination object bits, but bitwise copyable means we don't need to worry about destruction.
             memmove(m_p + index + n, m_p + index, sizeof(T) * num_to_move);
+         }
          else
          {
             const T* pSrc = m_p + orig_size - 1;
@@ -312,7 +315,10 @@ namespace crnlib
          T* pDst = m_p + index;
 
          if (CRNLIB_IS_BITWISE_COPYABLE(T))
+         {
+            // This copies in the new bits, overwriting the existing objects, which is OK for copyable types that don't need destruction.
             memcpy(pDst, p, sizeof(T) * n);
+         }
          else
          {
             for (uint i = 0; i < n; i++)
@@ -355,15 +361,29 @@ namespace crnlib
          const uint num_to_move = m_size - (start + n);
 
          T* pDst = m_p + start;
-
+         
          const T* pSrc = m_p + start + n;
 
-         if (CRNLIB_IS_BITWISE_COPYABLE(T))
+         if ((CRNLIB_IS_BITWISE_COPYABLE(T)) && (!CRNLIB_IS_BITWISE_MOVABLE(T)))
+         {
+            // Type is bitwise copyable, so there's no need to destruct the overwritten objects.
+            // Copy "down" the objects to preserve, filling in the empty slots.
             memmove(pDst, pSrc, num_to_move * sizeof(T));
+         }
+         else if (CRNLIB_IS_BITWISE_MOVABLE(T))
+         {
+            // Type is bitwise movable, which means we can move them around but they still may need to be destructed.
+            // First destroy the erased objects.
+            scalar_type<T>::destruct_array(pDst, n);
+
+            // Copy "down" the objects to preserve, filling in the empty slots.
+            memmove(pDst, pSrc, num_to_move * sizeof(T));
+         }
          else
          {
+            // Type is not bitwise copyable or movable. 
+            // Move them down one at a time by using the equals operator, and destroying anything that's left over at the end.
             T* pDst_end = pDst + num_to_move;
-
             while (pDst != pDst_end)
                *pDst++ = *pSrc++;
 
@@ -609,11 +629,11 @@ namespace crnlib
             // placement new
             new (static_cast<void*>(pDst)) T(*pSrc);
             pSrc->~T();
-            pSrc++;
-            pDst++;
+            ++pSrc;
+            ++pDst;
          }
       }
-
+      
       inline bool increase_capacity(uint min_new_capacity, bool grow_hint, bool nofail = false)
       {
          return reinterpret_cast<elemental_vector*>(this)->increase_capacity(

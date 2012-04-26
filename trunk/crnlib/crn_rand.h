@@ -63,6 +63,7 @@ namespace crnlib
       void seed(uint32 i1, uint32 i2, uint32 i3);
             
       uint32 urand32();
+      uint64 urand64();
       
       // "Fast" variant uses no multiplies.
       uint32 fast_urand32();
@@ -99,6 +100,7 @@ namespace crnlib
       void seed(uint32 i);
       
       uint32 urand32();
+      uint64 urand64();
       
       int irand(int l, int h);
       

@@ -1,8 +1,6 @@
 // File: crn_qdxt5.h
 // See Copyright Notice and license at the end of inc/crnlib.h
 #pragma once
-#include "crn_task_pool.h"
-#include "crn_spinlock.h"
 #include "crn_hash_map.h"
 #include "crn_clusterizer.h"
 #include "crn_hash.h"
@@ -17,23 +15,23 @@ namespace crnlib
       qdxt5_params()
       {
          clear();
-      }            
+      }
 
       void clear()
       {
          m_quality_level = cMaxQuality;
          m_dxt_quality = cCRNDXTQualityUber;
-                           
+
          m_pProgress_func = NULL;
          m_pProgress_data = NULL;
          m_num_mips = 0;
          m_hierarchical = true;
          utils::zero_object(m_mip_desc);
-         
+
          m_comp_index = 3;
          m_progress_start = 0;
          m_progress_range = 100;
-         
+
          m_use_both_block_types = true;
       }
 
@@ -50,7 +48,7 @@ namespace crnlib
       uint m_quality_level;
       crn_dxt_quality m_dxt_quality;
       bool m_hierarchical;
-      
+
       struct mip_desc
       {
          uint m_first_block;
@@ -67,20 +65,20 @@ namespace crnlib
       void* m_pProgress_data;
       uint m_progress_start;
       uint m_progress_range;
-            
+
       uint m_comp_index;
-      
+
       bool m_use_both_block_types;
    };
-   
+
    class qdxt5
    {
       CRNLIB_NO_COPY_OR_ASSIGNMENT_OP(qdxt5);
-      
+
    public:
       qdxt5(task_pool& task_pool);
       ~qdxt5();
-      
+
       void clear();
 
       bool init(uint n, const dxt_pixel_block* pBlocks, const qdxt5_params& params);
@@ -92,7 +90,7 @@ namespace crnlib
 
    private:
       task_pool*           m_pTask_pool;
-      uint32               m_main_thread_id;
+      crn_thread_id_t      m_main_thread_id;
       bool                 m_canceled;
 
       uint                 m_progress_start;
@@ -146,7 +144,7 @@ namespace crnlib
 
             std::sort(m_cells.begin(), m_cells.end());
 
-            m_hash = fast_hash(&m_cells[0], sizeof(m_cells[0]) * m_cells.size());            
+            m_hash = fast_hash(&m_cells[0], sizeof(m_cells[0]) * m_cells.size());
          }
 
          bool operator< (const cluster_id& rhs) const
@@ -156,7 +154,7 @@ namespace crnlib
 
          bool operator== (const cluster_id& rhs) const
          {
-            if (m_hash != rhs.m_hash) 
+            if (m_hash != rhs.m_hash)
                return false;
 
             return m_cells == rhs.m_cells;

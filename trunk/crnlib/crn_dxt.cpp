@@ -11,43 +11,46 @@ namespace crnlib
 {
    const uint8 g_dxt5_from_linear[cDXT5SelectorValues]   = { 0U, 2U, 3U, 4U, 5U, 6U, 7U, 1U };
    const uint8 g_dxt5_to_linear[cDXT5SelectorValues]     = { 0U, 7U, 1U, 2U, 3U, 4U, 5U, 6U };
-   
+
    const uint8 g_dxt5_alpha6_to_linear[cDXT5SelectorValues] = { 0U, 5U, 1U, 2U, 3U, 4U, 0U, 0U };
 
    const uint8 g_dxt1_from_linear[cDXT1SelectorValues]   = { 0U, 2U, 3U, 1U };
    const uint8 g_dxt1_to_linear[cDXT1SelectorValues]     = { 0U, 3U, 1U, 2U };
-   
+
    const uint8 g_six_alpha_invert_table[cDXT5SelectorValues] = { 1, 0, 5, 4, 3, 2, 6, 7 };
    const uint8 g_eight_alpha_invert_table[cDXT5SelectorValues] = { 1, 0, 7, 6, 5, 4, 3, 2 };
 
-   const wchar_t* get_dxt_format_string(dxt_format fmt)
+   const char* get_dxt_format_string(dxt_format fmt)
    {
       switch (fmt)
       {
-         case cDXT1:    return L"DXT1";
-         case cDXT1A:   return L"DXT1A";
-         case cDXT3:    return L"DXT3";
-         case cDXT5:    return L"DXT5";
-         case cDXT5A:   return L"DXT5A";
-         case cDXN_XY:  return L"DXN_XY";
-         case cDXN_YX:  return L"DXN_YX";
+         case cDXT1:    return "DXT1";
+         case cDXT1A:   return "DXT1A";
+         case cDXT3:    return "DXT3";
+         case cDXT5:    return "DXT5";
+         case cDXT5A:   return "DXT5A";
+         case cDXN_XY:  return "DXN_XY";
+         case cDXN_YX:  return "DXN_YX";
          default: break;
       }
       CRNLIB_ASSERT(false);
-      return L"?";
+      return "?";
    }
 
-   const wchar_t* get_dxt_compressor_name(crn_dxt_compressor_type c)
+   const char* get_dxt_compressor_name(crn_dxt_compressor_type c)
    {
       switch (c)
       {
-         case cCRNDXTCompressorCRN:    return L"CRN";
-         case cCRNDXTCompressorCRNF:   return L"CRNF";
-         case cCRNDXTCompressorRYG:    return L"RYG";
+         case cCRNDXTCompressorCRN:    return "CRN";
+         case cCRNDXTCompressorCRNF:   return "CRNF";
+         case cCRNDXTCompressorRYG:    return "RYG";
+#if CRNLIB_SUPPORT_ATI_COMPRESS
+         case cCRNDXTCompressorATI:  return "ATI";
+#endif
          default: break;
       }
       CRNLIB_ASSERT(false);
-      return L"?";
+      return "?";
    }
 
    uint get_dxt_format_bits_per_pixel(dxt_format fmt)

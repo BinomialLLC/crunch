@@ -33,7 +33,7 @@ namespace crnlib
       m_has_color_blocks(false),
       m_has_alpha0_blocks(false),
       m_has_alpha1_blocks(false),
-      m_main_thread_id(get_current_thread_id()),
+      m_main_thread_id(crn_get_current_thread_id()),
       m_canceled(false),
       m_pTask_pool(NULL),
       m_prev_phase_index(-1),
@@ -104,7 +104,7 @@ namespace crnlib
    bool dxt_hc::compress(const params& p, uint num_chunks, const pixel_chunk* pChunks, task_pool& task_pool)
    {
       m_pTask_pool = &task_pool;
-      m_main_thread_id = get_current_thread_id();
+      m_main_thread_id = crn_get_current_thread_id();
 
       bool result = compress_internal(p, num_chunks, pChunks);
 
@@ -335,7 +335,7 @@ namespace crnlib
          if (m_canceled)
             return;
 
-         if ((get_current_thread_id() == m_main_thread_id) && ((chunk_index & 511) == 0))
+         if ((crn_get_current_thread_id() == m_main_thread_id) && ((chunk_index & 511) == 0))
          {
             if (!update_progress(0, chunk_index, m_num_chunks))
                return;
@@ -550,9 +550,9 @@ namespace crnlib
             }
          }
 
-         interlocked_increment32(&m_encoding_hist[best_encoding]);
+         atomic_increment32(&m_encoding_hist[best_encoding]);
 
-         interlocked_exchange_add32(&m_total_tiles, g_chunk_encodings[best_encoding].m_num_tiles);
+         atomic_exchange_add32(&m_total_tiles, g_chunk_encodings[best_encoding].m_num_tiles);
 
          for (uint q = 0; q < cNumCompressedChunkVecs; q++)
          {
@@ -664,15 +664,15 @@ namespace crnlib
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
       {
-         console::info(L"Total Pixels: %u, Chunks: %u, Blocks: %u, Adapted Tiles: %u", m_num_chunks * cChunkPixelWidth * cChunkPixelHeight, m_num_chunks, m_num_chunks * cChunkBlockWidth * cChunkBlockHeight, m_total_tiles);
+         console::info("Total Pixels: %u, Chunks: %u, Blocks: %u, Adapted Tiles: %u", m_num_chunks * cChunkPixelWidth * cChunkPixelHeight, m_num_chunks, m_num_chunks * cChunkBlockWidth * cChunkBlockHeight, m_total_tiles);
 
-         console::info(L"Chunk encoding type symbol_histogram: ");
+         console::info("Chunk encoding type symbol_histogram: ");
          for (uint e = 0; e < cNumChunkEncodings; e++)
-            console::info(L"%u ", m_encoding_hist[e]);
+            console::info("%u ", m_encoding_hist[e]);
 
-         console::info(L"Blocks per chunk encoding type: ");
+         console::info("Blocks per chunk encoding type: ");
          for (uint e = 0; e < cNumChunkEncodings; e++)
-            console::info(L"%u ", m_encoding_hist[e] * cChunkBlockWidth * cChunkBlockHeight);
+            console::info("%u ", m_encoding_hist[e] * cChunkBlockWidth * cChunkBlockHeight);
       }
 #endif
 
@@ -689,7 +689,7 @@ namespace crnlib
          if (m_canceled)
             return;
 
-         if ((get_current_thread_id() == m_main_thread_id) && ((chunk_index & 63) == 0))
+         if ((crn_get_current_thread_id() == m_main_thread_id) && ((chunk_index & 63) == 0))
          {
             if (!update_progress(2, chunk_index, m_num_chunks))
                return;
@@ -719,7 +719,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Generating color training vectors");
+         console::info("Generating color training vectors");
 #endif
 
       const float r_scale = .5f;
@@ -804,7 +804,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Begin color cluster analysis");
+         console::info("Begin color cluster analysis");
       timer t;
       t.start();
 #endif
@@ -816,7 +816,7 @@ namespace crnlib
       if (m_params.m_debugging)
       {
          double total_time = t.get_elapsed_secs();
-         console::info(L"Codebook gen time: %3.3fs, Total color clusters: %u", total_time, vq.get_codebook_size());
+         console::info("Codebook gen time: %3.3fs, Total color clusters: %u", total_time, vq.get_codebook_size());
       }
 #endif
 
@@ -824,7 +824,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Begin color cluster assignment");
+         console::info("Begin color cluster assignment");
 #endif
 
       assign_color_endpoint_clusters_state state(vq, training_vecs);
@@ -850,7 +850,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Completed color cluster assignment");
+         console::info("Completed color cluster assignment");
 #endif
 
       return true;
@@ -868,7 +868,7 @@ namespace crnlib
             if (m_canceled)
                return;
 
-            if ((get_current_thread_id() == m_main_thread_id) && ((chunk_index & 63) == 0))
+            if ((crn_get_current_thread_id() == m_main_thread_id) && ((chunk_index & 63) == 0))
             {
                if (!update_progress(7, m_num_chunks * a + chunk_index, m_num_chunks * m_num_alpha_blocks))
                   return;
@@ -899,7 +899,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Generating alpha training vectors");
+         console::info("Generating alpha training vectors");
 #endif
 
       determine_alpha_endpoint_clusters_state state;
@@ -966,7 +966,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Begin alpha cluster analysis");
+         console::info("Begin alpha cluster analysis");
       timer t;
       t.start();
 #endif
@@ -978,7 +978,7 @@ namespace crnlib
       if (m_params.m_debugging)
       {
          double total_time = t.get_elapsed_secs();
-         console::info(L"Codebook gen time: %3.3fs, Total alpha clusters: %u", total_time, state.m_vq.get_codebook_size());
+         console::info("Codebook gen time: %3.3fs, Total alpha clusters: %u", total_time, state.m_vq.get_codebook_size());
       }
 #endif
 
@@ -986,7 +986,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Begin alpha cluster assignment");
+         console::info("Begin alpha cluster assignment");
 #endif
 
       for (uint i = 0; i <= m_pTask_pool->get_num_threads(); i++)
@@ -1013,7 +1013,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Completed alpha cluster assignment");
+         console::info("Completed alpha cluster assignment");
 #endif
 
       return true;
@@ -1040,7 +1040,7 @@ namespace crnlib
          if (m_canceled)
             return;
 
-         if ((get_current_thread_id() == m_main_thread_id) && ((cluster_index & 63) == 0))
+         if ((crn_get_current_thread_id() == m_main_thread_id) && ((cluster_index & 63) == 0))
          {
             if (!update_progress(3, cluster_index, m_color_clusters.size()))
                return;
@@ -1151,7 +1151,7 @@ namespace crnlib
       if (m_params.m_debugging)
       {
          if (total_empty_clusters)
-            console::warning(L"Total empty color clusters: %u", total_empty_clusters);
+            console::warning("Total empty color clusters: %u", total_empty_clusters);
       }
 #endif
    }
@@ -1163,7 +1163,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Computing optimal color cluster endpoints");
+         console::info("Computing optimal color cluster endpoints");
 #endif
 
       for (uint i = 0; i <= m_pTask_pool->get_num_threads(); i++)
@@ -1192,7 +1192,7 @@ namespace crnlib
          if (m_canceled)
             return;
 
-         if ((get_current_thread_id() == m_main_thread_id) && ((cluster_index & 63) == 0))
+         if ((crn_get_current_thread_id() == m_main_thread_id) && ((cluster_index & 63) == 0))
          {
             if (!update_progress(8, cluster_index, m_alpha_clusters.size()))
                return;
@@ -1311,7 +1311,7 @@ namespace crnlib
       if (m_params.m_debugging)
       {
          if (total_empty_clusters)
-            console::warning(L"Total empty alpha clusters: %u", total_empty_clusters);
+            console::warning("Total empty alpha clusters: %u", total_empty_clusters);
       }
 #endif
    }
@@ -1323,7 +1323,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Computing optimal alpha cluster endpoints");
+         console::info("Computing optimal alpha cluster endpoints");
 #endif
 
       for (uint i = 0; i <= m_pTask_pool->get_num_threads(); i++)
@@ -1461,7 +1461,7 @@ namespace crnlib
             if (m_canceled)
                return;
 
-            if ((get_current_thread_id() == m_main_thread_id) && ((chunk_index & 127) == 0))
+            if ((crn_get_current_thread_id() == m_main_thread_id) && ((chunk_index & 127) == 0))
             {
                if (!update_progress(12 + comp_chunk_index, chunk_index, m_num_chunks))
                   return;
@@ -1632,7 +1632,7 @@ namespace crnlib
    {
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Computing selector training vectors");
+         console::info("Computing selector training vectors");
 #endif
 
       const uint cColorDistToWeight = 2000;
@@ -1775,7 +1775,7 @@ namespace crnlib
       if (m_params.m_debugging)
       {
          double total_time = t.get_elapsed_secs();
-         console::info(L"Codebook gen time: %3.3fs, Selector codebook size: %u", total_time, selector_vq.get_codebook_size());
+         console::info("Codebook gen time: %3.3fs, Selector codebook size: %u", total_time, selector_vq.get_codebook_size());
       }
 #endif
 
@@ -1827,7 +1827,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Refining quantized color selectors");
+         console::info("Refining quantized color selectors");
 #endif
 
       uint total_refined_selectors = 0;
@@ -1917,7 +1917,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Total refined pixels: %u, selectors: %u out of %u", total_refined_pixels, total_refined_selectors, total_selectors);
+         console::info("Total refined pixels: %u, selectors: %u out of %u", total_refined_pixels, total_refined_selectors, total_selectors);
 #endif
 
       return true;
@@ -1930,7 +1930,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Refining quantized alpha selectors");
+         console::info("Refining quantized alpha selectors");
 #endif
 
       uint total_refined_selectors = 0;
@@ -2021,7 +2021,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Total refined pixels: %u, selectors: %u out of %u", total_refined_pixels, total_refined_selectors, total_selectors);
+         console::info("Total refined pixels: %u, selectors: %u out of %u", total_refined_pixels, total_refined_selectors, total_selectors);
 #endif
 
       return true;
@@ -2037,7 +2037,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Refining quantized color endpoints");
+         console::info("Refining quantized color endpoints");
 #endif
 
       for (uint cluster_index = 0; cluster_index < m_color_clusters.size(); cluster_index++)
@@ -2138,7 +2138,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Total refined pixels: %u, endpoints: %u out of %u", total_refined_pixels, total_refined_tiles, m_color_clusters.size());
+         console::info("Total refined pixels: %u, endpoints: %u out of %u", total_refined_pixels, total_refined_tiles, m_color_clusters.size());
 #endif
 
       return true;
@@ -2153,7 +2153,7 @@ namespace crnlib
       uint total_refined_pixels = 0;
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Refining quantized alpha endpoints");
+         console::info("Refining quantized alpha endpoints");
 #endif
 
       for (uint cluster_index = 0; cluster_index < m_alpha_clusters.size(); cluster_index++)
@@ -2257,7 +2257,7 @@ namespace crnlib
 
 #if CRNLIB_ENABLE_DEBUG_MESSAGES
       if (m_params.m_debugging)
-         console::info(L"Total refined pixels: %u, endpoints: %u out of %u", total_refined_pixels, total_refined_tiles, m_alpha_clusters.size());
+         console::info("Total refined pixels: %u, endpoints: %u out of %u", total_refined_pixels, total_refined_tiles, m_alpha_clusters.size());
 #endif
 
       return true;
@@ -2515,7 +2515,7 @@ namespace crnlib
 
    bool dxt_hc::update_progress(uint phase_index, uint subphase_index, uint subphase_total)
    {
-      CRNLIB_ASSERT(get_current_thread_id() == m_main_thread_id);
+      CRNLIB_ASSERT(crn_get_current_thread_id() == m_main_thread_id);
 
       if (!m_params.m_pProgress_func)
          return true;

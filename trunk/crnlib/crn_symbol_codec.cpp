@@ -361,7 +361,7 @@ namespace crnlib
       if (!max_freq)
          return false;
 
-      if (max_freq <= UINT16_MAX)
+      if (max_freq <= cUINT16_MAX)
       {
          for (uint i = 0; i < total_syms; i++)
             sym_freq16[i] = static_cast<uint16>(pSym_freq[i]);
@@ -381,7 +381,7 @@ namespace crnlib
             if (fl < 1)
                fl = 1;
 
-            CRNLIB_ASSERT(fl <= UINT16_MAX);
+            CRNLIB_ASSERT(fl <= cUINT16_MAX);
 
             sym_freq16[i] = static_cast<uint16>(fl);
          }
@@ -917,7 +917,7 @@ namespace crnlib
       freq++;
       model.m_sym_freq[sym] = static_cast<uint16>(freq);
 
-      if (freq == UINT16_MAX)
+      if (freq == cUINT16_MAX)
          model.rescale();
 
       if (--model.m_symbols_until_update == 0)
@@ -1426,8 +1426,8 @@ namespace crnlib
       {
          uint32 t = pTables->m_lookup[m_bit_buf >> (cBitBufSize - pTables->m_table_bits)];
 
-         CRNLIB_ASSERT(t != UINT32_MAX);
-         sym = t & UINT16_MAX;
+         CRNLIB_ASSERT(t != cUINT32_MAX);
+         sym = t & cUINT16_MAX;
          len = t >> 16;
 
          CRNLIB_ASSERT(model.m_code_sizes[sym] == len);
@@ -1462,7 +1462,7 @@ namespace crnlib
       freq++;
       model.m_sym_freq[sym] = static_cast<uint16>(freq);
 
-      if (freq == UINT16_MAX)
+      if (freq == cUINT16_MAX)
          model.rescale();
 
       if (--model.m_symbols_until_update == 0)
@@ -1614,8 +1614,8 @@ namespace crnlib
       {
          uint32 t = pTables->m_lookup[m_bit_buf >> (cBitBufSize - pTables->m_table_bits)];
 
-         CRNLIB_ASSERT(t != UINT32_MAX);
-         sym = t & UINT16_MAX;
+         CRNLIB_ASSERT(t != cUINT32_MAX);
+         sym = t & cUINT16_MAX;
          len = t >> 16;
 
          CRNLIB_ASSERT(model.m_code_sizes[sym] == len);

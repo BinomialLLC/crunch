@@ -41,36 +41,7 @@ namespace crnlib
          return g_all_pixel_formats[index];
       }
 
-      const wchar_t* get_pixel_format_string(pixel_format fmt)
-      {
-         switch (fmt)
-         {
-            case PIXEL_FMT_INVALID:   return L"INVALID";
-            case PIXEL_FMT_DXT1:      return L"DXT1";
-            case PIXEL_FMT_DXT1A:     return L"DXT1A";
-            case PIXEL_FMT_DXT2:      return L"DXT2";
-            case PIXEL_FMT_DXT3:      return L"DXT3";
-            case PIXEL_FMT_DXT4:      return L"DXT4";
-            case PIXEL_FMT_DXT5:      return L"DXT5";
-            case PIXEL_FMT_3DC:       return L"3DC";
-            case PIXEL_FMT_DXN:       return L"DXN";
-            case PIXEL_FMT_DXT5A:     return L"DXT5A";
-            case PIXEL_FMT_DXT5_CCxY: return L"DXT5_CCxY";
-            case PIXEL_FMT_DXT5_xGxR: return L"DXT5_xGxR";
-            case PIXEL_FMT_DXT5_xGBR: return L"DXT5_xGBR";
-            case PIXEL_FMT_DXT5_AGBR: return L"DXT5_AGBR";
-            case PIXEL_FMT_R8G8B8:    return L"R8G8B8";
-            case PIXEL_FMT_A8R8G8B8:  return L"A8R8G8B8";
-            case PIXEL_FMT_A8:        return L"A8";
-            case PIXEL_FMT_L8:        return L"L8";
-            case PIXEL_FMT_A8L8:      return L"A8L8";
-            default: break;
-         }
-         CRNLIB_ASSERT(false);
-         return L"?";
-      }
-
-      const char* get_pixel_format_stringa(pixel_format fmt)
+      const char* get_pixel_format_string(pixel_format fmt)
       {
          switch (fmt)
          {
@@ -99,27 +70,7 @@ namespace crnlib
          return "?";
       }
 
-      const wchar_t* get_crn_format_string(crn_format fmt)
-      {
-         switch (fmt)
-         {
-            case cCRNFmtDXT1:        return L"DXT1";
-            case cCRNFmtDXT3:        return L"DXT3";
-            case cCRNFmtDXT5:        return L"DXT5";
-            case cCRNFmtDXT5_CCxY:   return L"DXT5_CCxY";
-            case cCRNFmtDXT5_xGBR:   return L"DXT5_xGBR";
-            case cCRNFmtDXT5_AGBR:   return L"DXT5_AGBR";
-            case cCRNFmtDXT5_xGxR:   return L"DXT5_xGxR";
-            case cCRNFmtDXN_XY:      return L"DXN_XY";
-            case cCRNFmtDXN_YX:      return L"DXN_YX";
-            case cCRNFmtDXT5A:       return L"DXT5A";
-            default: break;
-         }
-         CRNLIB_ASSERT(false);
-         return L"?";
-      }
-
-      const char* get_crn_format_stringa(crn_format fmt)
+      const char* get_crn_format_string(crn_format fmt)
       {
          switch (fmt)
          {
