@@ -300,7 +300,7 @@ struct crn_comp_params
 };
 }}}
 
-The `crn_comp_params` struct contains all parameters passed to the compressor. The caller must fill in this struct before calling `crn_compress()`. Note that some parameters/flags are relevant only when compressing to .CRN, clustered .DDS, or regular .DDS (I've tried to document all dependencies but I'm sure I missed some).
+The `crn_comp_params` struct contains all parameters passed to the compressor. The caller must fill in this struct before calling `crn_compress()`. Note that some parameters/flags are relevant only when compressing to .CRN, clustered .DDS, or regular .DDS (I've tried to document all dependencies).
 
 This struct contains several simple inline methods defined in this header. The constructor calls `clear()`, and the `clear()` method sets all parameters to their defaults. The `check()` method returns true if all parameters are within reasonable/supported ranges. The `get_flag()` and `set_flag()` helpers directly manipulate the `m_flags` member.
 
