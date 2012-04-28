@@ -228,7 +228,7 @@ enum crn_dxt_compressor_type
 };
 }}}
 
-This enum lists the DXTn block compressors supported by the library. Only enum is only relevant when compressing to non-clustered .DDS files.
+This enum lists the DXTn block compressors supported by the library. This enum is only relevant when compressing to non-clustered .DDS files.
 
 `cCRNDXTCompressorCRN`: crnlib's default endpoint optimizer.
 
