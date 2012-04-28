@@ -308,7 +308,7 @@ This struct contains several simple inline methods defined in this header. The c
 
 *crn_uint32 m_faces*: Default: 1. Set to 1 to compress 2D textures, or 6 to compress cubemaps.
 
-*crn_uint32 m_width* and *crn_uint32 m_height*: Default: (0,0). The source texture's topmost (largest) mipmap dimensions in pixels. Must be in the range [1, cCRNMaxLevelResolution], non-power of 2 is OK, non-square OK. Textures that don't have dimensions divisible by 4 will be padded to the next multiple of 4.
+*crn_uint32 m_width* and *crn_uint32 m_height*: Default: (0,0). The source texture's topmost (largest) mipmap dimensions in pixels. Must be in the range [1, cCRNMaxLevels], non-power of 2 is OK, non-square OK. Textures that don't have dimensions divisible by 4 will be padded to the next multiple of 4.
 
 *crn_uint32 m_levels*: Default: 1. The source texture's total mipmap chain size, where 1 is not mipmapped. Must be in the range [1, cCRNMaxLevelResolution].
 
