@@ -21,6 +21,6 @@ crnlib's custom DXT1 endpoint optimizer can detect pixel blocks which have been 
 
  * The DXT5_CCXY format uses a simple YCoCg encoding that seems workable but hasn't been tuned for max. quality yet.
 
- * Ignore the SSIM statistics printed when using the -imagestats option - it's currently bogus. (So far, I've been using PSNR, which I know sucks.)
+ * Ignore the SSIM statistics printed when using the -imagestats option - it's currently bogus. I've been tuning the codec using PSNR/RMSE so far.
 
  * The crn_decomp.h header file library is freaking huge (~4800 lines). It would be nice to port it to C and shrink it. Also, crnlib is Win32 only.
