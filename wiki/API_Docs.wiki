@@ -36,6 +36,8 @@ crnlib should also build with VC10 (Visual Studio 2010), and Codeblocks 10.05 us
 
 Currently crnlib is Win32 only, but it already compiles with GCC so a Linux/BSD/Mac port shouldn't be too difficult. (The threading related code is the biggest blocker to porting.) crnlib itself has only been tested on PC's, but [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h crn_decomp.h] (the stand-alone transcoder header file library) should work fine on consoles.
 
+A Xbox 360 specific version of crn_decomp.h is available that can transcode .CRN textures into X360 tiled textures located in cached or write combined memory at only a ~10% slowdown. Please email me if you're interested (it's bitrotted a bit since the public release).
+
 ----
 
 == Public API Overview ==
