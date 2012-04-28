@@ -94,4 +94,4 @@ Most of the compression steps are multithreaded in a relatively straightforward 
 
 The .CRN format currently utilizes [http://en.wikipedia.org/wiki/Canonical_Huffman_code canonical Huffman coding] for speed. The symbol codelengths for each Huffman table are sent in a simple compressed manner after the header (like Deflate). 
 
-Given a fixed amount of additional developer time to improve .CRN's bitrate/quality, I think the backend would benefit the most from more work. (So far, much more effort has been devoted to the DXT1 endpoint optimizer and the frontend stages.) The current format is probably favoring transcoding speed too highly vs. ratio. Also, the Huffman tables contain too many symbols.
+Given a fixed amount of additional developer time to improve .CRN's bitrate/quality, I think the backend would benefit the most from more work. (So far, much more effort has been devoted to the DXT1 endpoint optimizer and the frontend stages.) The current format is probably favoring transcoding speed too highly vs. ratio. Also, the Huffman tables contain too many symbols, and alternatives to the DPCM coding should be explored.
