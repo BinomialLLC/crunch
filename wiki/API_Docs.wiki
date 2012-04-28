@@ -314,7 +314,7 @@ This struct contains several simple inline methods defined in this header. The c
 
 *crn_format m_format*: Default: cCRNFmtDXT1. Sets the output file's compressed pixel format.
 
-*crn_uint32 m_flags*: Defualt: `cCRNCompFlagPerceptual` | `cCRNCompFlagHierarchical` | `cCRNCompFlagUseBothBlockTypes`. Compressor flags logically OR'd together, see the [enum_crn_comp_flags crn_comp_flags enum].
+*crn_uint32 m_flags*: Defualt: `cCRNCompFlagPerceptual` | `cCRNCompFlagHierarchical` | `cCRNCompFlagUseBothBlockTypes`. Compressor flags logically OR'd together, see the [API_Docs#enum_crn_comp_flags crn_comp_flags enum].
 
 
 *const crn_uint32`*` m_pImages`[`cCRNMaxFaces`]``[`cCRNMaxLevels`]`*: Default: All NULL. 2D array of pointers to 32bpp RGBA input images. The red component is always first in memory, independent of platform endianness.
