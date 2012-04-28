@@ -80,7 +80,7 @@ To transcode a mipmap level to DXTn, the palettes must be first unpacked, either
 
 == Compression ==
 
-The compressor is very complex, partially due to the weird and surprisingly deep properties imposed by the DXTn block format. It consists of two independent parts, called the "frontend" and "backend". The frontend is by far the most complex.
+The compressor is very complex, partially due to the weird and surprisingly deep properties imposed by the DXTn block format. It consists of two independent parts, called the "frontend" and "backend". The frontend is by far the most complex, and a good chunk of crnlib is devoted to building up enough functionality to enable the frontend to function.
 
 The frontend, located in [http://code.google.com/p/crunch/source/browse/trunk/crnlib/crn_dxt_hc.cpp dxt_hc.cpp/h], takes the 24/32bpp source texture mipmaps as inputs. It adaptively subdivides the texture macroblocks into tiles, finds the endpoint and selector clusters, and then generates optimized, but unordered palettes based off these clusters. The backend, located in [http://code.google.com/p/crunch/source/browse/trunk/crnlib/crn_comp.cpp crn_comp.cpp/h] takes the raw palettes, macroblock tile layouts, and indices supplied by the frontend and tries to efficiently code them.
 
