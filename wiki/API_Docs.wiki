@@ -156,7 +156,7 @@ enum crn_limits
 };
 }}}
 
-The `crn_limits` enum lists various library limits. Notable, the max supported texture resolution is currently limited to 4096x4096.
+The `crn_limits` enum lists various library limits. Notably, the max supported texture resolution is currently 4096x4096 (this can be easily increased in the x64 version).
 
 === enum crn_comp_flags ===
 {{{
