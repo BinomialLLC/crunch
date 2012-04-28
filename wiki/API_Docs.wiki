@@ -179,7 +179,7 @@ The `crn_comp_flags` enum contains a number of compression related flags:
 
 `cCRNCompFlagPerceptual`: Default: Enabled. If enabled, perceptual colorspace distance metrics are enabled. *Important*: Be sure to *disable* this flag when compressing non-sRGB colorspace images, like normal maps!
 
-`cCRNCompFlagHierarchical`: Default: Enabled. If enabled, 4x4, 4x8, 8x4, and 8x8 tiles may be used in each macroblock. If disabled, all macroblocks are forced to use four 4x4 pixel tiles. Compression ratio will be lower when disabled, and transcoding will be a bit slower, but this will reduce block artifacts due to macroblocks.
+`cCRNCompFlagHierarchical`: Default: Enabled. If enabled, 4x4, 4x8, 8x4, and 8x8 tiles may be used in each macroblock. If disabled, all macroblocks are forced to use four 4x4 pixel tiles. Compression ratio will be lower when disabled, and transcoding will be a bit slower, but this will reduce macroblock tiling artifacts.
 
 `cCRNCompFlagQuick`: Default: Disabled. If enabled, this flag disables several output file optimizations. Intended for things like quicker previews.
 
