@@ -109,4 +109,4 @@ Ideas for crunch v2.0:
   * Support "raw" CRN files that use no additional compression (assume they will be post-compressed by the user using gzip or LZMA - useful for Javascript/WebGL)
   * Support uncompressed palettes, for high speed random access in the transcoder
   * Investigate 16x16 or 32x32 macroblock sizes. Optimize .CRN for bitrates below 1.0 bpp.
-  * Clusterered (rate distortion optimized) DDS: Add support for ZLIB, LZO, and Snappy lossless post-compression 
+  * Clustered (rate distortion optimized) DDS: Add support for ZLIB, LZO, and Snappy lossless post-compression 
