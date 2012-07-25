@@ -7,7 +7,7 @@
 
  * You really should provide crnlib with raw, 24/32-bit source textures. Don't provide it with second generation textures that have already been DXTn or JPEG compressed. Of course, you can do so, and I know of one company doing this to repackage existing assets (without source art) so they download more quickly, but obviously don't expect the highest quality.
 
-crnlib's custom DXT1 endpoint optimizer can detect pixel blocks which have been previously compressed to DXT1 using another DXTn compression library. It attempts to derive the endpoints originally used to compress these blocks in order to reduce artifacts, but it's not always successful.
+ crnlib's custom DXT1 endpoint optimizer can detect pixel blocks which have been previously compressed to DXT1 using another DXTn compression library. It attempts to derive the endpoints originally used to compress these blocks in order to reduce artifacts, but it's not always successful.
 
  * crnlib currently assumes you'll be further losslessly compressing its output .DDS files using LZMA. However, some engines use weaker codecs such as LZO, zlib, etc., so crnlib's bitrate measurements will be inaccurate. It should be easy to allow the caller to plug-in custom lossless compressors for bitrate measurement.
 
