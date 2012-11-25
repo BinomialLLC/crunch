@@ -13,7 +13,7 @@ crnlib and crunch have also been built with VS2005, VS2010, and gcc 4.5.0 ([http
 
 I simple makefile to build only the crunch executable is in crnlib/Makefile. I've only built/tested under 32-bit Ubuntu 12.04, however 64-bit should be easy to get working with minimal tweaks. Alternately, you can use the Codeblocks v10.05 Linux workspace in "crn_linux.workspace".
 
-*Important*: When compiling with gcc, be sure to use -fno-strict-aliasing otherwise crnlib will randomly misbehave. This also applies to the transcoder library in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h].
+*Important*: When compiling with gcc, be sure to use *-fno-strict-aliasing* otherwise crnlib will randomly misbehave. This also applies to the transcoder library in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h].
 
 == [http://code.google.com/p/crunch/source/browse/trunk/example1/example1.cpp example1] ==
 Demonstrates how to use crnlib's high-level C-helper
