@@ -1,4 +1,4 @@
-#summary Building the Examples
+#summary Building the Library/Command Line Tool/Examples
 #labels Featured
 
 = Building =
