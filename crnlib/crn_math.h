@@ -216,10 +216,12 @@ namespace crnlib
 
       void compute_lower_pow2_dim(int& width, int& height);
       void compute_upper_pow2_dim(int& width, int& height);
+      
       inline bool equal_tol(float a, float b, float t)
       {
          return fabs(a - b) < ((maximum(fabs(a), fabs(b)) + 1.0f) * t);
       }
+
       inline bool equal_tol(double a, double b, double t)
       {
          return fabs(a - b) < ((maximum(fabs(a), fabs(b)) + 1.0f) * t);
@@ -227,4 +229,9 @@ namespace crnlib
    }
 
 } // namespace crnlib
+
+
+
+
+
 

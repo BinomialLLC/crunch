@@ -132,7 +132,7 @@ namespace crnlib
 
       if (xscale < 1.0f)
       {
-         int total;
+         int total; (void)total;
 
          /* Handle case when there are fewer destination
          * samples than source samples (downsampling/minification).

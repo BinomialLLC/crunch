@@ -286,7 +286,7 @@ namespace crnlib
 
 #if QDXT5_DEBUGGING
             if (debugging)
-               image_utils::save_to_file_stb(dynamic_wstring(cVarArg, "debug_%u.tga", level).get_ptr(), debug_img, image_utils::cSaveIgnoreAlpha);
+               image_utils::write_to_file(dynamic_wstring(cVarArg, "debug_%u.tga", level).get_ptr(), debug_img, image_utils::cWriteFlagIgnoreAlpha);
 #endif
 
          } // level

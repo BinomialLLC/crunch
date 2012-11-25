@@ -4,6 +4,7 @@
 #include "crn_color.h"
 #include "crn_vec.h"
 #include "crn_pixel_format.h"
+#include "crn_rect.h"
 
 namespace crnlib
 {
@@ -25,6 +26,7 @@ namespace crnlib
       {
       }
 
+      // pitch is in PIXELS, not bytes.
       image(uint width, uint height, uint pitch = UINT_MAX, const color_type& background = color_type::make_black(), uint flags = pixel_format_helpers::cDefaultCompFlags) :
          m_comp_flags(flags)
       {
@@ -44,6 +46,7 @@ namespace crnlib
          set_all(background);
       }
 
+      // pitch is in PIXELS, not bytes.
       image(color_type* pPixels, uint width, uint height, uint pitch = UINT_MAX, uint flags = pixel_format_helpers::cDefaultCompFlags)
       {
          alias(pPixels, width, height, pitch, flags);
@@ -94,6 +97,7 @@ namespace crnlib
          *this = other;
       }
 
+      // pitch is in PIXELS, not bytes.
       void alias(color_type* pPixels, uint width, uint height, uint pitch = UINT_MAX, uint flags = pixel_format_helpers::cDefaultCompFlags)
       {
          m_pixel_buf.clear();
@@ -105,6 +109,40 @@ namespace crnlib
          m_pitch = (pitch == UINT_MAX) ? width : pitch;
          m_total = m_pitch * m_height;
          m_comp_flags = flags;
+      }
+
+      // pitch is in PIXELS, not bytes.
+      bool grant_ownership(color_type* pPixels, uint width, uint height, uint pitch = UINT_MAX, uint flags = pixel_format_helpers::cDefaultCompFlags)
+      {
+         if (pitch == UINT_MAX)
+            pitch = width;
+
+         if ((!pPixels) || (!width) || (!height) || (pitch < width))
+         {
+            CRNLIB_ASSERT(0);
+            return false;
+         }
+
+         if (pPixels == get_ptr())
+         {
+            CRNLIB_ASSERT(0);
+            return false;
+         }
+         
+         clear();
+
+         if (!m_pixel_buf.grant_ownership(pPixels, height * pitch, height * pitch))
+            return false;
+         
+         m_pPixels = pPixels;
+
+         m_width = width;
+         m_height = height;
+         m_pitch = pitch;
+         m_total = pitch * height;
+         m_comp_flags = flags;
+         
+         return true;
       }
 
       void clear()
@@ -137,6 +175,34 @@ namespace crnlib
       {
          for (uint i = 0; i < m_total; i++)
             m_pPixels[i] = c;
+      }
+
+      void flip_x()
+      {
+         const uint half_width = m_width / 2;
+         for (uint y = 0; y < m_height; y++)
+         {
+            for (uint x = 0; x < half_width; x++)
+            {
+               color_type c((*this)(x, y));
+               (*this)(x, y) = (*this)(m_width - 1 - x, y);
+               (*this)(m_width - 1 - x, y) = c;
+            }
+         }
+      }
+
+      void flip_y()
+      {
+         const uint half_height = m_height / 2;
+         for (uint y = 0; y < half_height; y++)
+         {
+            for (uint x = 0; x < m_width; x++)
+            {
+               color_type c((*this)(x, y));
+               (*this)(x, y) = (*this)(x, m_height - 1 - y);
+               (*this)(x, m_height - 1 - y) = c;
+            }
+         }
       }
 
       void convert_to_grayscale()
@@ -183,13 +249,16 @@ namespace crnlib
       bool extract_block(color_type* pDst, uint x, uint y, uint w, uint h, bool flip_xy = false) const
       {
          if ((x >= m_width) || (y >= m_height))
+         {
+            CRNLIB_ASSERT(0);
             return false;
+         }
 
          if (flip_xy)
          {
             for (uint y_ofs = 0; y_ofs < h; y_ofs++)
                for (uint x_ofs = 0; x_ofs < w; x_ofs++)
-                  pDst[x_ofs * 4 + y_ofs] = get_clamped(x_ofs + x, y_ofs + y);
+                  pDst[x_ofs * h + y_ofs] = get_clamped(x_ofs + x, y_ofs + y);      // 5/4/12 - this was incorrectly x_ofs * 4
          }
          else if (((x + w) > m_width) || ((y + h) > m_height))
          {
@@ -213,10 +282,14 @@ namespace crnlib
          return true;
       }
 
-      void fill(uint x, uint y, uint w, uint h, const color_type& c)
+      // No clipping!
+      void unclipped_fill_box(uint x, uint y, uint w, uint h, const color_type& c)
       {
-         CRNLIB_ASSERT((x + w) <= m_width);
-         CRNLIB_ASSERT((y + h) <= m_height);
+         if (((x + w) > m_width) || ((y + h) > m_height))
+         {
+            CRNLIB_ASSERT(0);
+            return;
+         }
 
          color_type* p = get_scanline(y) + x;
 
@@ -229,7 +302,7 @@ namespace crnlib
          }
       }
 
-      void draw_box(int x, int y, uint width, uint height, const color_type& c)
+      void draw_rect(int x, int y, uint width, uint height, const color_type& c)
       {
          draw_line(x, y, x + width - 1, y, c);
          draw_line(x, y, x, y + height - 1, c);
@@ -238,13 +311,25 @@ namespace crnlib
       }
 
       // No clipping!
-      bool copy(uint src_x, uint src_y, uint src_w, uint src_h, uint dst_x, uint dst_y, const image& src)
+      bool unclipped_blit(uint src_x, uint src_y, uint src_w, uint src_h, uint dst_x, uint dst_y, const image& src)
       {
-         if ( ((src_x + src_w) > src.get_width()) || ((src_y + src_h) > src.get_height()) )
+         if ((!is_valid()) || (!src.is_valid()))
+         {
+            CRNLIB_ASSERT(0);
             return false;
+         }
+
+         if ( ((src_x + src_w) > src.get_width()) || ((src_y + src_h) > src.get_height()) )
+         {
+            CRNLIB_ASSERT(0);
+            return false;
+         }
 
          if ( ((dst_x + src_w) > get_width()) || ((dst_y + src_h) > get_height()) )
+         {
+            CRNLIB_ASSERT(0);
             return false;
+         }
 
          const color_type* pS = &src(src_x, src_y);
          color_type* pD = &(*this)(dst_x, dst_y);
@@ -262,38 +347,74 @@ namespace crnlib
       }
 
       // With clipping.
-      void blit(int dst_x, int dst_y, const image& src)
+      bool blit(int dst_x, int dst_y, const image& src)
       {
-         uint src_x = 0;
-         uint src_y = 0;
+         if ((!is_valid()) || (!src.is_valid()))
+         {
+            CRNLIB_ASSERT(0);
+            return false;
+         }
+
+         int src_x = 0;
+         int src_y = 0;
 
          if (dst_x < 0)
          {
             src_x = -dst_x;
-            if (src_x >= src.get_width())
-               return;
+            if (src_x >= static_cast<int>(src.get_width()))
+               return false;
             dst_x = 0;
          }
 
          if (dst_y < 0)
          {
             src_y = -dst_y;
-            if (src_y >= src.get_height())
-               return;
+            if (src_y >= static_cast<int>(src.get_height()))
+               return false;
             dst_y = 0;
          }
 
          if ((dst_x >= (int)m_width) || (dst_y >= (int)m_height))
-            return;
+            return false;
 
          uint width = math::minimum(m_width - dst_x, src.get_width() - src_x);
          uint height = math::minimum(m_height - dst_y, src.get_height() - src_y);
 
-         bool success = copy(src_x, src_y, width, height, dst_x, dst_y, src);
+         bool success = unclipped_blit(src_x, src_y, width, height, dst_x, dst_y, src);
          success;
          CRNLIB_ASSERT(success);
+
+         return true;
       }
 
+      // With clipping.
+      bool blit(int src_x, int src_y, int src_w, int src_h, int dst_x, int dst_y, const image& src)
+      {
+         if ((!is_valid()) || (!src.is_valid()))
+         {
+            CRNLIB_ASSERT(0);
+            return false;
+         }
+
+         rect src_rect(src_x, src_y, src_x + src_w, src_y + src_h);
+         if (!src_rect.intersect(src.get_bounds()))
+            return false;
+
+         rect dst_rect(dst_x, dst_y, dst_x + src_rect.get_width(), dst_y + src_rect.get_height());
+         if (!dst_rect.intersect(get_bounds()))
+            return false;
+         
+         bool success = unclipped_blit(
+            src_rect.get_left(), src_rect.get_top(), 
+            math::minimum(src_rect.get_width(), dst_rect.get_width()), math::minimum(src_rect.get_height(), dst_rect.get_height()),
+            dst_rect.get_left(), dst_rect.get_top(), src);
+         success;
+         CRNLIB_ASSERT(success);
+
+         return true;
+      }
+
+      // In-place resize of image dimensions (cropping).
       bool resize(uint new_width, uint new_height, uint new_pitch = UINT_MAX, const color_type background = color_type::make_black())
       {
          if (new_pitch == UINT_MAX)
@@ -341,6 +462,8 @@ namespace crnlib
       inline uint get_height() const { return m_height; }
       inline uint get_total_pixels() const { return m_width * m_height; }
 
+      inline rect get_bounds() const { return rect(0, 0, m_width, m_height); }
+
       inline uint get_pitch() const { return m_pitch; }
       inline uint get_pitch_in_bytes() const { return m_pitch * sizeof(color_type); }
 
@@ -368,15 +491,21 @@ namespace crnlib
          return m_pPixels[x + y * m_pitch];
       }
 
-      inline const color_type& get_clamped (int x, int y) const
+      inline const color_type& get_unclamped(uint x, uint y) const
+      {
+         CRNLIB_ASSERT((x < m_width) && (y < m_height));
+         return m_pPixels[x + y * m_pitch];
+      }
+
+      inline const color_type& get_clamped(int x, int y) const
       {
          x = math::clamp<int>(x, 0, m_width - 1);
          y = math::clamp<int>(y, 0, m_height - 1);
-         return (*this)((uint)x, (uint)y);
+         return m_pPixels[x + y * m_pitch];
       }
 
       // Sample image with bilinear filtering.
-      // (x,y) - Continuous coordinates, where pixel centers are at (.5,.5), valid image coords are (0,width] and (0,height].
+      // (x,y) - Continuous coordinates, where pixel centers are at (.5,.5), valid image coords are [0,width] and [0,height].
       void get_filtered(float x, float y, color_type& result) const
       {
          x -= .5f;
@@ -430,7 +559,7 @@ namespace crnlib
          }
       }
 
-      inline void set_pixel(uint x, uint y, const color_type& c)
+      inline void set_pixel_unclipped(uint x, uint y, const color_type& c)
       {
          CRNLIB_ASSERT((x < m_width) && (y < m_height));
          m_pPixels[x + y * m_pitch] = c;
@@ -438,7 +567,7 @@ namespace crnlib
 
       inline void set_pixel_clipped(int x, int y, const color_type& c)
       {
-         if ((x < 0) || (x >= (int)m_width) || (y < 0) || (y >= (int)m_height))
+         if ((static_cast<uint>(x) >= m_width) || (static_cast<uint>(y) >= m_height))
             return;
 
          m_pPixels[x + y * m_pitch] = c;
@@ -486,7 +615,6 @@ namespace crnlib
          }
 
          int dx = xe - xs, dy = ye - ys;
-
          if (!dx)
          {
             if (ys > ye)
@@ -503,35 +631,26 @@ namespace crnlib
          {
             if (dy <= dx)
             {
-               int e = 2 * dy - dx;
-               int e_no_inc = 2 * dy;
-               int e_inc = 2 * (dy - dx);
+               int e = 2 * dy - dx, e_no_inc = 2 * dy, e_inc = 2 * (dy - dx);
                rasterize_line(xs, ys, xe, ye, 0, 1, e, e_inc, e_no_inc, color);
             }
             else
             {
-               int e = 2 * dx - dy;
-               int e_no_inc = 2 * dx;
-               int e_inc = 2 * (dx - dy);
+               int e = 2 * dx - dy, e_no_inc = 2 * dx, e_inc = 2 * (dx - dy);
                rasterize_line(xs, ys, xe, ye, 1, 1, e, e_inc, e_no_inc, color);
             }
          }
          else
          {
             dy = -dy;
-
             if (dy <= dx)
             {
-               int e = 2 * dy - dx;
-               int e_no_inc = 2 * dy;
-               int e_inc = 2 * (dy - dx);
+               int e = 2 * dy - dx, e_no_inc = 2 * dy, e_inc = 2 * (dy - dx);
                rasterize_line(xs, ys, xe, ye, 0, -1, e, e_inc, e_no_inc, color);
             }
             else
             {
-               int e = 2 * dx - dy;
-               int e_no_inc = (2 * dx);
-               int e_inc = 2 * (dx - dy);
+               int e = 2 * dx - dy, e_no_inc = (2 * dx), e_inc = 2 * (dx - dy);
                rasterize_line(xe, ye, xs, ys, 1, -1, e, e_inc, e_no_inc, color);
             }
          }
@@ -557,14 +676,10 @@ namespace crnlib
 
          if (pred)
          {
-            start = ys;
-            end = ye;
-            var = xs;
-
+            start = ys; end = ye; var = xs;
             for (int i = start; i <= end; i++)
             {
                set_pixel_clipped(var, i, color);
-
                if (e < 0)
                   e += e_no_inc;
                else
@@ -576,14 +691,10 @@ namespace crnlib
          }
          else
          {
-            start = xs;
-            end = xe;
-            var = ys;
-
+            start = xs; end = xe; var = ys;
             for (int i = start; i <= end; i++)
             {
                set_pixel_clipped(i, var, color);
-
                if (e < 0)
                   e += e_no_inc;
                else

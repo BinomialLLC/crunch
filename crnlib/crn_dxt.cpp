@@ -31,6 +31,7 @@ namespace crnlib
          case cDXT5A:   return "DXT5A";
          case cDXN_XY:  return "DXN_XY";
          case cDXN_YX:  return "DXN_YX";
+         case cETC1:    return "ETC1";
          default: break;
       }
       CRNLIB_ASSERT(false);
@@ -60,6 +61,7 @@ namespace crnlib
          case cDXT1:
          case cDXT1A:
          case cDXT5A:
+         case cETC1:
             return 4;
          case cDXT3:
          case cDXT5:

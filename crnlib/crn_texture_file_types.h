@@ -13,7 +13,13 @@ namespace crnlib
       {
          cFormatInvalid = -1,
 
-         cFormatTGA = 0,
+         cFormatDDS,
+         cFormatCRN,
+         cFormatKTX,
+
+         cNumMipmappedFileFormats,
+
+         cFormatTGA = cNumMipmappedFileFormats,
          cFormatPNG,
          cFormatJPG,
          cFormatJPEG,
@@ -23,12 +29,12 @@ namespace crnlib
          cFormatTIFF,
          cFormatPPM,
          cFormatPGM,
-         cFormatDDS,
          cFormatPSD,
          cFormatJP2,
-         cFormatCRN,
-
+         
          cNumRegularFileFormats,
+         
+         cNumImageFileFormats = cNumRegularFileFormats - cNumMipmappedFileFormats,
 
          // Not really a file format
          cFormatClipboard = cNumRegularFileFormats,

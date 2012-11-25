@@ -59,6 +59,7 @@ namespace crnlib
       static void disable_prefixes();
       static void enable_prefixes();
       static bool get_prefixes() { return m_prefixes; }
+      static bool get_at_beginning_of_line() { return m_at_beginning_of_line; }
 
       static void disable_crlf();
       static void enable_crlf();
@@ -92,6 +93,8 @@ namespace crnlib
       static mutex* m_pMutex;
 
       static uint m_num_messages[cCMTTotal];
+
+      static bool m_at_beginning_of_line;
    };
 
 #if defined(WIN32)

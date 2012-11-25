@@ -47,7 +47,7 @@ namespace crnlib
       if (INVALID_HANDLE_VALUE != cons)
          SetConsoleTextAttribute(cons, (WORD)attr);
 
-      if (console::get_prefixes())
+      if ((console::get_prefixes()) && (console::get_at_beginning_of_line()))
       {
          switch (type)
          {
@@ -85,7 +85,7 @@ namespace crnlib
       if (console::get_output_disabled())
          return true;
 
-      if (console::get_prefixes())
+      if ((console::get_prefixes()) && (console::get_at_beginning_of_line()))
       {
          switch (type)
          {

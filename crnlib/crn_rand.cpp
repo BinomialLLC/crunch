@@ -211,7 +211,7 @@ namespace crnlib
 
       return math::clamp<float>(r, l, h);
    }
-
+   
    int random::irand(int l, int h)
    {
       CRNLIB_ASSERT(l < h);
@@ -234,6 +234,12 @@ namespace crnlib
       int result = l + rnd_range;
       CRNLIB_ASSERT((result >= l) && (result < h));
       return result;
+   }
+
+   int random::irand_inclusive(int l, int h)
+   {
+      CRNLIB_ASSERT(h < cINT32_MAX);
+      return irand(l, h + 1);
    }
 
    /*

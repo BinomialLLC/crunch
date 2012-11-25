@@ -14,6 +14,10 @@ namespace crnlib
 
       static const char* extensions[cNumFileFormats] =
       {
+         "dds",
+         "crn",
+         "ktx",
+
          "tga",
          "png",
          "jpg",
@@ -24,10 +28,9 @@ namespace crnlib
          "tiff",
          "ppm",
          "pgm",
-         "dds",
          "psd",
          "jp2",
-         "crn",
+         
          "<clipboard>",
          "<dragdrop>"
       };
@@ -59,6 +62,7 @@ namespace crnlib
       {
          case cFormatCRN:
          case cFormatDDS:
+         case cFormatKTX:
             return true;
          default: break;
       }

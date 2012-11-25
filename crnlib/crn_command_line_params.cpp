@@ -14,7 +14,7 @@
 #endif
 namespace crnlib
 {
-   void get_command_line(dynamic_string& cmd_line, int argc, char *argv[])
+   void get_command_line_as_single_string(dynamic_string& cmd_line, int argc, char *argv[])
    {
       argc, argv;
 #if CRNLIB_USE_WIN32_API

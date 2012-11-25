@@ -66,6 +66,8 @@ namespace crnlib
 
          m_nodes.push_back(root);
 
+         // Warning: if this code is NOT compiled with -fno-strict-aliasing, m_nodes.get_ptr() can be NULL here. (Argh!)
+
          uint total_leaves = 1;
 
          while (total_leaves < max_size)

@@ -8,15 +8,16 @@
 // Note: This is a single file, stand-alone C++ library which is controlled by the use of two macros:
 //   If CRND_INCLUDE_CRND_H is NOT defined, the header is included.
 //   If CRND_HEADER_FILE_ONLY is NOT defined, the implementation is included.
-
+//
+// Important: If compiling with gcc, be sure strict aliasing is disabled: -fno-strict-aliasing
 #ifndef CRND_INCLUDE_CRND_H
 #define CRND_INCLUDE_CRND_H
 
 // Include crnlib.h (only to bring in some basic CRN-related types).
 #include "crnlib.h"
 
-#define CRND_LIB_VERSION 103
-#define CRND_VERSION_STRING "01.03"
+#define CRND_LIB_VERSION 104
+#define CRND_VERSION_STRING "01.04"
 
 #ifdef _DEBUG
 #define CRND_BUILD_DEBUG
@@ -2624,6 +2625,7 @@ namespace crnd
          case cCRNFmtDXT5_xGxR:   return CRND_FOURCC('x', 'G', 'x', 'R');
          case cCRNFmtDXT5_xGBR:   return CRND_FOURCC('x', 'G', 'B', 'R');
          case cCRNFmtDXT5_AGBR:   return CRND_FOURCC('A', 'G', 'B', 'R');
+         case cCRNFmtETC1:        return CRND_FOURCC('E', 'T', 'C', '1');
          default: break;
       }
       CRND_ASSERT(false);
@@ -2650,6 +2652,7 @@ namespace crnd
       {
          case cCRNFmtDXT1:
          case cCRNFmtDXT5A:
+         case cCRNFmtETC1:
             return 4;
          case cCRNFmtDXT3:
          case cCRNFmtDXT5:

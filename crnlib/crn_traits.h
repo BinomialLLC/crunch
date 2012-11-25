@@ -71,12 +71,16 @@ namespace crnlib
    struct bitwise_movable { enum { cFlag = false }; };
 
 // Defines type Q as bitwise movable.
+// Bitwise movable: type T may be safely moved to a new location via memcpy, without requiring the old copy to be destructed.
+// However, the final version of the object (wherever it winds up in memory) must be eventually destructed (a single time, of course).
+// Bitwise movable is a superset of bitwise copyable (all bitwise copyable types are also bitwise movable).
 #define CRNLIB_DEFINE_BITWISE_MOVABLE(Q) template<> struct bitwise_movable<Q> { enum { cFlag = true }; };
 
    template<typename T>
    struct bitwise_copyable { enum { cFlag = false }; };
 
-   // Defines type Q as bitwise copyable.
+// Defines type Q as bitwise copyable.
+// Bitwise copyable: type T may be safely and freely copied (duplicated) via memcpy, and *does not* require destruction.
 #define CRNLIB_DEFINE_BITWISE_COPYABLE(Q) template<> struct bitwise_copyable<Q> { enum { cFlag = true }; };
 
 #define CRNLIB_IS_POD(T) __is_pod(T)
@@ -85,7 +89,7 @@ namespace crnlib
 
 #define CRNLIB_IS_BITWISE_COPYABLE(T) (CRNLIB_IS_SCALAR_TYPE(T) || CRNLIB_IS_POD(T) || (bitwise_copyable<T>::cFlag))
 
-#define CRNLIB_IS_BITWISE_MOVABLE(T) (CRNLIB_IS_BITWISE_COPYABLE(T) || (bitwise_movable<T>::cFlag))
+#define CRNLIB_IS_BITWISE_COPYABLE_OR_MOVABLE(T) (CRNLIB_IS_BITWISE_COPYABLE(T) || (bitwise_movable<T>::cFlag))
 
 #define CRNLIB_HAS_DESTRUCTOR(T) ((!scalar_type<T>::cFlag) && (!__is_pod(T)))
 

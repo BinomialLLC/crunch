@@ -2,8 +2,9 @@
 // See Copyright Notice and license at the end of inc/crnlib.h
 //
 // Notes:
+// stl-like hash map/hash set, with predictable performance across platforms/compilers/C run times/etc.
 // Hash function ref: http://www.brpreiss.com/books/opus4/html/page215.html
-// Compared for speed against VC9's std::hash_map.
+// Compared for performance against VC9's std::hash_map.
 // Linear probing, auto resizes on ~50% load factor.
 // Uses Knuth's multiplicative method (Fibonacci hashing).
 #pragma once
@@ -374,6 +375,8 @@ namespace crnlib
          return iterator(*this, m_values.size());
       }
 
+      // insert_result.first will always point to inserted key/value (or the already existing key/value).
+      // insert_resutt.second will be true if a new key/value was inserted, or false if the key already existed (in which case first will point to the already existing value).
       typedef std::pair<iterator, bool> insert_result;
 
       inline insert_result insert(const Key& k, const Value& v = Value())
@@ -508,17 +511,19 @@ namespace crnlib
          scalar_type<Value>::destruct(&p->second);
       }
 
+      // Moves *pSrc to *pDst efficiently.
+      // pDst should NOT be constructed on entry.
       static inline void move_node(node* pDst, node* pSrc)
       {
          CRNLIB_ASSERT(!pDst->state);
 
-         if (CRNLIB_IS_BITWISE_MOVABLE(Key) && CRNLIB_IS_BITWISE_MOVABLE(Value))
+         if (CRNLIB_IS_BITWISE_COPYABLE_OR_MOVABLE(Key) && CRNLIB_IS_BITWISE_COPYABLE_OR_MOVABLE(Value))
          {
             memcpy(pDst, pSrc, sizeof(node));
          }
          else
          {
-            if (CRNLIB_IS_BITWISE_MOVABLE(Key))
+            if (CRNLIB_IS_BITWISE_COPYABLE_OR_MOVABLE(Key))
                memcpy(&pDst->first, &pSrc->first, sizeof(Key));
             else
             {
@@ -526,7 +531,7 @@ namespace crnlib
                scalar_type<Key>::destruct(&pSrc->first);
             }
 
-            if (CRNLIB_IS_BITWISE_MOVABLE(Value))
+            if (CRNLIB_IS_BITWISE_COPYABLE_OR_MOVABLE(Value))
                memcpy(&pDst->second, &pSrc->second, sizeof(Value));
             else
             {

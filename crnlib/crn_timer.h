@@ -42,4 +42,22 @@ namespace crnlib
       bool m_stopped : 1;
    };
 
+   // Prints object's lifetime to stdout
+   class timed_scope
+   {
+      const char* m_pName;
+      timer m_tm;
+
+   public:
+      inline timed_scope(char* pName = "timed_scope") : m_pName(pName) { m_tm.start(); }
+      
+      inline double get_elapsed_secs() const { return m_tm.get_elapsed_secs(); }
+      inline double get_elapsed_ms() const { return m_tm.get_elapsed_ms(); }
+
+      const timer &get_timer() const { return m_tm; }
+            timer &get_timer() { return m_tm; }
+
+      inline ~timed_scope() { double secs = m_tm.get_elapsed_secs(); printf("%s: %f secs, %f ms\n", m_pName, secs, secs * 1000.0f); }
+   };
+
 } // namespace crnlib

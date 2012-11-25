@@ -554,4 +554,25 @@ namespace crnlib
       return !*pWild;
    }
 
+   bool file_utils::write_buf_to_file(const char* pPath, const void* pData, size_t data_size)
+   {
+      FILE *pFile = NULL;
+
+#ifdef _MSC_VER
+      // Compiling with MSVC
+      if (fopen_s(&pFile, pPath, "wb"))
+         return false;
+#else
+      pFile = fopen(pPath, "wb");
+#endif
+      if (!pFile)
+         return false;
+
+      bool success = fwrite(pData, 1, data_size, pFile) == data_size;
+
+      fclose(pFile);
+
+      return success;
+   }
+
 } // namespace crnlib

@@ -72,6 +72,11 @@ namespace crnlib
          p_new = ::malloc(size);
          CRNLIB_ASSERT( (reinterpret_cast<ptr_bits_t>(p_new) & (CRNLIB_MIN_ALLOC_ALIGNMENT - 1)) == 0 );
 
+         if (!p_new)
+         {
+            printf("WARNING: ::malloc() of size %u failed!\n", (uint)size);
+         }
+
          if (pActual_size)
             *pActual_size = p_new ? ::_msize(p_new) : 0;
       }
@@ -105,6 +110,10 @@ namespace crnlib
             {
                CRNLIB_ASSERT( (reinterpret_cast<ptr_bits_t>(p_new) & (CRNLIB_MIN_ALLOC_ALIGNMENT - 1)) == 0 );
                p_final_block = p_new;
+            }
+            else
+            {
+               printf("WARNING: ::realloc() of size %u failed!\n", (uint)size);
             }
          }
 

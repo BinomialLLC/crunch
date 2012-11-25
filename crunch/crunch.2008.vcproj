@@ -351,6 +351,22 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\corpus_gen.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\corpus_gen.h"
+				>
+			</File>
+			<File
+				RelativePath=".\corpus_test.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\corpus_test.h"
+				>
+			</File>
+			<File
 				RelativePath=".\crunch.cpp"
 				>
 			</File>

@@ -77,6 +77,9 @@ namespace crnlib
       
       // Returns random between [l, h)
       int irand(int l, int h);
+
+      // Returns random between [l, h]
+      int irand_inclusive(int l, int h);
                   
       double gaussian(double mean, double stddev);
       

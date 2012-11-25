@@ -285,8 +285,8 @@ namespace crnlib
       }
 
 #if CRNLIB_CREATE_DEBUG_IMAGES
-      image_utils::save_to_file(dynamic_string(cVarArg, "color_endpoint_residuals_%u.tga", trial_index).get_ptr(), endpoint_residual_image);
-      image_utils::save_to_file(dynamic_string(cVarArg, "color_endpoints_%u.tga", trial_index).get_ptr(), endpoint_image);
+      image_utils::write_to_file(dynamic_string(cVarArg, "color_endpoint_residuals_%u.tga", trial_index).get_ptr(), endpoint_residual_image);
+      image_utils::write_to_file(dynamic_string(cVarArg, "color_endpoints_%u.tga", trial_index).get_ptr(), endpoint_image);
 #endif
 
       static_huffman_data_model residual_dm[2];
@@ -432,8 +432,8 @@ namespace crnlib
       }
 
 #if CRNLIB_CREATE_DEBUG_IMAGES
-      image_utils::save_to_file(dynamic_string(cVarArg, "alpha_endpoint_residuals_%u.tga", trial_index).get_ptr(), endpoint_residual_image);
-      image_utils::save_to_file(dynamic_string(cVarArg, "alpha_endpoints_%u.tga", trial_index).get_ptr(), endpoint_image);
+      image_utils::write_to_file(dynamic_string(cVarArg, "alpha_endpoint_residuals_%u.tga", trial_index).get_ptr(), endpoint_residual_image);
+      image_utils::write_to_file(dynamic_string(cVarArg, "alpha_endpoints_%u.tga", trial_index).get_ptr(), endpoint_image);
 #endif
 
       static_huffman_data_model residual_dm;
@@ -686,8 +686,8 @@ namespace crnlib
       }
 
 #if CRNLIB_CREATE_DEBUG_IMAGES
-      image_utils::save_to_file(dynamic_string(cVarArg, "selectors_%u_%u.tga", trial_index, max_selector_value).get_ptr(), selector_image);
-      image_utils::save_to_file(dynamic_string(cVarArg, "selector_residuals_%u_%u.tga", trial_index, max_selector_value).get_ptr(), residual_image);
+      image_utils::write_to_file(dynamic_string(cVarArg, "selectors_%u_%u.tga", trial_index, max_selector_value).get_ptr(), selector_image);
+      image_utils::write_to_file(dynamic_string(cVarArg, "selector_residuals_%u_%u.tga", trial_index, max_selector_value).get_ptr(), residual_image);
 #endif
 
       static_huffman_data_model residual_dm;
@@ -1065,7 +1065,7 @@ namespace crnlib
 
       uint mip_group = 0;
       uint chunk_index = 0;
-      uint mip_group_chunk_index = 0;
+      uint mip_group_chunk_index = 0; (void)mip_group_chunk_index;
       for (uint level_index = 0; level_index < m_pParams->m_levels; level_index++)
       {
          const uint width = math::maximum(1U, m_pParams->m_width >> level_index);
@@ -1342,6 +1342,11 @@ namespace crnlib
             params.m_perceptual = false;
             break;
          }
+         case cCRNFmtETC1:
+         {
+            console::warning("crn_comp::quantize_chunks: This class does not support ETC1");
+            return false;
+         }
          default:
          {
             return false;
@@ -1366,7 +1371,7 @@ namespace crnlib
 
          image_u8 img;
          dxt_hc::create_debug_image_from_chunks((m_pParams->m_width+7)>>3, (m_pParams->m_height+7)>>3, pixel_chunks, &m_hvq.get_chunk_encoding_vec(), img, true, -1);
-         image_utils::save_to_file("quantized_chunks.tga", img);
+         image_utils::write_to_file("quantized_chunks.tga", img);
       }
 #endif
 

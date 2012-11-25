@@ -34,7 +34,7 @@ namespace crnlib
       }
    }
    
-   bool dds_comp::create_dds_tex(dds_texture &dds_tex)
+   bool dds_comp::create_dds_tex(mipmapped_texture &dds_tex)
    {
       image_u8 images[cCRNMaxFaces][cCRNMaxLevels];
 
@@ -137,7 +137,7 @@ namespace crnlib
 
          if (!m_pQDXT_state)
          {
-            m_pQDXT_state = crnlib_new<dds_texture::qdxt_state>(m_task_pool);
+            m_pQDXT_state = crnlib_new<mipmapped_texture::qdxt_state>(m_task_pool);
                         
             if (params.m_pProgress_func)
             {

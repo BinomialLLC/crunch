@@ -3,6 +3,10 @@
 #pragma once
 #include "crn_dxt1.h"
 #include "crn_dxt5a.h"
+#include "crn_etc.h"
+#if CRNLIB_SUPPORT_ETC_A1
+#include "crn_etc_a1.h"
+#endif
 #include "crn_image.h"
 
 #define CRNLIB_SUPPORT_ATI_COMPRESS 0
@@ -34,7 +38,7 @@ namespace crnlib
       
       dxt_format get_format() const { return m_format; }
       
-      bool has_color() const { return (m_format == cDXT1) || (m_format == cDXT1A) || (m_format == cDXT3) || (m_format == cDXT5); }
+      bool has_color() const { return (m_format == cDXT1) || (m_format == cDXT1A) || (m_format == cDXT3) || (m_format == cDXT5) || (m_format == cETC1); }
       
       // Will be pretty slow if the image is DXT1, as this method scans for alpha blocks/selectors.
       bool has_alpha() const;
@@ -43,10 +47,12 @@ namespace crnlib
       { 
          cUnused = 0,
          
-         cColor, 
+         cColorDXT1,    // DXT1 color block
          
-         cAlpha3,
-         cAlpha5,
+         cAlphaDXT3,    // DXT3 alpha block (only)
+         cAlphaDXT5,    // DXT5 alpha block (only)
+
+         cColorETC1,    // ETC1 color block
       };
       
       element_type get_element_type(uint element_index) const { CRNLIB_ASSERT(element_index < m_num_elements_per_block); return m_element_type[element_index]; }
@@ -86,6 +92,7 @@ namespace crnlib
          {
             m_quality = cCRNDXTQualityUber;
             m_perceptual = true;
+            m_dithering = false;
             m_grayscale_sampling = false;
             m_use_both_block_types = true;
             m_endpoint_caching = true;
@@ -125,6 +132,7 @@ namespace crnlib
          crn_dxt_compressor_type m_compressor;
                            
          bool                    m_perceptual;
+         bool                    m_dithering;
          bool                    m_grayscale_sampling;
          bool                    m_use_both_block_types;
          bool                    m_endpoint_caching;
@@ -148,7 +156,7 @@ namespace crnlib
       
       void endian_swap();
       
-      uint get_num_elements() const { return m_elements.size(); }
+      uint get_total_elements() const { return m_elements.size(); }
                   
       const element_vec& get_element_vec() const   { return m_elements; }
             element_vec& get_element_vec()         { return m_elements; }
@@ -168,9 +176,19 @@ namespace crnlib
       void set_pixel(uint x, uint y, const color_quad_u8& c, bool perceptual = true);
       
       // get_block_pixels() only sets those components stored in the image!
-      void get_block_pixels(uint block_x, uint block_y, color_quad_u8* pPixels) const;
+      bool get_block_pixels(uint block_x, uint block_y, color_quad_u8* pPixels) const;
+
+      struct set_block_pixels_context
+      {
+         dxt1_endpoint_optimizer m_dxt1_optimizer;
+         dxt5_endpoint_optimizer m_dxt5_optimizer;
+         pack_etc1_block_context m_etc1_optimizer;
+#if CRNLIB_SUPPORT_ETC_A1
+         etc_a1::pack_etc1_block_context m_etc1_a1_optimizer;
+#endif
+      };
       
-      void set_block_pixels(uint block_x, uint block_y, const color_quad_u8* pPixels, const pack_params& p, dxt1_endpoint_optimizer& dxt1_optimizer, dxt5_endpoint_optimizer& dxt5_optimizer);
+      void set_block_pixels(uint block_x, uint block_y, const color_quad_u8* pPixels, const pack_params& p, set_block_pixels_context& context);
       void set_block_pixels(uint block_x, uint block_y, const color_quad_u8* pPixels, const pack_params& p);
       
       void get_block_endpoints(uint block_x, uint block_y, uint element_index, uint& packed_low_endpoint, uint& packed_high_endpoint) const;
@@ -181,11 +199,20 @@ namespace crnlib
       
       // pColors should point to a 16 entry array, to handle DXT3.
       // Returns the number of block colors: 3, 4, 6, 8, or 16.
-      uint get_block_colors(uint block_x, uint block_y, uint element_index, color_quad_u8* pColors);
+      uint get_block_colors(uint block_x, uint block_y, uint element_index, color_quad_u8* pColors, uint subblock_index = 0);
+            
+      uint get_subblock_index(uint x, uint y, uint element_index) const;
+      uint get_total_subblocks(uint element_index) const;
       
       uint get_selector(uint x, uint y, uint element_index) const;
       
       void change_dxt1_to_dxt1a();
+
+      bool can_flip(uint axis_index);
+
+      // Returns true if the texture can actually be flipped.
+      bool flip_x();
+      bool flip_y();
          
    private:
       element_vec       m_elements;
@@ -205,7 +232,7 @@ namespace crnlib
       int8              m_element_component_index[2];            
       element_type      m_element_type[2];
          
-      dxt_format        m_format;             // DXT1, 1A, 3, 5, N/3DC, or A
+      dxt_format        m_format;             // DXT1, 1A, 3, 5, N/3DC, or 5A
       
       bool init_internal(dxt_format fmt, uint width, uint height);
       void init_task(uint64 data, void* pData_ptr);
@@ -213,6 +240,9 @@ namespace crnlib
 #if CRNLIB_SUPPORT_ATI_COMPRESS   
       bool init_ati_compress(dxt_format fmt, const image_u8& img, const pack_params& p);
 #endif      
+
+      void flip_col(uint x);
+      void flip_row(uint y);
    };
 
 } // namespace crnlib

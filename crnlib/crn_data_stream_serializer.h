@@ -19,6 +19,8 @@ namespace crnlib
       data_stream* get_stream() const { return m_pStream; }
       void set_stream(data_stream* pStream) { m_pStream = pStream; }
 
+      const dynamic_string& get_name() const { return m_pStream ? m_pStream->get_name() : g_empty_dynamic_string; }
+
       bool get_error() { return m_pStream ? m_pStream->get_error() : false; }
       
       bool get_little_endian() const { return m_little_endian; }
@@ -32,6 +34,30 @@ namespace crnlib
       bool read(void* pBuf, uint len)
       {
          return m_pStream->read(pBuf, len) == len;
+      }
+      
+      // size = size of each element, count = number of elements, returns actual count of elements written
+      uint write(const void* pBuf, uint size, uint count)
+      {
+         uint actual_size = size * count;
+         if (!actual_size)
+            return 0;
+         uint n = m_pStream->write(pBuf, actual_size);
+         if (n == actual_size)
+            return count;
+         return n / size;
+      }
+
+      // size = size of each element, count = number of elements, returns actual count of elements read
+      uint read(void* pBuf, uint size, uint count)
+      {
+         uint actual_size = size * count;
+         if (!actual_size)
+            return 0;
+         uint n = m_pStream->read(pBuf, actual_size);
+         if (n == actual_size)
+            return count;
+         return n / size;
       }
       
       bool write_chars(const char* pBuf, uint len)
@@ -248,6 +274,16 @@ namespace crnlib
          }
          
          return true;
+      }
+
+      bool read_entire_file(crnlib::vector<uint8>& buf)
+      {
+         return m_pStream->read_array(buf);
+      }
+
+      bool write_entire_file(const crnlib::vector<uint8>& buf)
+      {
+         return m_pStream->write_array(buf);
       }
       
       // Got this idea from the Molly Rocket forums.

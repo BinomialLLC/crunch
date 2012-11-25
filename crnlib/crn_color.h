@@ -16,6 +16,17 @@ namespace crnlib
       };
    };
 
+   template<> struct color_quad_component_traits<int8>
+   {
+      enum
+      {
+         cSigned = true,
+         cFloat = false,
+         cMin = cINT8_MIN,
+         cMax = cINT8_MAX
+      };
+   };
+
    template<> struct color_quad_component_traits<int16>
    {
       enum
@@ -86,21 +97,22 @@ namespace crnlib
    class color_quad : public helpers::rel_ops<color_quad<component_type, parameter_type> >
    {
       template<typename T>
-      static inline T clamp(T v)
+      static inline parameter_type clamp(T v)
       {
+         parameter_type result = static_cast<parameter_type>(v);
          if (!component_traits::cFloat)
          {
             if (v < component_traits::cMin)
-               v = component_traits::cMin;
+               result = static_cast<parameter_type>(component_traits::cMin);
             else if (v > component_traits::cMax)
-               v = component_traits::cMax;
+               result = static_cast<parameter_type>(component_traits::cMax);
          }
-         return v;
+         return result;
       }
 
 #ifdef _MSC_VER
       template<>
-      static inline int clamp(int v)
+      static inline parameter_type clamp(int v)
       {
          if (!component_traits::cFloat)
          {
@@ -117,7 +129,7 @@ namespace crnlib
                   v = component_traits::cMax;
             }
          }
-         return v;
+         return static_cast<parameter_type>(v);
       }
 #endif
 
@@ -179,7 +191,7 @@ namespace crnlib
 
       template<typename other_component_type, typename other_parameter_type>
       inline color_quad(const color_quad<other_component_type, other_parameter_type>& other) :
-         r(clamp(other.r)), g(clamp(other.g)), b(clamp(other.b)), a(clamp(other.a))
+         r(static_cast<component_type>(clamp(other.r))), g(static_cast<component_type>(clamp(other.g))), b(static_cast<component_type>(clamp(other.b))), a(static_cast<component_type>(clamp(other.a)))
       {
       }
 
@@ -200,13 +212,21 @@ namespace crnlib
          return *this;
       }
 
+      inline color_quad& set_rgb(const color_quad& other)
+      {
+         r = other.r;
+         g = other.g;
+         b = other.b;
+         return *this;
+      }
+
       template<typename other_component_type, typename other_parameter_type>
       inline color_quad& operator=(const color_quad<other_component_type, other_parameter_type>& other)
       {
-         r = clamp(other.r);
-         g = clamp(other.g);
-         b = clamp(other.b);
-         a = clamp(other.a);
+         r = static_cast<component_type>(clamp(other.r));
+         g = static_cast<component_type>(clamp(other.g));
+         b = static_cast<component_type>(clamp(other.b));
+         a = static_cast<component_type>(clamp(other.a));
          return *this;
       }
 
@@ -519,6 +539,7 @@ namespace crnlib
    };
 
    typedef color_quad<uint8, int>      color_quad_u8;
+   typedef color_quad<int8, int>       color_quad_i8;
    typedef color_quad<int16, int>      color_quad_i16;
    typedef color_quad<uint16, int>     color_quad_u16;
    typedef color_quad<int32, int>      color_quad_i32;
@@ -633,7 +654,7 @@ namespace crnlib
       const int YR = 19595, YG = 38470, YB = 7471, CB_R = -11059, CB_G = -21709, CB_B = 32768, CR_R = 32768, CR_G = -27439, CR_B = -5329;
       // YCbCr->RGB constants, scaled by 2^16
       const int R_CR = 91881, B_CB = 116130, G_CR = -46802, G_CB = -22554;
-      
+
       inline int RGB_to_Y(const color_quad_u8& rgb)
       {
          const int r = rgb[0], g = rgb[1], b = rgb[2];
@@ -663,7 +684,7 @@ namespace crnlib
          rgb.b = clamp_component(y + ((B_CB * cb             + 32768) >> 16));
          rgb.a = 255;
       }
-      
+
       // Float RGB->YCbCr constants
       const float S = 1.0f/65536.0f;
       const float F_YR = S*YR, F_YG = S*YG, F_YB = S*YB, F_CB_R = S*CB_R, F_CB_G = S*CB_G, F_CB_B = S*CB_B, F_CR_R = S*CR_R, F_CR_G = S*CR_G, F_CR_B = S*CR_B;
@@ -689,6 +710,285 @@ namespace crnlib
       }
 
    } // namespace color
+
+   // This class purposely trades off speed for extremely flexibility. It can handle any component swizzle, any pixel type from 1-4 components and 1-32 bits/component,
+   // any pixel size between 1-16 bytes/pixel, any pixel stride, any color_quad data type (signed/unsigned/float 8/16/32 bits/component), and scaled/non-scaled components.
+   // On the downside, it's freaking slow.
+   class pixel_packer
+   {
+   public:
+      pixel_packer()
+      {
+         clear();
+      }
+
+      pixel_packer(uint num_comps, uint bits_per_comp, int pixel_stride = -1, bool reversed = false)
+      {
+         init(num_comps, bits_per_comp, pixel_stride, reversed);
+      }
+
+      pixel_packer(const char* pComp_map, int pixel_stride = -1, int force_comp_size = -1)
+      {
+         init(pComp_map, pixel_stride, force_comp_size);
+      }
+
+      void clear()
+      {
+         utils::zero_this(this);
+      }
+
+      inline bool is_valid() const { return m_pixel_stride > 0; }
+
+      inline uint get_pixel_stride() const { return m_pixel_stride; }
+      void set_pixel_stride(uint n) { m_pixel_stride = n; }
+
+      uint get_num_comps() const { return m_num_comps; }
+      uint get_comp_size(uint index) const { CRNLIB_ASSERT(index < 4); return m_comp_size[index]; }
+      uint get_comp_ofs(uint index) const { CRNLIB_ASSERT(index < 4); return m_comp_ofs[index]; }
+      uint get_comp_max(uint index) const { CRNLIB_ASSERT(index < 4); return m_comp_max[index]; }
+      bool get_rgb_is_luma() const { return m_rgb_is_luma; }
+
+      template<typename color_quad_type>
+      const void* unpack(const void* p, color_quad_type& color, bool rescale = true) const
+      {
+         const uint8* pSrc = static_cast<const uint8*>(p);
+
+         for (uint i = 0; i < 4; i++)
+         {
+            const uint comp_size = m_comp_size[i];
+            if (!comp_size)
+            {
+               if (color_quad_type::component_traits::cFloat)
+                  color[i] = static_cast< typename color_quad_type::parameter_t >((i == 3) ? 1 : 0);
+               else
+                  color[i] = static_cast< typename color_quad_type::parameter_t >((i == 3) ? color_quad_type::component_traits::cMax : 0);
+               continue;
+            }
+
+            uint n = 0, dst_bit_ofs = 0;
+            uint src_bit_ofs = m_comp_ofs[i];
+            while (dst_bit_ofs < comp_size)
+            {
+               const uint byte_bit_ofs = src_bit_ofs & 7;
+               n |= ((pSrc[src_bit_ofs >> 3] >> byte_bit_ofs) << dst_bit_ofs);
+
+               const uint bits_read = 8 - byte_bit_ofs;
+               src_bit_ofs += bits_read;
+               dst_bit_ofs += bits_read;
+            }
+
+            const uint32 mx = m_comp_max[i];
+            n &= mx;
+
+            const uint32 h = static_cast<uint32>(color_quad_type::component_traits::cMax);
+
+            if (color_quad_type::component_traits::cFloat)
+               color.set_component(i, static_cast<typename color_quad_type::parameter_t>(n));
+            else if (rescale)
+               color.set_component(i, static_cast<typename color_quad_type::parameter_t>( (static_cast<uint64>(n) * h + (mx >> 1U)) / mx ) );
+            else if (color_quad_type::component_traits::cSigned)
+               color.set_component(i, static_cast<typename color_quad_type::parameter_t>(math::minimum<uint32>(n, h)));
+            else
+               color.set_component(i, static_cast<typename color_quad_type::parameter_t>(n));
+         }
+
+         if (m_rgb_is_luma)
+         {
+            color[0] = color[1];
+            color[2] = color[1];
+         }
+
+         return pSrc + m_pixel_stride;
+      }
+
+      template<typename color_quad_type>
+      void* pack(const color_quad_type& color, void* p, bool rescale = true) const
+      {
+         uint8* pDst = static_cast<uint8*>(p);
+
+         for (uint i = 0; i < 4; i++)
+         {
+            const uint comp_size = m_comp_size[i];
+            if (!comp_size)
+               continue;
+
+            uint32 mx = m_comp_max[i];
+
+            uint32 n;
+            if (color_quad_type::component_traits::cFloat)
+            {
+               typename color_quad_type::parameter_t t = color[i];
+               if (t < 0.0f)
+                  n = 0;
+               else if (t > static_cast<typename color_quad_type::parameter_t>(mx))
+                  n = mx;
+               else
+                  n = math::minimum<uint32>(static_cast<uint32>(floor(t + .5f)), mx);
+            }
+            else if (rescale)
+            {
+               if (color_quad_type::component_traits::cSigned)
+                  n = math::maximum<int>(static_cast<int>(color[i]), 0);
+               else
+                  n = static_cast<uint32>(color[i]);
+
+               const uint32 h = static_cast<uint32>(color_quad_type::component_traits::cMax);
+               n = static_cast<uint32>((static_cast<uint64>(n) * mx + (h >> 1)) / h);
+            }
+            else
+            {
+               if (color_quad_type::component_traits::cSigned)
+                  n = math::minimum<uint32>(static_cast<uint32>(math::maximum<int>(static_cast<int>(color[i]), 0)), mx);
+               else
+                  n = math::minimum<uint32>(static_cast<uint32>(color[i]), mx);
+            }
+
+            uint src_bit_ofs = 0;
+            uint dst_bit_ofs = m_comp_ofs[i];
+            while (src_bit_ofs < comp_size)
+            {
+               const uint cur_byte_bit_ofs = (dst_bit_ofs & 7);
+               const uint cur_byte_bits = 8 - cur_byte_bit_ofs;
+
+               uint byte_val = pDst[dst_bit_ofs >> 3];
+               uint bit_mask = (mx << cur_byte_bit_ofs) & 0xFF;
+               byte_val &= ~bit_mask;
+               byte_val |= (n << cur_byte_bit_ofs);
+               pDst[dst_bit_ofs >> 3] = static_cast<uint8>(byte_val);
+
+               mx >>= cur_byte_bits;
+               n >>= cur_byte_bits;
+
+               dst_bit_ofs += cur_byte_bits;
+               src_bit_ofs += cur_byte_bits;
+            }
+         }
+
+         return pDst + m_pixel_stride;
+      }
+
+      bool init(uint num_comps, uint bits_per_comp, int pixel_stride = -1, bool reversed = false)
+      {
+         clear();
+
+         if ((num_comps < 1) || (num_comps > 4) || (bits_per_comp < 1) || (bits_per_comp > 32))
+         {
+            CRNLIB_ASSERT(0);
+            return false;
+         }
+
+         for (uint i = 0; i < num_comps; i++)
+         {
+            m_comp_size[i] = bits_per_comp;
+            m_comp_ofs[i] = i * bits_per_comp;
+            if (reversed)
+               m_comp_ofs[i] = ((num_comps - 1) * bits_per_comp) - m_comp_ofs[i];
+         }
+
+         for (uint i = 0; i < 4; i++)
+            m_comp_max[i] = static_cast<uint32>((1ULL << m_comp_size[i]) - 1ULL);
+
+         m_pixel_stride = (pixel_stride >= 0) ? pixel_stride : (num_comps * bits_per_comp + 7) / 8;
+
+         return true;
+      }
+
+      // Format examples:
+      // R16G16B16
+      // B5G6R5
+      // B5G5R5x1
+      // Y8A8
+      // A8R8G8B8
+      // First component is at LSB in memory. Assumes unsigned integer components, 1-32bits each.
+      bool init(const char* pComp_map, int pixel_stride = -1, int force_comp_size = -1)
+      {
+         clear();
+
+         uint cur_bit_ofs = 0;
+
+         while (*pComp_map)
+         {
+            char c = *pComp_map++;
+
+            int comp_index = -1;
+            if (c == 'R')
+               comp_index = 0;
+            else if (c == 'G')
+               comp_index = 1;
+            else if (c == 'B')
+               comp_index = 2;
+            else if (c == 'A')
+               comp_index = 3;
+            else if (c == 'Y')
+               comp_index = 4;
+            else if (c != 'x')
+               return false;
+
+            uint comp_size = 0;
+
+            uint n = *pComp_map;
+            if ((n >= '0') && (n <= '9'))
+            {
+               comp_size = n - '0';
+               pComp_map++;
+
+               n = *pComp_map;
+               if ((n >= '0') && (n <= '9'))
+               {
+                  comp_size = (comp_size * 10) + (n - '0');
+                  pComp_map++;
+               }
+            }
+
+            if (force_comp_size != -1)
+               comp_size = force_comp_size;
+
+            if ((!comp_size) || (comp_size > 32))
+               return false;
+
+            if (comp_index == 4)
+            {
+               if (m_comp_size[0] || m_comp_size[1] || m_comp_size[2])
+                  return false;
+
+               //m_comp_ofs[0] = m_comp_ofs[1] = m_comp_ofs[2] = cur_bit_ofs;
+               //m_comp_size[0] = m_comp_size[1] = m_comp_size[2] = comp_size;
+               m_comp_ofs[1] = cur_bit_ofs;
+               m_comp_size[1] = comp_size;
+               m_rgb_is_luma = true;
+               m_num_comps++;
+            }
+            else if (comp_index >= 0)
+            {
+               if (m_comp_size[comp_index])
+                  return false;
+
+               m_comp_ofs[comp_index] = cur_bit_ofs;
+               m_comp_size[comp_index] = comp_size;
+               m_num_comps++;
+            }
+
+            cur_bit_ofs += comp_size;
+         }
+
+         for (uint i = 0; i < 4; i++)
+            m_comp_max[i] = static_cast<uint32>((1ULL << m_comp_size[i]) - 1ULL);
+
+         if (pixel_stride >= 0)
+            m_pixel_stride = pixel_stride;
+         else
+            m_pixel_stride = (cur_bit_ofs + 7) / 8;
+         return true;
+      }
+
+   private:
+      uint m_pixel_stride;
+      uint m_num_comps;
+      uint m_comp_size[4];
+      uint m_comp_ofs[4];
+      uint m_comp_max[4];
+      bool m_rgb_is_luma;
+   };
 
 } // namespace crnlib
 
