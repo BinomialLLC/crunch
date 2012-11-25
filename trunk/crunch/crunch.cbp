@@ -24,6 +24,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-march=core2" />
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
@@ -40,6 +41,7 @@
 			<Add option="-fexceptions" />
 			<Add option="-Wno-unused-value" />
 			<Add option="-Wno-unused" />
+			<Add option="-fno-strict-aliasing" />
 			<Add directory="..\inc" />
 			<Add directory="..\crnlib" />
 		</Compiler>

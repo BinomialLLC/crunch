@@ -27,6 +27,7 @@
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
 				<Compiler>
+					<Add option="-march=core2" />
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
@@ -43,6 +44,7 @@
 			<Add option="-Wall" />
 			<Add option="-Wno-unused-value" />
 			<Add option="-Wno-unused" />
+			<Add option="-fno-strict-aliasing" />
 		</Compiler>
 		<Unit filename="crn_arealist.cpp" />
 		<Unit filename="crn_arealist.h" />
