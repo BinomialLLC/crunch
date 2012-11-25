@@ -325,7 +325,6 @@ namespace crnlib
 
    bool task_pool::queue_task(task_callback_func pFunc, uint64 data, void* pData_ptr)
    {
-      CRNLIB_ASSERT(m_num_threads);
       CRNLIB_ASSERT(pFunc);
 
       task tsk;
@@ -350,7 +349,6 @@ namespace crnlib
    // It's the object's responsibility to delete pObj within the execute_task() method, if needed!
    bool task_pool::queue_task(executable_task* pObj, uint64 data, void* pData_ptr)
    {
-      CRNLIB_ASSERT(m_num_threads);
       CRNLIB_ASSERT(pObj);
 
       task tsk;
@@ -426,4 +424,5 @@ namespace crnlib
       return 0;
    }
 
-}
+} // namespace crnlib
+

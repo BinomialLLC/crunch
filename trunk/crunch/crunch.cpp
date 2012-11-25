@@ -5,6 +5,8 @@
 // lifting is actually done by functions in the crnlib::texture_conversion namespace,
 // which are mostly wrappers over the public crnlib.h functions.
 // See Copyright Notice and license at the end of inc/crnlib.h
+//
+// Important: If compiling with gcc, be sure strict aliasing is disabled: -fno-strict-aliasing
 #include "crn_core.h"
 #include "crn_console.h"
 
@@ -20,6 +22,9 @@
 
 #define CRND_HEADER_FILE_ONLY
 #include "crn_decomp.h"
+
+#include "corpus_gen.h"
+#include "corpus_test.h"
 
 using namespace crnlib;
 
@@ -69,9 +74,10 @@ public:
       console::printf("crunch [options] -file filename");
       console::printf("-file filename - Required input filename, wildcards, multiple -file params OK.");
       console::printf("-file @list.txt - List of files to convert.");
-      console::printf("Supported source file formats: dds,crn,tga,bmp,png,jpg/jpeg,psd");
-      console::printf("Note: Some file format variants are unsupported, such as progressive JPEG's.");
+      console::printf("Supported source file formats: dds,ktx,crn,tga,bmp,png,jpg/jpeg,psd");
+      console::printf("Note: Some file format variants are unsupported.");
       console::printf("See the docs for stb_image.c: http://www.nothings.org/stb_image.c");
+      console::printf("Progressive JPEG files are supported, see: http://code.google.com/p/jpeg-compressor/");
 
       console::message("\nPath/file related parameters:");
       console::printf("-out filename - Output filename");
@@ -82,7 +88,7 @@ public:
       console::printf("-timestamp - Update only changed files");
       console::printf("-forcewrite - Overwrite read-only files");
       console::printf("-recreate - Recreate directory structure");
-      console::printf("-fileformat [dds,crn,tga,bmp] - Output file format, default=crn or dds");
+      console::printf("-fileformat [dds,ktx,crn,tga,bmp,png] - Output file format, default=crn or dds");
 
       console::message("\nModes:");
       console::printf("-compare - Compare input and output files (no output files are written).");
@@ -103,7 +109,9 @@ public:
       console::printf("-imagestats - Print various image qualilty statistics");
       console::printf("-mipstats - Print statistics for each mipmap, not just the top mip");
       console::printf("-lzmastats - Print size of output file compressed with LZMA codec");
-      console::printf("-split - Write faces/mip levels to multiple separate output files");
+      console::printf("-split - Write faces/mip levels to multiple separate output PNG files");
+      console::printf("-yflip - Always flip texture on Y axis before processing");
+      console::printf("-unflip - Unflip texture if read from source file as flipped");
 
       console::message("\nImage rescaling (mutually exclusive options)");
       console::printf("-rescale <int> <int> - Rescale image to specified resolution");
@@ -251,6 +259,9 @@ public:
          { "lzmastats", 0, false },
          { "split", 0, false },
          { "csvfile", 1, false },
+
+         { "yflip", 0, false },
+         { "unflip", 0, false },
       };
 
       crnlib::vector<command_line_params::param_desc> params;
@@ -398,6 +409,11 @@ private:
    {
       dynamic_string find_name(input_spec);
 
+      if ((find_name.get_len()) && (file_utils::does_dir_exist(find_name.get_ptr())))
+      {
+         file_utils::combine_path(find_name, find_name.get_ptr(), "*");
+      }
+
       if ((find_name.is_empty()) || (!file_utils::full_path(find_name)))
       {
          console::error("Invalid input filename: %s", find_name.get_ptr());
@@ -421,6 +437,7 @@ private:
          console::error("Failed finding files: %s", find_name.get_ptr());
          return false;
       }
+
       if (file_finder.get_files().empty())
       {
          console::warning("No files found: %s", find_name.get_ptr());
@@ -479,8 +496,12 @@ private:
                out_file_type = texture_file_types::cFormatBMP;
             else if (fmt == "dds")
                out_file_type = texture_file_types::cFormatDDS;
+            else if (fmt == "ktx")
+               out_file_type = texture_file_types::cFormatKTX;
             else if (fmt == "crn")
                out_file_type = texture_file_types::cFormatCRN;
+            else if (fmt == "png")
+               out_file_type = texture_file_types::cFormatPNG;
             else
             {
                console::error("Unsupported output file type: %s", fmt.get_ptr());
@@ -488,18 +509,25 @@ private:
             }
          }
 
+         // No explicit output format has been specified - try to determine something doable.
          if (!m_params.has_key("fileformat"))
          {
             if (m_params.has_key("split"))
             {
-               out_file_type = texture_file_types::cFormatTGA;
+               out_file_type = texture_file_types::cFormatPNG;
             }
             else
             {
                texture_file_types::format input_file_type = texture_file_types::determine_file_format(in_filename.get_ptr());
                if (input_file_type == texture_file_types::cFormatCRN)
                {
+                  // Automatically transcode CRN->DXTc and write to DDS files, unless the user specifies either the /fileformat or /split options.
                   out_file_type = texture_file_types::cFormatDDS;
+               }
+               else if (input_file_type == texture_file_types::cFormatKTX)
+               {
+                  // Default to converting KTX files to PNG
+                  out_file_type = texture_file_types::cFormatPNG;
                }
             }
          }
@@ -528,15 +556,22 @@ private:
          {
             dynamic_string out_dir(m_params.get_value_as_string_or_empty("outdir"));
 
-            if (m_params.get_value_as_bool("recreate"))
+            if (m_params.get_value_as_bool("recreate") && file_desc.m_rel.get_len())
             {
                file_utils::combine_path(out_dir, out_dir.get_ptr(), file_desc.m_rel.get_ptr());
             }
 
             if (out_dir.get_len())
-               out_filename.format("%s\\%s.%s", out_dir.get_ptr(), in_fname.get_ptr(), texture_file_types::get_extension(out_file_type));
+            {
+               if (file_utils::is_path_separator(out_dir.back()))
+                  out_filename.format("%s%s.%s", out_dir.get_ptr(), in_fname.get_ptr(), texture_file_types::get_extension(out_file_type));
+               else
+                  out_filename.format("%s\\%s.%s", out_dir.get_ptr(), in_fname.get_ptr(), texture_file_types::get_extension(out_file_type));
+            }
             else
+            {
                out_filename.format("%s.%s", in_fname.get_ptr(), texture_file_types::get_extension(out_file_type));
+            }
 
             if (m_params.get_value_as_bool("recreate"))
             {
@@ -621,7 +656,7 @@ private:
       return true;
    }
 
-   void print_texture_info(const char* pTex_desc, texture_conversion::convert_params& params, dds_texture& tex)
+   void print_texture_info(const char* pTex_desc, texture_conversion::convert_params& params, mipmapped_texture& tex)
    {
       console::info("%s: %ux%u, Levels: %u, Faces: %u, Format: %s",
          pTex_desc,
@@ -642,6 +677,7 @@ private:
       if (tex.get_comp_flags() & pixel_format_helpers::cCompFlagGrayscale) console::info("Grayscale ");
       if (tex.get_comp_flags() & pixel_format_helpers::cCompFlagNormalMap) console::info("NormalMap ");
       if (tex.get_comp_flags() & pixel_format_helpers::cCompFlagLumaChroma) console::info("LumaChroma ");
+      if (tex.is_flipped()) console::info("Flipped "); else console::info("Non-Flipped ");
       console::info("\n");
       console::enable_crlf();
    }
@@ -817,7 +853,7 @@ private:
       {
          const char *pKeyName = m_params.has_key("q") ? "q" : "quality";
 
-         if ((dst_file_format == texture_file_types::cFormatDDS) || (dst_file_format == texture_file_types::cFormatCRN))
+         if ((dst_file_format == texture_file_types::cFormatDDS) || (dst_file_format == texture_file_types::cFormatCRN) || (dst_file_format == texture_file_types::cFormatKTX))
          {
             uint32 i = m_params.get_value_as_int(pKeyName, 0, cDefaultCRNQualityLevel, 0, cCRNMaxQualityLevel);
 
@@ -825,7 +861,7 @@ private:
          }
          else
          {
-            console::error("/quality or /q option is only invalid when writing DDS or CRN files!");
+            console::error("/quality or /q option is only invalid when writing DDS, KTX or CRN files!");
             return false;
          }
       }
@@ -937,8 +973,8 @@ private:
          return cCSFailed;
       }
 
-      dds_texture src_tex;
-      if (!src_tex.load_from_file(pSrc_filename, src_file_format))
+      mipmapped_texture src_tex;
+      if (!src_tex.read_from_file(pSrc_filename, src_file_format))
       {
          if (src_tex.get_last_error().is_empty())
             console::error("Failed reading source file: \"%s\"", pSrc_filename);
@@ -982,12 +1018,14 @@ private:
             compressed_size = cmp_tex_bytes.size();
          }
       }
-      console::info("Source texture dimensions: %ux%u, Levels: %u, Faces: %u, Format: %s",
+      console::info("Source texture dimensions: %ux%u, Levels: %u, Faces: %u, Format: %s\nPacked Format: %u, Apparent Type: %s, Flipped: %u, Can Unflip Without Unpacking: %u",
          src_tex.get_width(),
          src_tex.get_height(),
          src_tex.get_num_levels(),
          src_tex.get_num_faces(),
-         pixel_format_helpers::get_pixel_format_string(src_tex.get_format()));
+         pixel_format_helpers::get_pixel_format_string(src_tex.get_format()),
+         src_tex.is_packed(), get_texture_type_desc(src_tex.determine_texture_type()),
+         src_tex.is_flipped(), src_tex.can_unflip_without_unpacking());
 
       console::info("Total pixels: %u, Source file size: " CRNLIB_UINT64_FORMAT_SPECIFIER ", Source file bits/pixel: %1.3f",
          total_in_pixels, input_file_size, (input_file_size * 8.0f) / total_in_pixels);
@@ -1054,9 +1092,9 @@ private:
          return cCSFailed;
       }
 
-      dds_texture src_tex;
+      mipmapped_texture src_tex;
 
-      if (!src_tex.load_from_file(pSrc_filename, src_file_format))
+      if (!src_tex.read_from_file(pSrc_filename, src_file_format))
       {
          if (src_tex.get_last_error().is_empty())
             console::error("Failed reading source file: \"%s\"", pSrc_filename);
@@ -1091,9 +1129,9 @@ private:
          return cCSFailed;
       }
 
-      dds_texture src_tex;
+      mipmapped_texture src_tex;
       tim.start();
-      if (!src_tex.load_from_file(pSrc_filename, src_file_format))
+      if (!src_tex.read_from_file(pSrc_filename, src_file_format))
       {
          if (src_tex.get_last_error().is_empty())
             console::error("Failed reading source file: \"%s\"", pSrc_filename);
@@ -1118,7 +1156,9 @@ private:
       params.m_dst_file_type = out_file_type;
       params.m_lzma_stats = m_params.has_key("lzmastats");
       params.m_write_mipmaps_to_multiple_files = m_params.has_key("split");
-      params.m_use_source_format = m_params.has_key("usesourceformat");
+      params.m_always_use_source_pixel_format = m_params.has_key("usesourceformat");
+      params.m_y_flip = m_params.has_key("yflip");
+      params.m_unflip = m_params.has_key("unflip");
 
       if ((!m_params.get_value_as_bool("noprogress")) && (!m_params.get_value_as_bool("quiet")))
          params.m_pProgress_func = progress_callback_func;
@@ -1233,12 +1273,25 @@ static int main_internal(int argc, char *argv[])
 
    print_title();
 
-   crunch converter;
-
    dynamic_string cmd_line;
-   get_command_line(cmd_line, argc, argv);
+   get_command_line_as_single_string(cmd_line, argc, argv);
 
-   bool status = converter.convert(cmd_line.get_ptr());
+   bool status = false;
+   if (check_for_option(argc, argv, "corpus_gen"))
+   {
+      corpus_gen generator;
+      status = generator.generate(cmd_line.get_ptr());
+   }
+   else if (check_for_option(argc, argv, "corpus_test"))
+   {
+      corpus_tester tester;
+      status = tester.test(cmd_line.get_ptr());
+   }
+   else
+   {
+      crunch converter;
+      status = converter.convert(cmd_line.get_ptr());
+   }
 
    colorized_console::deinit();
 
@@ -1246,7 +1299,6 @@ static int main_internal(int argc, char *argv[])
 
    return status ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
 
 static void pause_and_wait(void)
 {
@@ -1265,21 +1317,6 @@ static void pause_and_wait(void)
 
 int main(int argc, char *argv[])
 {
-#if 0
-   dynamic_string path, filename;
-   file_utils::split_path("/usr/local/blah/xxx.tga", path, filename);
-
-   dynamic_string combined;
-   file_utils::combine_path(combined, path.get_ptr(), filename.get_ptr());
-
-   find_files ff;
-   bool b = ff.find("/home/richg", "*", find_files::cFlagAllowFiles|find_files::cFlagAllowDirs|find_files::cFlagRecursive);
-   for (uint32 i = 0; i < ff.get_files().size(); i++)
-   {
-      printf("%s dir:%i\n", ff.get_files()[i].m_fullname.get_ptr(), ff.get_files()[i].m_is_dir);
-   }
-#endif
-
    int status = EXIT_FAILURE;
 
    if (crnlib_is_debugger_present())

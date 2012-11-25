@@ -1,5 +1,13 @@
 // File: crn_dxt1.cpp
 // See Copyright Notice and license at the end of inc/crnlib.h
+//
+// Notes:
+// This class is not optimized for performance on small blocks, unlike typical DXT1 compressors. It's optimized for scalability and quality:
+// - Very high quality in terms of avg. RMSE or Luma RMSE. Goal is to always match or beat every other known offline DXTc compressor: ATI_Compress, squish, NVidia texture tools, nvdxt.exe, etc.
+// - Reasonable scalability and stability with hundreds to many thousands of input colors (including inputs with many thousands of equal/nearly equal colors).
+// - Any quality optimization which results in even a tiny improvement is worth it -- as long as it's either a constant or linear slowdown.
+//   Tiny quality improvements can be extremely valuable in large clusters.
+// - Quality should scale well vs. CPU time cost, i.e. the more time you spend the higher the quality.
 #include "crn_core.h"
 #include "crn_dxt1.h"
 #include "crn_ryg_dxt.hpp"
@@ -9,6 +17,22 @@
 
 namespace crnlib
 {
+   //-----------------------------------------------------------------------------------------------------------------------------------------
+
+   static const int16 g_fast_probe_table[] = { 0, 1, 2, 3 };
+   static const uint cFastProbeTableSize = sizeof(g_fast_probe_table) / sizeof(g_fast_probe_table[0]);
+
+   static const int16 g_normal_probe_table[] = { 0, 1, 3, 5, 7 };
+   static const uint cNormalProbeTableSize = sizeof(g_normal_probe_table) / sizeof(g_normal_probe_table[0]);
+
+   static const int16 g_better_probe_table[] = { 0, 1, 2, 3, 5, 9, 15, 19, 27, 43 };
+   static const uint cBetterProbeTableSize = sizeof(g_better_probe_table) / sizeof(g_better_probe_table[0]);
+
+   static const int16 g_uber_probe_table[] = { 0, 1, 2, 3, 5, 7, 9, 10, 13, 15, 19, 27, 43, 59, 91 };
+   static const uint cUberProbeTableSize = sizeof(g_uber_probe_table) / sizeof(g_uber_probe_table[0]);
+
+   //-----------------------------------------------------------------------------------------------------------------------------------------
+
    dxt1_endpoint_optimizer::dxt1_endpoint_optimizer() :
       m_pParams(NULL),
       m_pResults(NULL),
@@ -75,6 +99,7 @@ namespace crnlib
       return true;
    }
 
+   // All selectors are equal. Try compressing as if it was solid, using the block's average color, using ryg's optimal single color compression tables.
    bool dxt1_endpoint_optimizer::try_average_block_as_solid()
    {
       uint64 tot_r = 0;
@@ -110,6 +135,7 @@ namespace crnlib
 
       if (m_pParams->m_quality == cCRNDXTQualityUber)
       {
+         // Try compressing as all-solid using the other (non-average) colors in the block in uber.
          for (uint i = 0; i < m_unique_colors.size(); i++)
          {
             uint r = m_unique_colors[i].m_color[0];
@@ -134,6 +160,7 @@ namespace crnlib
       return improved;
    }
 
+   // Block is solid, trying using ryg's optimal single color tables.
    bool dxt1_endpoint_optimizer::handle_solid_block()
    {
       int r = m_unique_colors[0].m_color.r;
@@ -195,6 +222,7 @@ namespace crnlib
       }
    }
 
+   // Compute PCA (principle axis, i.e. direction of largest variance) of input vectors.
    void dxt1_endpoint_optimizer::compute_pca(vec3F& axis, const vec3F_array& norm_colors, const vec3F& def)
    {
 #if 0
@@ -202,6 +230,7 @@ namespace crnlib
 
       CRNLIB_ASSERT(m_unique_colors.size() == norm_colors.size());
 
+      // Incremental PCA
       bool first = true;
       for (uint i = 0; i < norm_colors.size(); i++)
       {
@@ -272,6 +301,7 @@ namespace crnlib
       //vfr = hi[0] - lo[0];
       //vfg = hi[1] - lo[1];
       //vfb = hi[2] - lo[2];
+      // This is more stable.
       vfr = .9f;
       vfg = 1.0f;
       vfb = .7f;
@@ -325,6 +355,7 @@ namespace crnlib
    static const uint8 g_invTableAlpha[4] = { 1, 0, 2, 3 };
    static const uint8 g_invTableColor[4] = { 1, 0, 3, 2 };
 
+   // Computes a valid (encodable) DXT1 solution (low/high colors, swizzled selectors) from input.
    void dxt1_endpoint_optimizer::return_solution(results& res, const potential_solution& solution)
    {
       bool invert_selectors;
@@ -433,6 +464,7 @@ namespace crnlib
       return vec3F(c.r, c.g, c.b);
    }
 
+   // Per-component 1D endpoint optimization.
    void dxt1_endpoint_optimizer::optimize_endpoint_comps()
    {
       if ((m_best_solution.m_alpha_block) || (!m_best_solution.m_error))
@@ -583,6 +615,7 @@ namespace crnlib
       } // comp_index
    }
 
+   // Voxel adjacency delta coordinations.
    static const struct adjacent_coords
    {
       int8 x, y, z;
@@ -618,6 +651,7 @@ namespace crnlib
       {1, 1, 1}
    };
 
+   // Attempt to refine current solution's endpoints given the current selectors using least squares.
    bool dxt1_endpoint_optimizer::refine_solution(int refinement_level)
    {
       CRNLIB_ASSERT(m_best_solution.m_valid);
@@ -694,11 +728,15 @@ namespace crnlib
       }
       else if (refinement_level == 1)
       {
+         // Try exploring the local lattice neighbors of the least squares optimized result.
          color_quad_u8 e[2];
+
+         e[0].clear();
          e[0][0] = (uint8)math::clamp<int>(static_cast<int>((At1_r*yy - At2_r*xy)*frb+0.5f),0,31);
          e[0][1] = (uint8)math::clamp<int>(static_cast<int>((At1_g*yy - At2_g*xy)*fg +0.5f),0,63);
          e[0][2] = (uint8)math::clamp<int>(static_cast<int>((At1_b*yy - At2_b*xy)*frb+0.5f),0,31);
 
+         e[1].clear();
          e[1][0] = (uint8)math::clamp<int>(static_cast<int>((At2_r*xx - At1_r*xy)*frb+0.5f),0,31);
          e[1][1] = (uint8)math::clamp<int>(static_cast<int>((At2_g*xx - At1_g*xy)*fg +0.5f),0,63);
          e[1][2] = (uint8)math::clamp<int>(static_cast<int>((At2_b*xx - At1_b*xy)*frb+0.5f),0,31);
@@ -737,11 +775,14 @@ namespace crnlib
       }
       else
       {
+         // Try even harder to explore the local lattice neighbors of the least squares optimized result.
          color_quad_u8 e[2];
+         e[0].clear();
          e[0][0] = (uint8)math::clamp<int>(static_cast<int>((At1_r*yy - At2_r*xy)*frb+0.5f),0,31);
          e[0][1] = (uint8)math::clamp<int>(static_cast<int>((At1_g*yy - At2_g*xy)*fg +0.5f),0,63);
          e[0][2] = (uint8)math::clamp<int>(static_cast<int>((At1_b*yy - At2_b*xy)*frb+0.5f),0,31);
 
+         e[1].clear();
          e[1][0] = (uint8)math::clamp<int>(static_cast<int>((At2_r*xx - At1_r*xy)*frb+0.5f),0,31);
          e[1][1] = (uint8)math::clamp<int>(static_cast<int>((At2_g*xx - At1_g*xy)*fg +0.5f),0,63);
          e[1][2] = (uint8)math::clamp<int>(static_cast<int>((At2_b*xx - At1_b*xy)*frb+0.5f),0,31);
@@ -790,63 +831,7 @@ namespace crnlib
 
    //-----------------------------------------------------------------------------------------------------------------------------------------
 
-   static int16 g_fast_probe_table[] =
-   {
-      0,
-      1,
-      2,
-      3
-   };
-   const uint cFastProbeTableSize = sizeof(g_fast_probe_table) / sizeof(g_fast_probe_table[0]);
-
-   static int16 g_normal_probe_table[] =
-   {
-      0,
-      1,
-      3,
-      5,
-      7
-   };
-   const uint cNormalProbeTableSize = sizeof(g_normal_probe_table) / sizeof(g_normal_probe_table[0]);
-
-   static int16 g_better_probe_table[] =
-   {
-      0,
-      1,
-      2,
-      3,
-
-      5,
-      9,
-      15,
-      19,
-
-      27,
-      43
-   };
-   const uint cBetterProbeTableSize = sizeof(g_better_probe_table) / sizeof(g_better_probe_table[0]);
-
-   static int16 g_uber_probe_table[] =
-   {
-      0,
-      1,
-      2,
-      3,
-      5,
-      7,
-      9,
-      10,
-      13,
-      15,
-      19,
-      27,
-      43,
-      59,
-      91
-   };
-
-   const uint cUberProbeTableSize = sizeof(g_uber_probe_table) / sizeof(g_uber_probe_table[0]);
-
+   // Primary endpoint optimization entrypoint.
    bool dxt1_endpoint_optimizer::optimize_endpoints(vec3F& low_color, vec3F& high_color)
    {
       vec3F orig_low_color(low_color);
@@ -855,10 +840,11 @@ namespace crnlib
       m_trial_solution.clear();
 
       uint num_passes;
-      int16* pProbe_table = g_uber_probe_table;
+      const int16* pProbe_table = g_uber_probe_table;
       uint probe_range;
       float dist_per_trial = .015625f;
 
+      // How many probes, and the distance between each probe depends on the quality level.
       switch (m_pParams->m_quality)
       {
          case cCRNDXTQualitySuperFast:
@@ -895,6 +881,7 @@ namespace crnlib
 
       if (m_pParams->m_endpoint_caching)
       {
+         // Try the previous X winning endpoints. This may not give us optimal results, but it may increase the probability of early outs while evaluating potential solutions.
          const uint num_prev_results = math::minimum<uint>(cMaxPrevResults, m_num_prev_results);
          for (uint i = 0; i < num_prev_results; i++)
          {
@@ -909,6 +896,7 @@ namespace crnlib
 
          if (!m_best_solution.m_error)
          {
+            // Got lucky - one of the previous endpoints is optimal.
             return_solution(*m_pResults, m_best_solution);
             return true;
          }
@@ -949,6 +937,12 @@ namespace crnlib
 
       for (uint pass = 0; pass < num_passes; pass++)
       {
+         // Now separately sweep or probe the low and high colors along the principle axis, both positively and negatively.
+         // This results in two arrays of candidate low/high endpoints. Every unique combination of candidate endpoints is tried as a potential solution.
+         // In higher quality modes, the various nearby lattice neighbors of each candidate endpoint are also explored, which allows the current solution to "wobble" or "migrate"
+         // to areas with lower error.
+         // This entire process can be repeated up to X times (depending on the quality level) until a local minimum is established.
+         // This method is very stable and scalable. It could be implemented more elegantly, but I'm now very cautious of touching this code.
          if (pass)
          {
             low_color = unpack_to_vec3F_raw(m_best_solution.m_coords.m_low_color);
@@ -959,6 +953,7 @@ namespace crnlib
          if (!prev_best_error)
             break;
 
+         // Sweep low endpoint along principle axis, record positions
          int prev_packed_color[2] = { -1, -1 };
          uint num_low_trials = 0;
          vec3F initial_probe_low_color(low_color + vec3F(.5f));
@@ -987,6 +982,7 @@ namespace crnlib
          prev_packed_color[0] = -1;
          prev_packed_color[1] = -1;
 
+         // Sweep high endpoint along principle axis, record positions
          uint num_high_trials = 0;
          vec3F initial_probe_high_color(high_color + vec3F(.5f));
          for (uint i = 0; i < probe_range; i++)
@@ -1011,6 +1007,7 @@ namespace crnlib
             }
          }
 
+         // Now try all unique combinations.
          for (uint i = 0; i < num_low_trials; i++)
          {
             for (uint j = 0; j < num_high_trials; j++)
@@ -1028,6 +1025,7 @@ namespace crnlib
 
          if (m_pParams->m_quality >= cCRNDXTQualityNormal)
          {
+            // Generate new candidates by exploring the low color's direct lattice neighbors
             color_quad_u8 lc(dxt1_block::unpack_color(m_best_solution.m_coords.m_low_color, false));
 
             for (int i = 0; i < 26; i++)
@@ -1051,6 +1049,7 @@ namespace crnlib
 
             if (m_pParams->m_quality == cCRNDXTQualityUber)
             {
+               // Generate new candidates by exploring the low color's direct lattice neighbors - this time, explore much further separately on each axis.
                lc = dxt1_block::unpack_color(m_best_solution.m_coords.m_low_color, false);
 
                for (int a = 0; a < 3; a++)
@@ -1075,6 +1074,7 @@ namespace crnlib
                }
             }
 
+            // Generate new candidates by exploring the high color's direct lattice neighbors
             color_quad_u8 hc(dxt1_block::unpack_color(m_best_solution.m_coords.m_high_color, false));
 
             for (int i = 0; i < 26; i++)
@@ -1098,6 +1098,7 @@ namespace crnlib
 
             if (m_pParams->m_quality == cCRNDXTQualityUber)
             {
+               // Generate new candidates by exploring the high color's direct lattice neighbors - this time, explore much further separately on each axis.
                hc = dxt1_block::unpack_color(m_best_solution.m_coords.m_high_color, false);
 
                for (int a = 0; a < 3; a++)
@@ -1127,7 +1128,10 @@ namespace crnlib
             break;
 
          if (m_pParams->m_quality >= cCRNDXTQualityUber)
+         {
+            // Attempt to refine current solution's endpoints given the current selectors using least squares.
             refine_solution(1);
+         }
       }
 
       if (m_pParams->m_quality >= cCRNDXTQualityNormal)
@@ -1136,16 +1140,26 @@ namespace crnlib
          {
             bool choose_solid_block = false;
             if (m_best_solution.are_selectors_all_equal())
+            {
+               // All selectors equal - try various solid-block optimizations
                choose_solid_block = try_average_block_as_solid();
+            }
 
             if ((!choose_solid_block) && (m_pParams->m_quality == cCRNDXTQualityUber))
+            {
+               // Per-component 1D endpoint optimization.
                optimize_endpoint_comps();
+            }
          }
 
          if (m_pParams->m_quality == cCRNDXTQualityUber)
          {
             if (m_best_solution.m_error)
+            {
+               // The pixels may have already been DXTc compressed by another compressor.
+               // It's usually possible to recover the endpoints used to previously pack the block.
                try_combinatorial_encoding();
+            }
          }
       }
 
@@ -1153,6 +1167,7 @@ namespace crnlib
 
       if (m_pParams->m_endpoint_caching)
       {
+         // Remember result for later reruse.
          m_prev_results[m_num_prev_results & (cMaxPrevResults - 1)] = m_best_solution.m_coords;
          m_num_prev_results++;
       }
@@ -1173,6 +1188,8 @@ namespace crnlib
 
       if (m_perceptual)
       {
+         // Compute RGB weighting for use in perceptual mode.
+         // The more saturated the block, the more the weights deviate from (1,1,1).
          float ave_redness = 0;
          float ave_blueness = 0;
          float ave_l = 0;
@@ -1224,6 +1241,8 @@ namespace crnlib
          im.transpose_in_place();
          m_principle_axis = m_principle_axis * im;
 #else
+         // Purposely scale the components of the principle axis by the perceptual weighting.
+         // There's probably a cleaner way to go about this, but it works (more competitive in perceptual mode against nvdxt.exe or ATI_Compress).
          m_principle_axis[0] /= perceptual_weights[0];
          m_principle_axis[1] /= perceptual_weights[1];
          m_principle_axis[2] /= perceptual_weights[2];
@@ -1232,6 +1251,7 @@ namespace crnlib
 
          if (num_passes > 1)
          {
+            // Check for obviously wild principle axes and try to compensate by backing off the component weightings.
             if (fabs(m_principle_axis[0]) >= .795f)
                perceptual_weights.set(.424f, .6f, .072f);
             else if (fabs(m_principle_axis[2]) >= .795f)
@@ -1241,6 +1261,7 @@ namespace crnlib
          }
       }
 
+      // Find bounds of projection onto (potentially skewed) principle axis.
       float l = 1e+9;
       float h = -1e+9;
 
@@ -1256,6 +1277,7 @@ namespace crnlib
 
       if (!low_color.is_within_bounds(0.0f, 1.0f))
       {
+         // Low color is outside the lattice, so bring it back in by casting a ray.
          vec3F coord;
          float t;
          aabb3F bounds(vec3F(0.0f), vec3F(1.0f));
@@ -1266,6 +1288,7 @@ namespace crnlib
 
       if (!high_color.is_within_bounds(0.0f, 1.0f))
       {
+         // High color is outside the lattice, so bring it back in by casting a ray.
          vec3F coord;
          float t;
          aabb3F bounds(vec3F(0.0f), vec3F(1.0f));
@@ -1274,6 +1297,7 @@ namespace crnlib
             high_color = coord;
       }
 
+      // Now optimize the endpoints using the projection bounds on the (potentially skewed) principle axis as a starting point.
       if (!optimize_endpoints(low_color, high_color))
          return false;
 
@@ -1286,6 +1310,7 @@ namespace crnlib
       return true;
    }
 
+   // Tries quantizing the block to 4 colors using vanilla LBG. It tries all combinations of the quantized results as potential endpoints.
    bool dxt1_endpoint_optimizer::try_median4(const vec3F& low_color, const vec3F& high_color)
    {
       vec3F means[4];
@@ -1408,6 +1433,8 @@ namespace crnlib
       return improved;
    }
 
+   // Given candidate low/high endpoints, find the optimal selectors for 3 and 4 color blocks, compute the resulting error,
+   // and use the candidate if it results in less error than the best found result so far.
    bool dxt1_endpoint_optimizer::evaluate_solution(
       const dxt1_solution_coordinates& coords,
       bool early_out,
@@ -1428,6 +1455,7 @@ namespace crnlib
 
       CRNLIB_ASSERT(m_trial_solution.m_valid);
 
+      // Caller has requested all considered candidate solutions for later analysis.
       m_pSolutions->resize(m_pSolutions->size() + 1);
       solution& new_solution = m_pSolutions->back();
       new_solution.m_selectors.resize(m_pParams->m_num_pixels);
@@ -1843,6 +1871,8 @@ namespace crnlib
       return unique_color(res, 1);
    }
 
+   // The block may have been already compressed using another DXTc compressor, such as squish, ATI_Compress, ryg_dxt, etc.
+   // Attempt to recover the endpoints used by that block compressor.
    void dxt1_endpoint_optimizer::try_combinatorial_encoding()
    {
       if ((m_unique_colors.size() < 2) || (m_unique_colors.size() > 4))
@@ -1954,6 +1984,8 @@ namespace crnlib
       return;
    }
 
+   // The fourth (transparent) color in 3 color "transparent" blocks is black, which can be optionally exploited for small gains in DXT1 mode if the caller
+   // doesn't actually use alpha. (But not in DXT5 mode, because 3-color blocks aren't permitted by GPU's for DXT5.)
    bool dxt1_endpoint_optimizer::try_alpha_as_black_optimization()
    {
       const params*  pOrig_params = m_pParams;
@@ -2077,6 +2109,7 @@ namespace crnlib
       return true;
    }
 
+   // Build array of unique colors and their weights.
    void dxt1_endpoint_optimizer::find_unique_colors()
    {
       m_has_transparent_pixels = false;

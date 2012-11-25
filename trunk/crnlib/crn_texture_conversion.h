@@ -2,7 +2,7 @@
 // See Copyright Notice and license at the end of inc/crnlib.h
 #pragma once
 #include "crn_dxt_image.h"
-#include "crn_dds_texture.h"
+#include "crn_mipmapped_texture.h"
 #include "crn_rect.h"
 #include "crn_lzma_codec.h"
 
@@ -18,7 +18,7 @@ namespace crnlib
          bool init(
             const char* pSrc_filename,
             const char* pDst_filename,
-            dds_texture& src_tex,
+            mipmapped_texture& src_tex,
             texture_file_types::format dst_file_type,
             bool lzma_stats);
 
@@ -26,12 +26,12 @@ namespace crnlib
 
          void clear();
 
-         dynamic_string            m_src_filename;
-         dynamic_string            m_dst_filename;
+         dynamic_string             m_src_filename;
+         dynamic_string             m_dst_filename;
          texture_file_types::format m_dst_file_type;
 
-         dds_texture*               m_pInput_tex;
-         dds_texture                m_output_tex;
+         mipmapped_texture*               m_pInput_tex;
+         mipmapped_texture                m_output_tex;
 
          uint64                     m_input_file_size;
          uint                       m_total_input_pixels;
@@ -53,12 +53,14 @@ namespace crnlib
             m_pProgress_func(NULL),
             m_pProgress_user_data(NULL),
             m_pIntermediate_texture(NULL),
+            m_y_flip(false),
+            m_unflip(false),
+            m_always_use_source_pixel_format(false),
             m_write_mipmaps_to_multiple_files(false),
             m_quick(false),
             m_debugging(false),
             m_param_debugging(false),
             m_no_stats(false),
-            m_use_source_format(false),
             m_lzma_stats(false),
             m_status(false),
             m_canceled(false)
@@ -73,11 +75,11 @@ namespace crnlib
          void print();
 
          // Input parameters
-         dds_texture*                  m_pInput_texture;
+         mipmapped_texture*                  m_pInput_texture;
 
          texture_type                  m_texture_type;
 
-         dynamic_string               m_dst_filename;
+         dynamic_string                m_dst_filename;
          texture_file_types::format    m_dst_file_type;
          pixel_format                  m_dst_format;
 
@@ -89,15 +91,17 @@ namespace crnlib
          void*                         m_pProgress_user_data;
 
          // Return parameters
-         dds_texture*                  m_pIntermediate_texture;
-         mutable dynamic_string       m_error_message;
+         mipmapped_texture*                  m_pIntermediate_texture;
+         mutable dynamic_string        m_error_message;
 
+         bool                          m_y_flip;
+         bool                          m_unflip;
+         bool                          m_always_use_source_pixel_format;
          bool                          m_write_mipmaps_to_multiple_files;
          bool                          m_quick;
          bool                          m_debugging;
          bool                          m_param_debugging;
          bool                          m_no_stats;
-         bool                          m_use_source_format;
 
          bool                          m_lzma_stats;
          mutable bool                  m_status;

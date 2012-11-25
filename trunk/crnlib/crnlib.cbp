@@ -70,8 +70,6 @@
 		<Unit filename="crn_data_stream_serializer.h" />
 		<Unit filename="crn_dds_comp.cpp" />
 		<Unit filename="crn_dds_comp.h" />
-		<Unit filename="crn_dds_texture.cpp" />
-		<Unit filename="crn_dds_texture.h" />
 		<Unit filename="crn_decomp.cpp" />
 		<Unit filename="crn_dxt.cpp" />
 		<Unit filename="crn_dxt.h" />
@@ -92,6 +90,8 @@
 		<Unit filename="crn_dynamic_stream.h" />
 		<Unit filename="crn_dynamic_string.cpp" />
 		<Unit filename="crn_dynamic_string.h" />
+		<Unit filename="crn_etc.cpp" />
+		<Unit filename="crn_etc.h" />
 		<Unit filename="crn_file_utils.cpp" />
 		<Unit filename="crn_file_utils.h" />
 		<Unit filename="crn_find_files.cpp" />
@@ -108,6 +108,12 @@
 		<Unit filename="crn_image_utils.cpp" />
 		<Unit filename="crn_image_utils.h" />
 		<Unit filename="crn_intersect.h" />
+		<Unit filename="crn_jpgd.cpp" />
+		<Unit filename="crn_jpgd.h" />
+		<Unit filename="crn_jpge.cpp" />
+		<Unit filename="crn_jpge.h" />
+		<Unit filename="crn_ktx_texture.cpp" />
+		<Unit filename="crn_ktx_texture.h" />
 		<Unit filename="crn_lzma_codec.cpp" />
 		<Unit filename="crn_lzma_codec.h" />
 		<Unit filename="crn_math.cpp" />
@@ -115,6 +121,10 @@
 		<Unit filename="crn_matrix.h" />
 		<Unit filename="crn_mem.cpp" />
 		<Unit filename="crn_mem.h" />
+		<Unit filename="crn_miniz.cpp" />
+		<Unit filename="crn_miniz.h" />
+		<Unit filename="crn_mipmapped_texture.cpp" />
+		<Unit filename="crn_mipmapped_texture.h" />
 		<Unit filename="crn_mutex.h" />
 		<Unit filename="crn_packed_uint.h" />
 		<Unit filename="crn_pixel_format.cpp" />
@@ -135,6 +145,8 @@
 		<Unit filename="crn_resample_filters.h" />
 		<Unit filename="crn_resampler.cpp" />
 		<Unit filename="crn_resampler.h" />
+		<Unit filename="crn_rg_etc1.cpp" />
+		<Unit filename="crn_rg_etc1.h" />
 		<Unit filename="crn_ryg_dxt.cpp" />
 		<Unit filename="crn_ryg_dxt.hpp" />
 		<Unit filename="crn_ryg_types.hpp" />
@@ -173,6 +185,7 @@
 		<Unit filename="crn_vec_interval.h" />
 		<Unit filename="crn_vector.cpp" />
 		<Unit filename="crn_vector.h" />
+		<Unit filename="crn_vector2d.h" />
 		<Unit filename="crn_winhdr.h" />
 		<Unit filename="crn_zeng.cpp" />
 		<Unit filename="crn_zeng.h" />

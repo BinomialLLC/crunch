@@ -22,13 +22,14 @@ namespace crnlib
       PIXEL_FMT_DXN                   = CRNLIB_PIXEL_FMT_FOURCC('A', '2', 'X', 'Y'), // DXN_XY
       PIXEL_FMT_DXT5A                 = CRNLIB_PIXEL_FMT_FOURCC('A', 'T', 'I', '1'), // ATI1N, http://developer.amd.com/media/gpu_assets/Radeon_X1x00_Programming_Guide.pdf
 
-      // Non-standard, crnlib-specific pixel formats (some of these are supported by ATI's compressonator)
+      // Non-standard, crnlib-specific pixel formats (some of these are supported by ATI's Compressonator)
       PIXEL_FMT_DXT5_CCxY             = CRNLIB_PIXEL_FMT_FOURCC('C', 'C', 'x', 'Y'),
       PIXEL_FMT_DXT5_xGxR             = CRNLIB_PIXEL_FMT_FOURCC('x', 'G', 'x', 'R'),
       PIXEL_FMT_DXT5_xGBR             = CRNLIB_PIXEL_FMT_FOURCC('x', 'G', 'B', 'R'),
       PIXEL_FMT_DXT5_AGBR             = CRNLIB_PIXEL_FMT_FOURCC('A', 'G', 'B', 'R'),
 
       PIXEL_FMT_DXT1A                 = CRNLIB_PIXEL_FMT_FOURCC('D', 'X', '1', 'A'),
+      PIXEL_FMT_ETC1                  = CRNLIB_PIXEL_FMT_FOURCC('E', 'T', 'C', '1'),
 
       PIXEL_FMT_R8G8B8                = CRNLIB_PIXEL_FMT_FOURCC('R', 'G', 'B', 'x'),
       PIXEL_FMT_L8                    = CRNLIB_PIXEL_FMT_FOURCC('L', 'x', 'x', 'x'),
@@ -56,7 +57,7 @@ namespace crnlib
       crn_uint32 dwSize;
       crn_uint32 dwFlags;
       crn_uint32 dwFourCC;
-      crn_uint32 dwRGBBitCount;     // ATI compressonator and crnlib sometimes place a FOURCC code here
+      crn_uint32 dwRGBBitCount;     // ATI compressonator and crnlib will place a FOURCC code here for swizzled/cooked DXTn formats
       crn_uint32 dwRBitMask;
       crn_uint32 dwGBitMask;
       crn_uint32 dwBBitMask;
@@ -121,7 +122,7 @@ namespace crnlib
    const crn_uint32 DDSD_FVF                    = 0x00200000;
    const crn_uint32 DDSD_SRCVBHANDLE            = 0x00400000;
    const crn_uint32 DDSD_DEPTH                  = 0x00800000;
-
+   
    const crn_uint32 DDSD_ALL                    = 0x00fff9ee;
 
    const crn_uint32 DDPF_ALPHAPIXELS            = 0x00000001;

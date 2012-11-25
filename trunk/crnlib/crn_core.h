@@ -12,7 +12,7 @@
 #if defined(WIN32) && !defined(CRNLIB_ANSI_CPLUSPLUS)
    // MSVC or MinGW, x86 or x64, Win32 API's for threading and Win32 Interlocked API's or GCC built-ins for atomic ops.
    #ifdef NDEBUG
-      // Ensure checked iterators are disabled.
+      // Ensure checked iterators are disabled. Note: Be sure anything else that links against this lib also #define's this stuff, or remove this crap!
       #define _SECURE_SCL 0
       #define _HAS_ITERATOR_DEBUGGING 0
    #endif

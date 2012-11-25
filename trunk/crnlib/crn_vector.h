@@ -138,6 +138,7 @@ namespace crnlib
       inline const   T* get_ptr() const   { return m_p; }
       inline         T* get_ptr()         { return m_p; }
 
+      // clear() sets the container to empty, then frees the allocated block.
       inline void clear()
       {
          if (m_p)
@@ -149,7 +150,7 @@ namespace crnlib
             m_capacity = 0;
          }
       }
-
+      
       inline void clear_no_destruction()
       {
          if (m_p)
@@ -181,6 +182,7 @@ namespace crnlib
          return increase_capacity(new_capacity, true, true);
       }
 
+      // resize(0) sets the container to empty, but does not free the allocated block.
       inline void resize(uint new_size, bool grow_hint = false)
       {
          if (m_size != new_size)
@@ -220,6 +222,16 @@ namespace crnlib
          }
 
          return true;
+      }
+
+      // If size >= capacity/2, reset() sets the container's size to 0 but doesn't free the allocated block (because the container may be similarly loaded in the future).
+      // Otherwise it blows away the allocated block. See http://www.codercorner.com/blog/?p=494
+      inline void reset()
+      {
+         if (m_size >= (m_capacity >> 1))
+            resize(0);
+         else
+            clear();
       }
 
       inline T* enlarge(uint i)
@@ -364,17 +376,15 @@ namespace crnlib
          
          const T* pSrc = m_p + start + n;
 
-         if ((CRNLIB_IS_BITWISE_COPYABLE(T)) && (!CRNLIB_IS_BITWISE_MOVABLE(T)))
+         if (CRNLIB_IS_BITWISE_COPYABLE_OR_MOVABLE(T))
          {
-            // Type is bitwise copyable, so there's no need to destruct the overwritten objects.
-            // Copy "down" the objects to preserve, filling in the empty slots.
-            memmove(pDst, pSrc, num_to_move * sizeof(T));
-         }
-         else if (CRNLIB_IS_BITWISE_MOVABLE(T))
-         {
-            // Type is bitwise movable, which means we can move them around but they still may need to be destructed.
-            // First destroy the erased objects.
-            scalar_type<T>::destruct_array(pDst, n);
+            // This test is overly cautious.
+            if ((!CRNLIB_IS_BITWISE_COPYABLE(T)) || (CRNLIB_HAS_DESTRUCTOR(T)))
+            {
+               // Type has been marked explictly as bitwise movable, which means we can move them around but they may need to be destructed.
+               // First destroy the erased objects.
+               scalar_type<T>::destruct_array(pDst, n);
+            }
 
             // Copy "down" the objects to preserve, filling in the empty slots.
             memmove(pDst, pSrc, num_to_move * sizeof(T));
@@ -601,6 +611,7 @@ namespace crnlib
          }
       }
 
+      // Caller assumes ownership of the heap block associated with the container. Container is cleared.
       inline void *assume_ownership()
       {
          T* p = m_p;
@@ -608,6 +619,45 @@ namespace crnlib
          m_size = 0;
          m_capacity = 0;
          return p;
+      }
+
+      // Caller is granting ownership of the indicated heap block.
+      // Block must have size constructed elements, and have enough room for capacity elements.
+      inline bool grant_ownership(T* p, uint size, uint capacity)
+      {
+         // To to prevent the caller from obviously shooting themselves in the foot.
+         if (((p + capacity) > m_p) && (p < (m_p + m_capacity)))
+         {
+            // Can grant ownership of a block inside the container itself!
+            CRNLIB_ASSERT(0);
+            return false;
+         }
+         
+         if (size > capacity)
+         {
+            CRNLIB_ASSERT(0);
+            return false;
+         }
+
+         if (!p)
+         {
+            if (capacity)
+            {
+               CRNLIB_ASSERT(0);
+               return false;
+            }
+         }
+         else if (!capacity)
+         {
+            CRNLIB_ASSERT(0);
+            return false;
+         }
+         
+         clear();
+         m_p = p;
+         m_size = size;
+         m_capacity = capacity;
+         return true;
       }
 
    private:
@@ -638,9 +688,11 @@ namespace crnlib
       {
          return reinterpret_cast<elemental_vector*>(this)->increase_capacity(
             min_new_capacity, grow_hint, sizeof(T),
-            (CRNLIB_IS_BITWISE_MOVABLE(T) || (is_vector<T>::cFlag)) ? NULL : object_mover, nofail);
+            (CRNLIB_IS_BITWISE_COPYABLE_OR_MOVABLE(T) || (is_vector<T>::cFlag)) ? NULL : object_mover, nofail);
       }
    };
+
+   typedef crnlib::vector<uint8> uint8_vec;
 
    template<typename T> struct bitwise_movable< vector<T> > { enum { cFlag = true }; };
 

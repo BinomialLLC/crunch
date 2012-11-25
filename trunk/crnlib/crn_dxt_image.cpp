@@ -19,6 +19,10 @@
    #include "..\ext\ATI_Compress\ATI_Compress.h"
 #endif
 
+#include "crn_rg_etc1.h"
+#include "crn_etc.h"
+#define CRNLIB_USE_RG_ETC1 1
+
 namespace crnlib
 {
    dxt_image::dxt_image() :
@@ -103,12 +107,13 @@ namespace crnlib
       m_blocks_y = (m_height + 3) >> cDXTBlockShift;
 
       m_num_elements_per_block = 2;
-      if ((fmt == cDXT1) || (fmt == cDXT1A) || (fmt == cDXT5A))
+      if ((fmt == cDXT1) || (fmt == cDXT1A) || (fmt == cDXT5A) || (fmt == cETC1))
          m_num_elements_per_block = 1;
 
       m_total_blocks = m_blocks_x * m_blocks_y;
       m_total_elements = m_total_blocks * m_num_elements_per_block;
 
+      CRNLIB_ASSUME((uint)cDXT1BytesPerBlock == (uint)cETC1BytesPerBlock);
       m_bytes_per_block = cDXT1BytesPerBlock * m_num_elements_per_block;
 
       m_format = fmt;
@@ -118,46 +123,52 @@ namespace crnlib
          case cDXT1:
          case cDXT1A:
          {
-            m_element_type[0] = cColor;
+            m_element_type[0] = cColorDXT1;
             m_element_component_index[0] = -1;
             break;
          }
          case cDXT3:
          {
-            m_element_type[0] = cAlpha3;
-            m_element_type[1] = cColor;
+            m_element_type[0] = cAlphaDXT3;
+            m_element_type[1] = cColorDXT1;
             m_element_component_index[0] = 3;
             m_element_component_index[1] = -1;
             break;
          }
          case cDXT5:
          {
-            m_element_type[0] = cAlpha5;
-            m_element_type[1] = cColor;
+            m_element_type[0] = cAlphaDXT5;
+            m_element_type[1] = cColorDXT1;
             m_element_component_index[0] = 3;
             m_element_component_index[1] = -1;
             break;
          }
          case cDXT5A:
          {
-            m_element_type[0] = cAlpha5;
+            m_element_type[0] = cAlphaDXT5;
             m_element_component_index[0] = 3;
             break;
          }
          case cDXN_XY:
          {
-            m_element_type[0] = cAlpha5;
-            m_element_type[1] = cAlpha5;
+            m_element_type[0] = cAlphaDXT5;
+            m_element_type[1] = cAlphaDXT5;
             m_element_component_index[0] = 0;
             m_element_component_index[1] = 1;
             break;
          }
          case cDXN_YX:
          {
-            m_element_type[0] = cAlpha5;
-            m_element_type[1] = cAlpha5;
+            m_element_type[0] = cAlphaDXT5;
+            m_element_type[1] = cAlphaDXT5;
             m_element_component_index[0] = 1;
             m_element_component_index[1] = 0;
+            break;
+         }
+         case cETC1:
+         {
+            m_element_type[0] = cColorETC1;
+            m_element_component_index[0] = -1;
             break;
          }
          default:
@@ -231,8 +242,7 @@ namespace crnlib
 
       uint block_index = 0;
 
-      dxt1_endpoint_optimizer dxt1_optimizer;
-      dxt5_endpoint_optimizer dxt5_optimizer;
+      set_block_pixels_context optimizer_context;
       int prev_progress_percentage = -1;
 
       for (uint block_y = 0; block_y < m_blocks_y; block_y++)
@@ -280,7 +290,7 @@ namespace crnlib
                }
             }
 
-            set_block_pixels(block_x, block_y, pixels, p, dxt1_optimizer, dxt5_optimizer);
+            set_block_pixels(block_x, block_y, pixels, p, optimizer_context);
          }
       }
    }
@@ -430,6 +440,7 @@ namespace crnlib
       for (uint i = 0; i < cDXTBlockSize * cDXTBlockSize; i++)
          pixels[i].set(0, 0, 0, 255);
 
+      bool all_blocks_valid = true;
       for (uint block_y = 0; block_y < m_blocks_y; block_y++)
       {
          const uint pixel_ofs_y = block_y * cDXTBlockSize;
@@ -437,7 +448,8 @@ namespace crnlib
 
          for (uint block_x = 0; block_x < m_blocks_x; block_x++)
          {
-            get_block_pixels(block_x, block_y, pixels);
+            if (!get_block_pixels(block_x, block_y, pixels))
+               all_blocks_valid = false;
 
             const uint pixel_ofs_x = block_x * cDXTBlockSize;
 
@@ -456,6 +468,9 @@ namespace crnlib
             }
          }
       }
+
+      if (!all_blocks_valid)
+         console::error("dxt_image::unpack: One or more invalid blocks encountered!");
 
       img.reset_comp_flags();
       img.set_component_valid(0, false);
@@ -542,7 +557,53 @@ namespace crnlib
       {
          switch (m_element_type[element_index])
          {
-            case cColor:
+            case cColorETC1:
+            {
+               const etc1_block& block = *reinterpret_cast<const etc1_block*>(&get_element(block_x, block_y, element_index));
+
+               const bool diff_flag = block.get_diff_bit();
+               const bool flip_flag = block.get_flip_bit();
+               const uint table_index0 = block.get_inten_table(0);
+               const uint table_index1 = block.get_inten_table(1);
+               color_quad_u8 subblock_colors0[4], subblock_colors1[4];
+
+               if (diff_flag)
+               {
+                  const uint16 base_color5 = block.get_base5_color();
+                  const uint16 delta_color3 = block.get_delta3_color();
+                  etc1_block::get_diff_subblock_colors(subblock_colors0, base_color5, table_index0);
+                  etc1_block::get_diff_subblock_colors(subblock_colors1, base_color5, delta_color3, table_index1);
+               }
+               else
+               {
+                  const uint16 base_color4_0 = block.get_base4_color(0);
+                  etc1_block::get_abs_subblock_colors(subblock_colors0, base_color4_0, table_index0);
+                  const uint16 base_color4_1 = block.get_base4_color(1);
+                  etc1_block::get_abs_subblock_colors(subblock_colors1, base_color4_1, table_index1);
+               }
+
+               const uint bx = x & 3;
+               const uint by = y & 3;
+
+               const uint selector_index = block.get_selector(bx, by);
+               if (flip_flag)
+               {
+                  if (by <= 2)
+                     result = subblock_colors0[selector_index];
+                  else
+                     result = subblock_colors1[selector_index];
+               }
+               else
+               {
+                  if (bx <= 2)
+                     result = subblock_colors0[selector_index];
+                  else
+                     result = subblock_colors1[selector_index];
+               }
+
+               break;
+            }
+            case cColorDXT1:
             {
                const dxt1_block* pBlock = reinterpret_cast<const dxt1_block*>(&get_element(block_x, block_y, element_index));
 
@@ -584,7 +645,7 @@ namespace crnlib
 
                break;
             }
-            case cAlpha5:
+            case cAlphaDXT5:
             {
                const int comp_index = m_element_component_index[element_index];
 
@@ -626,7 +687,7 @@ namespace crnlib
 
                break;
             }
-            case cAlpha3:
+            case cAlphaDXT3:
             {
                const int comp_index = m_element_component_index[element_index];
 
@@ -652,7 +713,7 @@ namespace crnlib
 
       switch (m_element_type[element_index])
       {
-         case cColor:
+         case cColorDXT1:
          {
             if (m_format <= cDXT1A)
             {
@@ -675,7 +736,7 @@ namespace crnlib
 
             break;
          }
-         case cAlpha5:
+         case cAlphaDXT5:
          {
             const dxt5_block* pBlock = reinterpret_cast<const dxt5_block*>(&get_element(block_x, block_y, element_index));
 
@@ -713,7 +774,7 @@ namespace crnlib
                }
             }
          }
-         case cAlpha3:
+         case cAlphaDXT3:
          {
             const dxt3_block* pBlock = reinterpret_cast<const dxt3_block*>(&get_element(block_x, block_y, element_index));
 
@@ -738,7 +799,63 @@ namespace crnlib
       {
          switch (m_element_type[element_index])
          {
-            case cColor:
+            case cColorETC1:
+            {
+               etc1_block& block = *reinterpret_cast<etc1_block*>(&get_element(block_x, block_y, element_index));
+
+               const bool diff_flag = block.get_diff_bit();
+               const bool flip_flag = block.get_flip_bit();
+               const uint table_index0 = block.get_inten_table(0);
+               const uint table_index1 = block.get_inten_table(1);
+               color_quad_u8 subblock_colors0[4], subblock_colors1[4];
+
+               if (diff_flag)
+               {
+                  const uint16 base_color5 = block.get_base5_color();
+                  const uint16 delta_color3 = block.get_delta3_color();
+                  etc1_block::get_diff_subblock_colors(subblock_colors0, base_color5, table_index0);
+                  etc1_block::get_diff_subblock_colors(subblock_colors1, base_color5, delta_color3, table_index1);
+               }
+               else
+               {
+                  const uint16 base_color4_0 = block.get_base4_color(0);
+                  etc1_block::get_abs_subblock_colors(subblock_colors0, base_color4_0, table_index0);
+                  const uint16 base_color4_1 = block.get_base4_color(1);
+                  etc1_block::get_abs_subblock_colors(subblock_colors1, base_color4_1, table_index1);
+               }
+
+               const uint bx = x & 3;
+               const uint by = y & 3;
+
+               color_quad_u8* pColors = subblock_colors1;
+               if (flip_flag)
+               {
+                  if (by <= 2)
+                     pColors = subblock_colors0;
+               }
+               else
+               {
+                  if (bx <= 2)
+                     pColors = subblock_colors0;
+               }
+
+               uint best_error = UINT_MAX;
+               uint best_selector = 0;
+
+               for (uint i = 0; i < 4; i++)
+               {
+                  uint error = color::color_distance(perceptual, pColors[i], c, false);
+                  if (error < best_error)
+                  {
+                     best_error = error;
+                     best_selector = i;
+                  }
+               }
+
+               block.set_selector(bx, by, best_selector);
+               break;
+            }
+            case cColorDXT1:
             {
                dxt1_block* pDXT1_block = reinterpret_cast<dxt1_block*>(pElement);
 
@@ -767,7 +884,7 @@ namespace crnlib
 
                break;
             }
-            case cAlpha5:
+            case cAlphaDXT5:
             {
                dxt5_block* pDXT5_block = reinterpret_cast<dxt5_block*>(pElement);
 
@@ -794,7 +911,7 @@ namespace crnlib
 
                break;
             }
-            case cAlpha3:
+            case cAlphaDXT3:
             {
                const int comp_index = m_element_component_index[element_index];
 
@@ -809,15 +926,30 @@ namespace crnlib
       } // element_index
    }
 
-   void dxt_image::get_block_pixels(uint block_x, uint block_y, color_quad_u8* pPixels) const
+   bool dxt_image::get_block_pixels(uint block_x, uint block_y, color_quad_u8* pPixels) const
    {
+      bool success = true;
       const element* pElement = &get_element(block_x, block_y, 0);
 
       for (uint element_index = 0; element_index < m_num_elements_per_block; element_index++, pElement++)
       {
          switch (m_element_type[element_index])
          {
-            case cColor:
+            case cColorETC1:
+            {
+               const etc1_block& block = *reinterpret_cast<const etc1_block*>(&get_element(block_x, block_y, element_index));
+               // Preserve alpha if the format is something weird (like ETC1 for color and DXT5A for alpha) - which isn't currently supported.
+#if CRNLIB_USE_RG_ETC1
+               if (!rg_etc1::unpack_etc1_block(&block, (uint32*)pPixels, m_format != cETC1))
+                  success = false;
+#else
+               if (!unpack_etc1(block, pPixels, m_format != cETC1))
+                  success = false;
+#endif
+
+               break;
+            }
+            case cColorDXT1:
             {
                const dxt1_block* pDXT1_block = reinterpret_cast<const dxt1_block*>(pElement);
 
@@ -838,7 +970,7 @@ namespace crnlib
 
                break;
             }
-            case cAlpha5:
+            case cAlphaDXT5:
             {
                const dxt5_block* pDXT5_block = reinterpret_cast<const dxt5_block*>(pElement);
 
@@ -856,7 +988,7 @@ namespace crnlib
 
                break;
             }
-            case cAlpha3:
+            case cAlphaDXT3:
             {
                const dxt3_block* pDXT3_block = reinterpret_cast<const dxt3_block*>(pElement);
 
@@ -874,21 +1006,53 @@ namespace crnlib
             default: break;
          }
       } // element_index
+      return success;
    }
 
    void dxt_image::set_block_pixels(uint block_x, uint block_y, const color_quad_u8* pPixels, const pack_params& p)
    {
-      dxt1_endpoint_optimizer dxt1_optimizer;
-      dxt5_endpoint_optimizer dxt5_optimizer;
-      set_block_pixels(block_x, block_y, pPixels, p, dxt1_optimizer, dxt5_optimizer);
+      set_block_pixels_context context;
+      set_block_pixels(block_x, block_y, pPixels, p, context);
    }
 
    void dxt_image::set_block_pixels(
       uint block_x, uint block_y, const color_quad_u8* pPixels, const pack_params& p,
-      dxt1_endpoint_optimizer& dxt1_optimizer, dxt5_endpoint_optimizer& dxt5_optimizer)
+      set_block_pixels_context& context)
    {
       element* pElement = &get_element(block_x, block_y, 0);
 
+      if (m_format == cETC1)
+      {
+         etc1_block &dst_block = *reinterpret_cast<etc1_block*>(pElement);
+
+#if CRNLIB_USE_RG_ETC1
+         rg_etc1::etc1_quality etc_quality = rg_etc1::cHighQuality;
+         if (p.m_quality <= cCRNDXTQualityFast)
+            etc_quality = rg_etc1::cLowQuality;
+         else if (p.m_quality <= cCRNDXTQualityNormal)
+            etc_quality = rg_etc1::cMediumQuality;
+
+         rg_etc1::etc1_pack_params pack_params;
+         pack_params.m_dithering = p.m_dithering;
+         //pack_params.m_perceptual = p.m_perceptual;
+         pack_params.m_quality = etc_quality;
+         rg_etc1::pack_etc1_block(&dst_block, (uint32*)pPixels, pack_params);
+#else
+         crn_etc_quality etc_quality = cCRNETCQualitySlow;
+         if (p.m_quality <= cCRNDXTQualityFast)
+            etc_quality = cCRNETCQualityFast;
+         else if (p.m_quality <= cCRNDXTQualityNormal)
+            etc_quality = cCRNETCQualityMedium;
+
+         crn_etc1_pack_params pack_params;
+         pack_params.m_perceptual = p.m_perceptual;
+         pack_params.m_quality = etc_quality;
+         pack_params.m_dithering = p.m_dithering;
+
+         pack_etc1_block(dst_block, pPixels, pack_params, context.m_etc1_optimizer);
+#endif
+      }
+      else
 #if CRNLIB_SUPPORT_SQUISH
       if ((p.m_compressor == cCRNDXTCompressorSquish) && ((m_format == cDXT1) || (m_format == cDXT1A) || (m_format == cDXT3) || (m_format == cDXT5) || (m_format == cDXT5A)))
       {
@@ -963,21 +1127,21 @@ namespace crnlib
          {
             switch (m_element_type[element_index])
             {
-               case cColor:
+               case cColorDXT1:
                {
                   dxt1_block* pDXT1_block = reinterpret_cast<dxt1_block*>(pElement);
                   dxt_fast::compress_color_block(pDXT1_block, pPixels, p.m_quality >= cCRNDXTQualityNormal);
 
                   break;
                }
-               case cAlpha5:
+               case cAlphaDXT5:
                {
                   dxt5_block* pDXT5_block = reinterpret_cast<dxt5_block*>(pElement);
                   dxt_fast::compress_alpha_block(pDXT5_block, pPixels, m_element_component_index[element_index]);
 
                   break;
                }
-               case cAlpha3:
+               case cAlphaDXT3:
                {
                   const int comp_index = m_element_component_index[element_index];
 
@@ -994,11 +1158,14 @@ namespace crnlib
       }
       else
       {
+         dxt1_endpoint_optimizer& dxt1_optimizer = context.m_dxt1_optimizer;
+         dxt5_endpoint_optimizer& dxt5_optimizer = context.m_dxt5_optimizer;
+
          for (uint element_index = 0; element_index < m_num_elements_per_block; element_index++, pElement++)
          {
             switch (m_element_type[element_index])
             {
-               case cColor:
+               case cColorDXT1:
                {
                   dxt1_block* pDXT1_block = reinterpret_cast<dxt1_block*>(pElement);
 
@@ -1050,7 +1217,7 @@ namespace crnlib
 
                   break;
                }
-               case cAlpha5:
+               case cAlphaDXT5:
                {
                   dxt5_block* pDXT5_block = reinterpret_cast<dxt5_block*>(pElement);
 
@@ -1081,7 +1248,7 @@ namespace crnlib
 
                   break;
                }
-               case cAlpha3:
+               case cAlphaDXT3:
                {
                   const int comp_index = m_element_component_index[element_index];
 
@@ -1104,7 +1271,23 @@ namespace crnlib
 
       switch (m_element_type[element_index])
       {
-         case cColor:
+         case cColorETC1:
+         {
+            const etc1_block& src_block = *reinterpret_cast<const etc1_block*>(&block);
+            if (src_block.get_diff_bit())
+            {
+               packed_low_endpoint = src_block.get_base5_color();
+               packed_high_endpoint = src_block.get_delta3_color();
+            }
+            else
+            {
+               packed_low_endpoint =  src_block.get_base4_color(0);
+               packed_high_endpoint = src_block.get_base4_color(1);
+            }
+
+            break;
+         }
+         case cColorDXT1:
          {
             const dxt1_block& block1 = *reinterpret_cast<const dxt1_block*>(&block);
 
@@ -1113,7 +1296,7 @@ namespace crnlib
 
             break;
          }
-         case cAlpha5:
+         case cAlphaDXT5:
          {
             const dxt5_block& block5 = *reinterpret_cast<const dxt5_block*>(&block);
 
@@ -1122,7 +1305,7 @@ namespace crnlib
 
             break;
          }
-         case cAlpha3:
+         case cAlphaDXT3:
          {
             packed_low_endpoint = 0;
             packed_high_endpoint = 255;
@@ -1140,7 +1323,23 @@ namespace crnlib
 
       switch (m_element_type[element_index])
       {
-         case cColor:
+         case cColorETC1:
+         {
+            const etc1_block& src_block = *reinterpret_cast<const etc1_block*>(&get_element(block_x, block_y, element_index));
+            if (src_block.get_diff_bit())
+            {
+               low_endpoint = etc1_block::unpack_color5(static_cast<uint16>(l), scaled);
+               etc1_block::unpack_color5(high_endpoint, static_cast<uint16>(l), static_cast<uint16>(h), scaled);
+            }
+            else
+            {
+               low_endpoint = etc1_block::unpack_color4(static_cast<uint16>(l), scaled);
+               high_endpoint = etc1_block::unpack_color4(static_cast<uint16>(h), scaled);
+            }
+
+            return -1;
+         }
+         case cColorDXT1:
          {
             uint r, g, b;
 
@@ -1156,7 +1355,7 @@ namespace crnlib
 
             return -1;
          }
-         case cAlpha5:
+         case cAlphaDXT5:
          {
             const int component = m_element_component_index[element_index];
 
@@ -1165,7 +1364,7 @@ namespace crnlib
 
             return component;
          }
-         case cAlpha3:
+         case cAlphaDXT3:
          {
             const int component = m_element_component_index[element_index];
 
@@ -1180,18 +1379,48 @@ namespace crnlib
       return 0;
    }
 
-   uint dxt_image::get_block_colors(uint block_x, uint block_y, uint element_index, color_quad_u8* pColors)
+   uint dxt_image::get_block_colors(uint block_x, uint block_y, uint element_index, color_quad_u8* pColors, uint subblock_index)
    {
       const element& block = get_element(block_x, block_y, element_index);
 
       switch (m_element_type[element_index])
       {
-         case cColor:
+         case cColorETC1:
+         {
+            const etc1_block& src_block = *reinterpret_cast<const etc1_block*>(&get_element(block_x, block_y, element_index));
+            const uint table_index0 = src_block.get_inten_table(0);
+            const uint table_index1 = src_block.get_inten_table(1);
+            if (src_block.get_diff_bit())
+            {
+               const uint16 base_color5 = src_block.get_base5_color();
+               const uint16 delta_color3 = src_block.get_delta3_color();
+               if (subblock_index)
+                  etc1_block::get_diff_subblock_colors(pColors, base_color5, delta_color3, table_index1);
+               else
+                  etc1_block::get_diff_subblock_colors(pColors, base_color5, table_index0);
+            }
+            else
+            {
+               if (subblock_index)
+               {
+                  const uint16 base_color4_1 = src_block.get_base4_color(1);
+                  etc1_block::get_abs_subblock_colors(pColors, base_color4_1, table_index1);
+               }
+               else
+               {
+                  const uint16 base_color4_0 = src_block.get_base4_color(0);
+                  etc1_block::get_abs_subblock_colors(pColors, base_color4_0, table_index0);
+               }
+            }
+
+            break;
+         }
+         case cColorDXT1:
          {
             const dxt1_block& block1 = *reinterpret_cast<const dxt1_block*>(&block);
             return dxt1_block::get_block_colors(pColors, static_cast<uint16>(block1.get_low_color()), static_cast<uint16>(block1.get_high_color()));
          }
-         case cAlpha5:
+         case cAlphaDXT5:
          {
             const dxt5_block& block5 = *reinterpret_cast<const dxt5_block*>(&block);
 
@@ -1205,7 +1434,7 @@ namespace crnlib
 
             return n;
          }
-         case cAlpha3:
+         case cAlphaDXT3:
          {
             const int comp_index = m_element_component_index[element_index];
             for (uint i = 0; i < 16; i++)
@@ -1219,6 +1448,32 @@ namespace crnlib
       return 0;
    }
 
+   uint dxt_image::get_subblock_index(uint x, uint y, uint element_index) const
+   {
+      if (m_element_type[element_index] != cColorETC1)
+         return 0;
+
+      const uint block_x = x >> cDXTBlockShift;
+      const uint block_y = y >> cDXTBlockShift;
+
+      const element& block = get_element(block_x, block_y, element_index);
+
+      const etc1_block& src_block = *reinterpret_cast<const etc1_block*>(&block);
+      if (src_block.get_flip_bit())
+      {
+         return ((y & 3) >= 2) ? 1 : 0;
+      }
+      else
+      {
+         return ((x & 3) >= 2) ? 1 : 0;
+      }
+   }
+
+   uint dxt_image::get_total_subblocks(uint element_index) const
+   {
+      return (m_element_type[element_index] == cColorETC1) ? 2 : 0;
+   }
+
    uint dxt_image::get_selector(uint x, uint y, uint element_index) const
    {
       CRNLIB_ASSERT((x < m_width) && (y < m_height));
@@ -1230,17 +1485,22 @@ namespace crnlib
 
       switch (m_element_type[element_index])
       {
-         case cColor:
+         case cColorETC1:
+         {
+            const etc1_block& src_block = *reinterpret_cast<const etc1_block*>(&block);
+            return src_block.get_selector(x & 3, y & 3);
+         }
+         case cColorDXT1:
          {
             const dxt1_block& block1 = *reinterpret_cast<const dxt1_block*>(&block);
             return block1.get_selector(x & 3, y & 3);
          }
-         case cAlpha5:
+         case cAlphaDXT5:
          {
             const dxt5_block& block5 = *reinterpret_cast<const dxt5_block*>(&block);
             return block5.get_selector(x & 3, y & 3);
          }
-         case cAlpha3:
+         case cAlphaDXT3:
          {
             const dxt3_block& block3 = *reinterpret_cast<const dxt3_block*>(&block);
             return block3.get_alpha(x & 3, y & 3, false);
@@ -1255,6 +1515,165 @@ namespace crnlib
    {
       if (m_format == cDXT1)
          m_format = cDXT1A;
+   }
+
+   void dxt_image::flip_col(uint x)
+   {
+      const uint other_x = (m_blocks_x - 1) - x;
+      for (uint y = 0; y < m_blocks_y; y++)
+      {
+         for (uint e = 0; e < get_elements_per_block(); e++)
+         {
+            element tmp[2] = { get_element(x, y, e), get_element(other_x, y, e) };
+
+            for (uint i = 0; i < 2; i++)
+            {
+               switch (get_element_type(e))
+               {
+                  case cColorDXT1: reinterpret_cast<dxt1_block*>(&tmp[i])->flip_x(); break;
+                  case cAlphaDXT3: reinterpret_cast<dxt3_block*>(&tmp[i])->flip_x(); break;
+                  case cAlphaDXT5: reinterpret_cast<dxt5_block*>(&tmp[i])->flip_x(); break;
+                  default: CRNLIB_ASSERT(0); break;
+               }
+            }
+
+            get_element(x, y, e) = tmp[1];
+            get_element(other_x, y, e) = tmp[0];
+         }
+      }
+   }
+
+   void dxt_image::flip_row(uint y)
+   {
+      const uint other_y = (m_blocks_y - 1) - y;
+      for (uint x = 0; x < m_blocks_x; x++)
+      {
+         for (uint e = 0; e < get_elements_per_block(); e++)
+         {
+            element tmp[2] = { get_element(x, y, e), get_element(x, other_y, e) };
+
+            for (uint i = 0; i < 2; i++)
+            {
+               switch (get_element_type(e))
+               {
+                  case cColorDXT1: reinterpret_cast<dxt1_block*>(&tmp[i])->flip_y(); break;
+                  case cAlphaDXT3: reinterpret_cast<dxt3_block*>(&tmp[i])->flip_y(); break;
+                  case cAlphaDXT5: reinterpret_cast<dxt5_block*>(&tmp[i])->flip_y(); break;
+                  default: CRNLIB_ASSERT(0); break;
+               }
+            }
+
+            get_element(x, y, e) = tmp[1];
+            get_element(x, other_y, e) = tmp[0];
+         }
+      }
+   }
+
+   bool dxt_image::can_flip(uint axis_index)
+   {
+      if (m_format == cETC1)
+      {
+         // Can't reliably flip ETC1 textures (because of asymmetry in the 555/333 differential coding of subblock colors).
+         return false;
+      }
+
+      uint d;
+      if (axis_index)
+         d = m_height;
+      else
+         d = m_width;
+
+      if (d & 3)
+      {
+         if (d > 4)
+            return false;
+      }
+
+      return true;
+   }
+
+   bool dxt_image::flip_x()
+   {
+      if (m_format == cETC1)
+      {
+         // Can't reliably flip ETC1 textures (because of asymmetry in the 555/333 differential coding of subblock colors).
+         return false;
+      }
+
+      if ((m_width & 3) && (m_width > 4))
+         return false;
+
+      if (m_width == 1)
+         return true;
+
+      const uint mid_x = m_blocks_x / 2;
+
+      for (uint x = 0; x < mid_x; x++)
+         flip_col(x);
+
+      if (m_blocks_x & 1)
+      {
+         const uint w = math::minimum(m_width, 4U);
+         for (uint y = 0; y < m_blocks_y; y++)
+         {
+            for (uint e = 0; e < get_elements_per_block(); e++)
+            {
+               element tmp(get_element(mid_x, y, e));
+               switch (get_element_type(e))
+               {
+                  case cColorDXT1: reinterpret_cast<dxt1_block*>(&tmp)->flip_x(w, 4); break;
+                  case cAlphaDXT3: reinterpret_cast<dxt3_block*>(&tmp)->flip_x(w, 4); break;
+                  case cAlphaDXT5: reinterpret_cast<dxt5_block*>(&tmp)->flip_x(w, 4); break;
+                  default: CRNLIB_ASSERT(0); break;
+               }
+               get_element(mid_x, y, e) = tmp;
+            }
+         }
+      }
+
+      return true;
+   }
+
+   bool dxt_image::flip_y()
+   {
+      if (m_format == cETC1)
+      {
+         // Can't reliably flip ETC1 textures (because of asymmetry in the 555/333 differential coding of subblock colors).
+         return false;
+      }
+
+      if ((m_height & 3) && (m_height > 4))
+         return false;
+
+      if (m_height == 1)
+         return true;
+
+      const uint mid_y = m_blocks_y / 2;
+
+      for (uint y = 0; y < mid_y; y++)
+         flip_row(y);
+
+      if (m_blocks_y & 1)
+      {
+         const uint h = math::minimum(m_height, 4U);
+         for (uint x = 0; x < m_blocks_x; x++)
+         {
+            for (uint e = 0; e < get_elements_per_block(); e++)
+            {
+               element tmp(get_element(x, mid_y, e));
+               switch (get_element_type(e))
+               {
+                  case cColorDXT1: reinterpret_cast<dxt1_block*>(&tmp)->flip_y(4, h); break;
+                  case cAlphaDXT3: reinterpret_cast<dxt3_block*>(&tmp)->flip_y(4, h); break;
+                  case cAlphaDXT5: reinterpret_cast<dxt5_block*>(&tmp)->flip_y(4, h); break;
+                  default: CRNLIB_ASSERT(0); break;
+               }
+               get_element(x, mid_y, e) = tmp;
+            }
+         }
+      }
+
+      return true;
    }
 
 } // namespace crnlib

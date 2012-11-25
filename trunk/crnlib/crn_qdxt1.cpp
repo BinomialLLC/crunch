@@ -306,7 +306,7 @@ namespace crnlib
 
 #if GENERATE_DEBUG_IMAGES
             if (debugging)
-               image_utils::save_to_file_stb(dynamic_string(cVarArg, "debug_%u.tga", level).get_ptr(), debug_img, image_utils::cSaveIgnoreAlpha);
+               image_utils::write_to_file(dynamic_string(cVarArg, "debug_%u.tga", level).get_ptr(), debug_img, image_utils::cWriteFlagIgnoreAlpha);
 #endif
 
          } // level

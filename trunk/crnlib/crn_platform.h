@@ -45,10 +45,13 @@ const bool c_crnlib_big_endian_platform = !c_crnlib_little_endian_platform;
 
 #if defined(__GNUC__)
    #define CRNLIB_ALIGNED(x) __attribute__((aligned(x)))
+   #define CRNLIB_NOINLINE __attribute__((noinline))
 #elif defined(_MSC_VER)
    #define CRNLIB_ALIGNED(x) __declspec(align(x))
+   #define CRNLIB_NOINLINE __declspec(noinline) 
 #else
    #define CRNLIB_ALIGNED(x)
+   #define CRNLIB_NOINLINE
 #endif
 
 #define CRNLIB_GET_ALIGNMENT(v) ((!sizeof(v)) ? 1 : (__alignof(v) ? __alignof(v) : sizeof(uint32)))

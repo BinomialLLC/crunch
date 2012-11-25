@@ -370,7 +370,6 @@ namespace crnlib
    template<typename S, typename T>
    inline bool task_pool::queue_multiple_object_tasks(S* pObject, T pObject_method, uint64 first_data, uint num_tasks, void* pData_ptr)
    {
-      CRNLIB_ASSERT(m_num_threads);
       CRNLIB_ASSERT(pObject);
       CRNLIB_ASSERT(num_tasks);
       if (!num_tasks)

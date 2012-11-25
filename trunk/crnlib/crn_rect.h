@@ -17,7 +17,8 @@ namespace crnlib
       {
          clear();
       }
-            
+
+      // up to, but not including right/bottom
       inline rect(int left, int top, int right, int bottom)
       {
          set(left, top, right, bottom);

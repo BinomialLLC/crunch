@@ -2176,7 +2176,7 @@ SRes LzmaEnc_Encode(CLzmaEncHandle pp, ISeqOutStream *outStream, ISeqInStream *i
   SRes res = SZ_OK;
 
   #ifdef COMPRESS_MF_MT
-  Byte allocaDummy[0x300];
+  Byte allocaDummy[0x300]; (void)allocaDummy;
   int i = 0;
   for (i = 0; i < 16; i++)
     allocaDummy[i] = (Byte)i;

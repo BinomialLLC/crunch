@@ -2504,7 +2504,7 @@ namespace crnlib
                {
                   const chunk_tile_desc &tile_desc = encoding_desc.m_tiles[t];
 
-                  img.draw_box(
+                  img.unclipped_fill_box(
                      x*8 + tile_desc.m_x_ofs, y*8 + tile_desc.m_y_ofs,
                      tile_desc.m_width + 1, tile_desc.m_height + 1, color_quad_u8(128, 128, 128, 255));
                }

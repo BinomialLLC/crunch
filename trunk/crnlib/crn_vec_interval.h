@@ -18,7 +18,7 @@ namespace crnlib
       inline void clear() { m_bounds[0].clear(); m_bounds[1].clear(); }
       
       inline const T& operator[] (uint i) const { CRNLIB_ASSERT(i < 2); return m_bounds[i]; }
-      inline T& operator[] (uint i) { CRNLIB_ASSERT(i < 2); return m_bounds[i]; }
+      inline       T& operator[] (uint i)       { CRNLIB_ASSERT(i < 2); return m_bounds[i]; }
 
    private:
       T m_bounds[2];

@@ -28,7 +28,7 @@ namespace crnlib
       bool convert_stats::init(
          const char* pSrc_filename,
          const char* pDst_filename,
-         dds_texture& src_tex,
+         mipmapped_texture& src_tex,
          texture_file_types::format dst_file_type,
          bool lzma_stats)
       {
@@ -74,7 +74,7 @@ namespace crnlib
             }
          }
 
-         if (!m_output_tex.load_from_file(pDst_filename, m_dst_file_type))
+         if (!m_output_tex.read_from_file(pDst_filename, m_dst_file_type))
          {
             console::error("Failed loading output file: %s", pDst_filename);
             return false;
@@ -130,42 +130,46 @@ namespace crnlib
             }
             else
             {
+               uint num_faces = math::minimum(m_pInput_tex->get_num_faces(), m_output_tex.get_num_faces());
                uint num_levels = math::minimum(m_pInput_tex->get_num_levels(), m_output_tex.get_num_levels());
 
                if (!mip_stats)
                   num_levels = 1;
 
-               for (uint level = 0; level < num_levels; level++)
+               for (uint face = 0; face < num_faces; face++)
                {
-                  image_u8 a, b;
-                  image_u8* pA = m_pInput_tex->get_level_image(0, level, a);
-                  image_u8* pB = m_output_tex.get_level_image(0, level, b);
-
-                  if (pA && pB)
+                  for (uint level = 0; level < num_levels; level++)
                   {
-                     image_u8 grayscale_a, grayscale_b;
-                     if (grayscale_sampling)
+                     image_u8 a, b;
+                     image_u8* pA = m_pInput_tex->get_level_image(face, level, a);
+                     image_u8* pB = m_output_tex.get_level_image(face, level, b);
+
+                     if (pA && pB)
                      {
-                        grayscale_a = *pA;
-                        grayscale_a.convert_to_grayscale();
-                        pA = &grayscale_a;
+                        image_u8 grayscale_a, grayscale_b;
+                        if (grayscale_sampling)
+                        {
+                           grayscale_a = *pA;
+                           grayscale_a.convert_to_grayscale();
+                           pA = &grayscale_a;
 
-                        grayscale_b = *pB;
-                        grayscale_b.convert_to_grayscale();
-                        pB = &grayscale_b;
+                           grayscale_b = *pB;
+                           grayscale_b.convert_to_grayscale();
+                           pB = &grayscale_b;
+                        }
+
+                        console::info("Face %u Mipmap level %u statistics:", face, level);
+                        image_utils::print_image_metrics(*pA, *pB);
+
+                        if ((pA->has_rgb()) || (pB->has_rgb()))
+                           image_utils::print_ssim(*pA, *pB);
                      }
-
-                     console::info("Mipmap level %u statistics:", level);
-                     image_utils::print_image_metrics(*pA, *pB);
-
-                     if ((pA->has_rgb()) || (pB->has_rgb()))
-                        image_utils::print_ssim(*pA, *pB);
                   }
                }
 
                if (pCSVStatsFile)
                {
-                  // FIXME: This is kind of a hack, and should be combine with the code above.
+                  // FIXME: This is kind of a hack, and should be combined with the code above.
                   image_u8 a, b;
                   image_u8* pA = m_pInput_tex->get_level_image(0, 0, a);
                   image_u8* pB = m_output_tex.get_level_image(0, 0, b);
@@ -292,56 +296,63 @@ namespace crnlib
          return false;
       }
 
-      static pixel_format choose_pixel_format(convert_params& params, const crn_comp_params &comp_params, const dds_texture& src_tex, texture_type tex_type)
+      static pixel_format choose_pixel_format(convert_params& params, const crn_comp_params &comp_params, const mipmapped_texture& src_tex, texture_type tex_type)
       {
-         if (params.m_use_source_format)
-            return src_tex.get_format();
-
+         const pixel_format src_fmt = src_tex.get_format();
+         const texture_file_types::format src_file_type = src_tex.get_source_file_type();
          const bool is_normal_map = (tex_type == cTextureTypeNormalMap);
 
+         if (params.m_always_use_source_pixel_format)
+            return src_fmt;
+         
+         // Attempt to choose a reasonable/sane output pixel format.
          if (params.m_dst_file_type == texture_file_types::cFormatCRN)
          {
             if (is_normal_map)
             {
-               switch (src_tex.get_format())
+               if (pixel_format_helpers::is_dxt(src_fmt))
+                  return src_fmt;
+               else
+                  return PIXEL_FMT_DXT5_AGBR;
+            }
+         }
+         else if (params.m_dst_file_type == texture_file_types::cFormatKTX)
+         {
+            if ((src_file_type != texture_file_types::cFormatCRN) && (src_file_type != texture_file_types::cFormatKTX) && (src_file_type != texture_file_types::cFormatDDS))
+            {
+               if (is_normal_map)
                {
-                  case PIXEL_FMT_DXN:
-                  case PIXEL_FMT_3DC:
-                  case PIXEL_FMT_DXT5_xGBR:
-                  case PIXEL_FMT_DXT5_AGBR:
-                  case PIXEL_FMT_DXT5_xGxR:
-                     return src_tex.get_format();
-                  default:
-                     return PIXEL_FMT_DXT5_AGBR;
+                  return pixel_format_helpers::has_alpha(src_fmt) ? PIXEL_FMT_A8R8G8B8 : PIXEL_FMT_R8G8B8;
                }
+               else if (pixel_format_helpers::is_grayscale(src_fmt))
+               {
+                  if (pixel_format_helpers::has_alpha(src_fmt))
+                     return PIXEL_FMT_A8L8;
+                  else
+                     return PIXEL_FMT_ETC1;
+               }
+               else if (pixel_format_helpers::has_alpha(src_fmt))
+                  return PIXEL_FMT_A8R8G8B8;
+               else
+                  return PIXEL_FMT_ETC1;
             }
          }
          else if (params.m_dst_file_type == texture_file_types::cFormatDDS)
          {
-            if (src_tex.get_source_file_type() != texture_file_types::cFormatCRN)
+            if ((src_file_type != texture_file_types::cFormatCRN) && (src_file_type != texture_file_types::cFormatKTX) && (src_file_type != texture_file_types::cFormatDDS))
             {
                if (is_normal_map)
                {
-                  switch (src_tex.get_format())
-                  {
-                     case PIXEL_FMT_DXN:
-                     case PIXEL_FMT_3DC:
-                     case PIXEL_FMT_DXT5_xGBR:
-                     case PIXEL_FMT_DXT5_AGBR:
-                     case PIXEL_FMT_DXT5_xGxR:
-                        return src_tex.get_format();
-                     default:
-                        return PIXEL_FMT_DXT5_AGBR;
-                  }
+                  return PIXEL_FMT_DXT5_AGBR;
                }
-               else if (pixel_format_helpers::is_grayscale(src_tex.get_format()))
+               else if (pixel_format_helpers::is_grayscale(src_fmt))
                {
-                  if (pixel_format_helpers::has_alpha(src_tex.get_format()))
+                  if (pixel_format_helpers::has_alpha(src_fmt))
                      return comp_params.get_flag(cCRNCompFlagDXT1AForTransparency) ? PIXEL_FMT_DXT1A : PIXEL_FMT_DXT5;
                   else
                      return PIXEL_FMT_DXT1;
                }
-               else if (pixel_format_helpers::has_alpha(src_tex.get_format()))
+               else if (pixel_format_helpers::has_alpha(src_fmt))
                   return comp_params.get_flag(cCRNCompFlagDXT1AForTransparency) ? PIXEL_FMT_DXT1A : PIXEL_FMT_DXT5;
                else
                   return PIXEL_FMT_DXT1;
@@ -349,21 +360,21 @@ namespace crnlib
          }
          else
          {
-            // A regular image format.
-            if (pixel_format_helpers::is_grayscale(src_tex.get_format()))
+            // Destination is a regular image format.
+            if (pixel_format_helpers::is_grayscale(src_fmt))
             {
-               if (pixel_format_helpers::has_alpha(src_tex.get_format()))
+               if (pixel_format_helpers::has_alpha(src_fmt))
                   return PIXEL_FMT_A8L8;
                else
                   return PIXEL_FMT_L8;
             }
-            else if (pixel_format_helpers::has_alpha(src_tex.get_format()))
+            else if (pixel_format_helpers::has_alpha(src_fmt))
                return PIXEL_FMT_A8R8G8B8;
             else
                return PIXEL_FMT_R8G8B8;
          }
 
-         return src_tex.get_format();
+         return src_fmt;
       }
 
       static void print_comp_params(const crn_comp_params &comp_params)
@@ -404,23 +415,27 @@ namespace crnlib
       void convert_params::print()
       {
          console::debug("\nTexture conversion parameters:");
-         console::debug("   Resolution: %ux%u, Faces: %u, Levels: %u, Format: %s",
+         console::debug("   Resolution: %ux%u, Faces: %u, Levels: %u, Format: %s, X Flipped: %u, Y Flipped: %u",
             m_pInput_texture->get_width(),
             m_pInput_texture->get_height(),
             m_pInput_texture->get_num_faces(),
             m_pInput_texture->get_num_levels(),
-            pixel_format_helpers::get_pixel_format_string(m_pInput_texture->get_format()));
+            pixel_format_helpers::get_pixel_format_string(m_pInput_texture->get_format()),
+            m_pInput_texture->is_x_flipped(),
+            m_pInput_texture->is_y_flipped());
 
          console::debug("      texture_type: %s", get_texture_type_desc(m_texture_type));
          console::debug("      dst_filename: %s", m_dst_filename.get_ptr());
          console::debug("     dst_file_type: %s", texture_file_types::get_extension(m_dst_file_type));
          console::debug("        dst_format: %s", pixel_format_helpers::get_pixel_format_string(m_dst_format));
          console::debug("             quick: %u", m_quick);
-         console::debug(" use_source_format: %u", m_use_source_format);
+         console::debug(" use_source_format: %u", m_always_use_source_pixel_format);
+         console::debug("            Y Flip: %u", m_y_flip);
+         console::debug("            Unflip: %u", m_unflip);
       }
 
       static bool write_compressed_texture(
-         dds_texture& work_tex, convert_params& params, crn_comp_params &comp_params, pixel_format dst_format, progress_params& progress_state, bool perceptual, convert_stats &stats)
+         mipmapped_texture& work_tex, convert_params& params, crn_comp_params &comp_params, pixel_format dst_format, progress_params& progress_state, bool perceptual, convert_stats &stats)
       {
          comp_params.m_file_type = (params.m_dst_file_type == texture_file_types::cFormatCRN) ? cCRNFileTypeCRN : cCRNFileTypeDDS;
 
@@ -450,7 +465,7 @@ namespace crnlib
          return true;
       }
 
-      static bool convert_and_write_normal_texture(dds_texture& work_tex, convert_params& params, const crn_comp_params &comp_params, pixel_format dst_format, progress_params& progress_state, bool formats_differ, bool perceptual, convert_stats& stats)
+      static bool convert_and_write_normal_texture(mipmapped_texture& work_tex, convert_params& params, const crn_comp_params &comp_params, pixel_format dst_format, progress_params& progress_state, bool formats_differ, bool perceptual, convert_stats& stats)
       {
          if (formats_differ)
          {
@@ -517,7 +532,7 @@ namespace crnlib
                   face_vec face(1);
                   face[0].push_back(crnlib_new<mip_level>(*pLevel));
 
-                  dds_texture new_tex;
+                  mipmapped_texture new_tex;
                   new_tex.assign(face);
 
                   console::info("Writing texture face %u mip level %u to file %s", f, l, filename.get_ptr());
@@ -567,9 +582,29 @@ namespace crnlib
             params.m_pIntermediate_texture = NULL;
          }
 
-         params.m_pIntermediate_texture = crnlib_new<dds_texture>(*params.m_pInput_texture);
+         params.m_pIntermediate_texture = crnlib_new<mipmapped_texture>(*params.m_pInput_texture);
+         
+         mipmapped_texture& work_tex = *params.m_pInput_texture;
 
-         dds_texture& work_tex = *params.m_pInput_texture;
+         if ((params.m_unflip) && (work_tex.is_flipped()))
+         {
+            console::info("Unflipping texture");
+            work_tex.unflip(true, true);
+         }
+
+         if (params.m_y_flip)
+         {
+            console::info("Flipping texture on Y axis");
+            
+            // This is awkward - if we're writing to KTX, then go ahead and properly update the work texture's orientation flags.
+            // Otherwise, don't bother updating the orientation flags because the writer may then attempt to unflip the texture before writing to formats
+            // that don't support flipped textures (ugh).
+            const bool bOutputFormatSupportsFlippedTextures = params.m_dst_file_type == texture_file_types::cFormatKTX;
+            if (!work_tex.flip_y(bOutputFormatSupportsFlippedTextures))
+            {
+               console::warning("Failed flipping texture on Y axis");
+            }
+         }
 
          if ((params.m_dst_format != PIXEL_FMT_INVALID) && (pixel_format_helpers::is_alpha_only(params.m_dst_format)))
          {
@@ -588,13 +623,14 @@ namespace crnlib
          if (pixel_format_helpers::is_dxt(dst_format))
          {
             if ((params.m_dst_file_type != texture_file_types::cFormatCRN) &&
-                (params.m_dst_file_type != texture_file_types::cFormatDDS))
+                (params.m_dst_file_type != texture_file_types::cFormatDDS) && 
+                (params.m_dst_file_type != texture_file_types::cFormatKTX))
             {
-               console::warning("Output file format does not support DXT - automatically choosing pixel format.");
+               console::warning("Output file format does not support DXTc - automatically choosing a non-DXT pixel format.");
                dst_format = PIXEL_FMT_INVALID;
             }
          }
-
+         
          if (dst_format == PIXEL_FMT_INVALID)
          {
             // Caller didn't specify a format to use, so try to pick something reasonable.
@@ -606,6 +642,18 @@ namespace crnlib
             dst_format = PIXEL_FMT_DXT1A;
          else if (dst_format == PIXEL_FMT_DXT1A)
             comp_params.set_flag(cCRNCompFlagDXT1AForTransparency, true);
+        
+         if ((dst_format == PIXEL_FMT_ETC1) && (params.m_dst_file_type == texture_file_types::cFormatCRN))
+         {
+            console::warning("CRN file format does not support ETC1 compressed textures - converting to DXT1 instead.");
+            dst_format = PIXEL_FMT_DXT1;
+         }
+
+         if ((dst_format == PIXEL_FMT_DXT1A) && (params.m_dst_file_type == texture_file_types::cFormatCRN))
+         {
+            console::warning("CRN file format does not support DXT1A compressed textures - converting to DXT5 instead.");
+            dst_format = PIXEL_FMT_DXT5;
+         }
 
          const bool is_normal_map = (tex_type == cTextureTypeNormalMap);
          bool perceptual = comp_params.get_flag(cCRNCompFlagPerceptual);
@@ -633,7 +681,9 @@ namespace crnlib
          }
 
          bool generate_mipmaps = texture_file_types::supports_mipmaps(params.m_dst_file_type);
-         if ((params.m_write_mipmaps_to_multiple_files) && ((params.m_dst_file_type != texture_file_types::cFormatCRN) && (params.m_dst_file_type != texture_file_types::cFormatDDS)))
+         if ( (params.m_write_mipmaps_to_multiple_files) && 
+              ((params.m_dst_file_type != texture_file_types::cFormatCRN) && (params.m_dst_file_type != texture_file_types::cFormatDDS) && (params.m_dst_file_type != texture_file_types::cFormatKTX))
+             )
          {
             generate_mipmaps = true;
          }
@@ -657,13 +707,14 @@ namespace crnlib
          }
 
          bool status = false;
-
+                  
          timer t;
          t.start();
 
          if ( (params.m_dst_file_type == texture_file_types::cFormatCRN) ||
                ( (params.m_dst_file_type == texture_file_types::cFormatDDS) && (pixel_format_helpers::is_dxt(dst_format)) &&
-                 ((formats_differ) || (comp_params.m_target_bitrate > 0.0f) || (comp_params.m_quality_level < cCRNMaxQualityLevel))
+                 //((formats_differ) || (comp_params.m_target_bitrate > 0.0f) || (comp_params.m_quality_level < cCRNMaxQualityLevel))
+                 ((comp_params.m_target_bitrate > 0.0f) || (comp_params.m_quality_level < cCRNMaxQualityLevel))
                )
             )
          {
@@ -671,6 +722,10 @@ namespace crnlib
          }
          else
          {
+            if ((comp_params.m_target_bitrate > 0.0f) || (comp_params.m_quality_level < cCRNMaxQualityLevel))
+            {
+               console::warning( "Target bitrate/quality level is not supported for this output file format.\n");
+            }
             status = convert_and_write_normal_texture(work_tex, params, comp_params, dst_format, progress_state, formats_differ, perceptual, stats);
          }
 

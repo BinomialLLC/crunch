@@ -10,6 +10,7 @@
 // The crn_decomp.h header file library contains all the code necessary for
 // decompression.
 //
+// Important: If compiling with gcc, be sure strict aliasing is disabled: -fno-strict-aliasing
 #ifndef CRNLIB_H
 #define CRNLIB_H
 
@@ -17,7 +18,7 @@
 #pragma warning (disable: 4127) //  conditional expression is constant
 #endif
 
-#define CRNLIB_VERSION 103
+#define CRNLIB_VERSION 104
 
 #define CRNLIB_SUPPORT_ATI_COMPRESS 0
 #define CRNLIB_SUPPORT_SQUISH 0
@@ -70,6 +71,8 @@ enum crn_format
 
    // DXT5 alpha blocks only
    cCRNFmtDXT5A,
+
+   cCRNFmtETC1,
 
    cCRNFmtTotal,
 
@@ -168,13 +171,14 @@ enum crn_dxt_quality
 // Which DXTn compressor to use when compressing to plain (non-clustered) .DDS.
 enum crn_dxt_compressor_type
 {
-   cCRNDXTCompressorCRN,      // Use crnlib's DXTc block compressor (default, highest quality, comparable or better than ati_compress or squish)
+   cCRNDXTCompressorCRN,      // Use crnlib's ETC1 or DXTc block compressor (default, highest quality, comparable or better than ati_compress or squish, and crnlib's ETC1 is a lot fasterw with similiar quality to Erricson's)
    cCRNDXTCompressorCRNF,     // Use crnlib's "fast" DXTc block compressor
    cCRNDXTCompressorRYG,      // Use RYG's DXTc block compressor (low quality, but very fast)
 
 #if CRNLIB_SUPPORT_ATI_COMPRESS
    cCRNDXTCompressorATI,
 #endif
+
 #if CRNLIB_SUPPORT_SQUISH
    cCRNDXTCompressorSquish,
 #endif
@@ -588,16 +592,25 @@ const char* crn_get_dxt_quality_string(crn_dxt_quality q);
 typedef void *crn_block_compressor_context_t;
 
 // Create a DXTn block compressor.
-// Notes this function only supports the basic/nonswizzled DXTn formats (DXT1, DXT3, DXT5, DXT5A, DXN_XY and DXN_YX).
+// This function only supports the basic/nonswizzled "fundamental" formats: DXT1, DXT3, DXT5, DXT5A, DXN_XY and DXN_YX.
 // Avoid calling this multiple times if you intend on compressing many blocks, because it allocates some memory.
 crn_block_compressor_context_t crn_create_block_compressor(const crn_comp_params &params);
 
 // Compresses a block of 16 pixels to the destination DXTn block.
 // pDst_block should be 8 (for DXT1/DXT5A) or 16 bytes (all the others).
+// pPixels should be an array of 16 crn_uint32's. Each crn_uint32 must be r,g,b,a (r is always first) in memory.
 void crn_compress_block(crn_block_compressor_context_t pContext, const crn_uint32 *pPixels, void *pDst_block);
 
 // Frees a DXTn block compressor.
 void crn_free_block_compressor(crn_block_compressor_context_t pContext);
+
+// Unpacks a compressed block to pDst_pixels.
+// pSrc_block should be 8 (for DXT1/DXT5A) or 16 bytes (all the others).
+// pDst_pixel should be an array of 16 crn_uint32's. Each uint32 will be r,g,b,a (r is always first) in memory.
+// crn_fmt should be one of the "fundamental" formats: DXT1, DXT3, DXT5, DXT5A, DXN_XY and DXN_YX.
+// The various swizzled DXT5 formats (such as cCRNFmtDXT5_xGBR, etc.) will be unpacked as if they where plain DXT5.
+// Returns false if the crn_fmt is invalid.
+bool crn_decompress_block(const void *pSrc_block, crn_uint32 *pDst_pixels, crn_format crn_fmt);
 
 #endif // CRNLIB_H
 

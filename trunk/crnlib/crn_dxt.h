@@ -43,7 +43,9 @@ namespace crnlib
       cDXT5A,
 
       cDXN_XY,    // inverted relative to standard ATI2, 360's DXN
-      cDXN_YX     // standard ATI2
+      cDXN_YX,    // standard ATI2,
+
+      cETC1       // Ericsson texture compression (color only, 4x4 blocks, 4bpp, 64-bits/block)
    };
 
    const float cDXT1MaxLinearValue = 3.0f;
@@ -131,6 +133,32 @@ namespace crnlib
          m_selectors[y] |= (val << (x * cDXT1SelectorBits));
       }
 
+      inline void flip_x(uint w = 4, uint h = 4)
+      {
+         for (uint x = 0; x < (w / 2); x++)
+         {
+            for (uint y = 0; y < h; y++)
+            {
+               const uint c = get_selector(x, y);
+               set_selector(x, y, get_selector((w - 1) - x, y));
+               set_selector((w - 1) - x, y, c);
+            }
+         }
+      }
+
+      inline void flip_y(uint w = 4, uint h = 4)
+      {
+         for (uint y = 0; y < (h / 2); y++)
+         {
+            for (uint x = 0; x < w; x++)
+            {
+               const uint c = get_selector(x, y);
+               set_selector(x, y, get_selector(x, (h - 1) - y));
+               set_selector(x, (h - 1) - y, c);
+            }
+         }
+      }
+      
       static uint16        pack_color(const color_quad_u8& color, bool scaled, uint bias = 127U);
       static uint16        pack_color(uint r, uint g, uint b, bool scaled, uint bias = 127U);
 
@@ -163,6 +191,32 @@ namespace crnlib
 
       void set_alpha(uint x, uint y, uint value, bool scaled);
       uint get_alpha(uint x, uint y, bool scaled) const;
+
+      inline void flip_x(uint w = 4, uint h = 4)
+      {
+         for (uint x = 0; x < (w / 2); x++)
+         {
+            for (uint y = 0; y < h; y++)
+            {
+               const uint c = get_alpha(x, y, false);
+               set_alpha(x, y, get_alpha((w - 1) - x, y, false), false);
+               set_alpha((w - 1) - x, y, c, false);
+            }
+         }
+      }
+
+      inline void flip_y(uint w = 4, uint h = 4)
+      {
+         for (uint y = 0; y < (h / 2); y++)
+         {
+            for (uint x = 0; x < w; x++)
+            {
+               const uint c = get_alpha(x, y, false);
+               set_alpha(x, y, get_alpha(x, (h - 1) - y, false), false);
+               set_alpha(x, (h - 1) - y, c, false);
+            }
+         }
+      }
    };
 
    CRNLIB_DEFINE_BITWISE_COPYABLE(dxt3_block);
@@ -243,6 +297,32 @@ namespace crnlib
          m_selectors[byte_index] = static_cast<uint8>(v);
          if (byte_index < (cNumSelectorBytes - 1))
             m_selectors[byte_index + 1] = static_cast<uint8>(v >> 8);
+      }
+
+      inline void flip_x(uint w = 4, uint h = 4)
+      {
+         for (uint x = 0; x < (w / 2); x++)
+         {
+            for (uint y = 0; y < h; y++)
+            {
+               const uint c = get_selector(x, y);
+               set_selector(x, y, get_selector((w - 1) - x, y));
+               set_selector((w - 1) - x, y, c);
+            }
+         }
+      }
+
+      inline void flip_y(uint w = 4, uint h = 4)
+      {
+         for (uint y = 0; y < (h / 2); y++)
+         {
+            for (uint x = 0; x < w; x++)
+            {
+               const uint c = get_selector(x, y);
+               set_selector(x, y, get_selector(x, (h - 1) - y));
+               set_selector(x, (h - 1) - y, c);
+            }
+         }
       }
 
       enum { cMaxSelectorValues = 8 };

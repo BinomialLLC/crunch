@@ -6,7 +6,9 @@
 
 namespace crnlib
 {
-   void get_command_line(dynamic_string& cmd_line, int argc, char *argv[]);
+   // Returns the command line passed to the app as a string.
+   // On systems where this isn't trivial, this function combines together the separate arguments, quoting and adding spaces as needed.
+   void get_command_line_as_single_string(dynamic_string& cmd_line, int argc, char *argv[]);
 
    class command_line_params
    {

@@ -231,7 +231,7 @@ namespace crnlib
       return true;
    }
 
-   static bool create_dds_tex(const crn_comp_params &params, dds_texture &dds_tex)
+   static bool create_dds_tex(const crn_comp_params &params, mipmapped_texture &dds_tex)
    {
       image_u8 images[cCRNMaxFaces][cCRNMaxLevels];
 
@@ -281,7 +281,7 @@ namespace crnlib
       return true;
    }
 
-   bool create_texture_mipmaps(dds_texture &work_tex, const crn_comp_params &params, const crn_mipmap_params &mipmap_params, bool generate_mipmaps)
+   bool create_texture_mipmaps(mipmapped_texture &work_tex, const crn_comp_params &params, const crn_mipmap_params &mipmap_params, bool generate_mipmaps)
    {
       crn_comp_params new_params(params);
 
@@ -438,7 +438,7 @@ namespace crnlib
 
          bool srgb = mipmap_params.m_gamma_filtering != 0;
 
-         dds_texture::resample_params res_params;
+         mipmapped_texture::resample_params res_params;
          res_params.m_pFilter = pFilter;
          res_params.m_wrapping = mipmap_params.m_tiled != 0;
          if (work_tex.get_num_faces())
@@ -462,7 +462,7 @@ namespace crnlib
 
          const char* pFilter = crn_get_mip_filter_name(mipmap_params.m_filter);
 
-         dds_texture::generate_mipmap_params gen_params;
+         mipmapped_texture::generate_mipmap_params gen_params;
          gen_params.m_pFilter = pFilter;
          gen_params.m_wrapping = mipmap_params.m_tiled != 0;
          gen_params.m_renormalize = mipmap_params.m_renormalize != 0;
@@ -496,7 +496,7 @@ namespace crnlib
       if (pActual_bitrate) *pActual_bitrate = 0.0f;
       if (pActual_quality_level) *pActual_quality_level = 0;
 
-      dds_texture work_tex;
+      mipmapped_texture work_tex;
       if (!create_dds_tex(params, work_tex))
       {
          console::error("Failed creating DDS texture from crn_comp_params!");

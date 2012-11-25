@@ -15,6 +15,7 @@ namespace crnlib
    data_stream*                              console::m_pLog_stream;
    mutex*                                    console::m_pMutex;
    uint                                      console::m_num_messages[cCMTTotal];
+   bool                                      console::m_at_beginning_of_line = true;
 
    const uint cConsoleBufSize = 4096;
 
@@ -70,7 +71,7 @@ namespace crnlib
       }
 
       const char* pPrefix = NULL;
-      if (m_prefixes)
+      if ((m_prefixes) && (m_at_beginning_of_line))
       {
          switch (type)
          {
@@ -87,6 +88,9 @@ namespace crnlib
             ::printf("%s", pPrefix);
          ::printf(m_crlf ? "%s\n" : "%s", buf);
       }
+
+      uint n = strlen(buf);
+      m_at_beginning_of_line = (m_crlf) || ((n) && (buf[n - 1] == '\n'));
 
       if ((type != cProgressConsoleMessage) && (m_pLog_stream))
       {

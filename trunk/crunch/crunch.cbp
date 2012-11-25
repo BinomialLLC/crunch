@@ -43,6 +43,10 @@
 			<Add directory="..\inc" />
 			<Add directory="..\crnlib" />
 		</Compiler>
+		<Unit filename="corpus_gen.cpp" />
+		<Unit filename="corpus_gen.h" />
+		<Unit filename="corpus_test.cpp" />
+		<Unit filename="corpus_test.h" />
 		<Unit filename="crunch.cpp" />
 		<Extensions>
 			<code_completion />
