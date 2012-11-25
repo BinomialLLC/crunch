@@ -5,13 +5,15 @@
 
 ==Windows==
 
-{{{crn.2008.sln}}} builds crnlib and the command line tool, and {{{crn_examples.2008.sln}}} builds the examples. Both are Visual Studio 2008 (VC9) solution file containing projects for Win32 and x64. crnlib itself also builds with VS2005, VS2010, and gcc 4.5.0 ([http://tdm-gcc.tdragon.net/ TDM GCC+MinGW]).  A codeblocks 10.05 workspace and project file is also included, but compiling crnlib this way hasn't been tested much.
+{{{crn.2008.sln}}} builds crnlib and the command line tool, and {{{crn_examples.2008.sln}}} builds the examples. Both are Visual Studio 2008 (VC9) solution file containing projects for Win32 and x64. 
+
+crnlib and crunch have also been built with VS2005, VS2010, and gcc 4.5.0 ([http://tdm-gcc.tdragon.net/ TDM GCC+MinGW]).  A Codeblocks 10.05 workspace is also included (but building crnlib this way hasn't been tested a whole lot - it mostly exists to make porting to Linux using gcc a little easier).
 
 ==Linux==
 
-I simple makefile to build only the crunch executable is in crnlib/Makefile. I've only tested/built under 32-bit Ubuntu 12.04, 64-bit should be easy to get working with minimal tweaks. Alternately, you can use the Codeblocks v10.05 workspace in "crn_linux.workspace".
+I simple makefile to build only the crunch executable is in crnlib/Makefile. I've only built/tested under 32-bit Ubuntu 12.04, however 64-bit should be easy to get working with minimal tweaks. Alternately, you can use the Codeblocks v10.05 Linux workspace in "crn_linux.workspace".
 
-Important: When compiling with gcc, be sure to use -fno-strict-aliasing otherwise crnlib will randomly misbehave. This also applies to the transcoder library in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h].
+*Important*: When compiling with gcc, be sure to use -fno-strict-aliasing otherwise crnlib will randomly misbehave. This also applies to the transcoder library in [http://code.google.com/p/crunch/source/browse/trunk/inc/crn_decomp.h inc/crn_decomp.h].
 
 == [http://code.google.com/p/crunch/source/browse/trunk/example1/example1.cpp example1] ==
 Demonstrates how to use crnlib's high-level C-helper
