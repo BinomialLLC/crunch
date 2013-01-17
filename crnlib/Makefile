@@ -1,5 +1,7 @@
-COMPILE_OPTIONS = -O3 -fomit-frame-pointer -ffast-math -fno-math-errno -g -fno-strict-aliasing -Wall -Wno-unused-value -Wno-unused -march=core2
+COMPILE_OPTIONS = -O3 -fomit-frame-pointer -ffast-math -fno-math-errno -g -fPIC -fno-strict-aliasing -Wall -Wno-unused-value -Wno-unused -march=core2
 LINKER_OPTIONS = -lpthread -g
+
+LIBCRUNCH = libcrunch.a
 
 OBJECTS = \
   crn_arealist.o \
@@ -82,6 +84,9 @@ all: crunch
 %.o: %.cpp
 	g++ $< -o $@ -c $(COMPILE_OPTIONS)
 
+$(LIBCRUNCH): $(OBJECTS)
+	ar rcs $(LIBCRUNCH) $(OBJECTS)
+
 crunch.o: ../crunch/crunch.cpp
 	g++ $< -o $@ -c -I../inc -I../crnlib $(COMPILE_OPTIONS)
 
@@ -91,6 +96,8 @@ corpus_gen.o: ../crunch/corpus_gen.cpp
 corpus_test.o: ../crunch/corpus_test.cpp
 	g++ $< -o $@ -c -I../inc -I../crnlib $(COMPILE_OPTIONS)
 
-crunch: $(OBJECTS) crunch.o corpus_gen.o corpus_test.o
-	g++ $(OBJECTS) crunch.o corpus_gen.o corpus_test.o -o crunch $(LINKER_OPTIONS)
+crunch: $(LIBCRUNCH) crunch.o corpus_gen.o corpus_test.o
+	g++ crunch.o corpus_gen.o corpus_test.o -o crunch $(LIBCRUNCH) $(LINKER_OPTIONS)
 
+clean:
+	rm -rf $(LIBCRUNCH) crunch *.o 
