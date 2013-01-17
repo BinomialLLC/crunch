@@ -56,7 +56,12 @@ namespace crnlib
 
       template<typename T> inline T square(T value) { return value * value; }
 
+#ifdef __GNUC__
+    #if CRNLIB_64BIT_POINTERS==0
       inline bool is_power_of_2(uint32 x) { return x && ((x & (x - 1U)) == 0U); }
+    #endif
+#endif
+
       inline bool is_power_of_2(uint64 x) { return x && ((x & (x - 1U)) == 0U); }
 
       template<typename T> inline T align_up_value(T x, uint alignment)
@@ -79,7 +84,9 @@ namespace crnlib
       {
          return align_up_value(x, alignment) - x;
       }
-		      
+
+#ifdef __GNUC__
+    #if CRNLIB_64BIT_POINTERS==0		      
 		// From "Hackers Delight"
       inline uint32 next_pow2(uint32 val)
       {
@@ -91,6 +98,8 @@ namespace crnlib
          val |= val >> 1;
          return val + 1;
       }
+    #endif
+#endif
 
       inline uint64 next_pow2(uint64 val)
       {

@@ -52,6 +52,7 @@ namespace crnlib
 } // namespace crnlib
 
 using namespace crnlib;
+using crnlib::uint; 
 
 const char* crn_get_format_string(crn_format fmt)
 {
