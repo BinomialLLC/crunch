@@ -430,7 +430,7 @@ namespace crnlib
       new_width = math::clamp<int>(new_width, 1, cCRNMaxLevelResolution);
       new_height = math::clamp<int>(new_height, 1, cCRNMaxLevelResolution);
 
-      if ((new_width != (int)work_tex.get_width()) || (new_height != (int)work_tex.get_height()))
+      if ((new_width != (int)work_tex.get_width()) || (new_height != (int)work_tex.get_height()) || (mipmap_params.m_renormalize != 0))
       {
          console::info("Resampling input texture to %ux%u", new_width, new_height);
 
