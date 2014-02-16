@@ -374,7 +374,7 @@ namespace crnd
 
    const uint32 cIntBits = 32U;
 
-#ifdef _WIN64
+#if defined(_WIN64) || defined(_LP64)
    typedef uint64 ptr_bits;
 #else
    #ifdef __x86_64__
