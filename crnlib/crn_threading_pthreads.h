@@ -14,6 +14,10 @@
 #include <semaphore.h>
 #include <unistd.h>
 
+#ifdef __APPLE__
+#include <libkern/OSAtomic.h>
+#endif
+
 namespace crnlib
 {
    // g_number_of_processors defaults to 1. Will be higher on multicore machines.
@@ -87,7 +91,11 @@ namespace crnlib
       void unlock();
 
    private:
+#ifdef __APPLE__
+      OSSpinLock m_spinlock;
+#else
       pthread_spinlock_t m_spinlock;
+#endif
    };
 
    class scoped_spinlock

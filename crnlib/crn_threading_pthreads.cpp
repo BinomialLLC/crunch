@@ -12,7 +12,11 @@
 #endif
 
 #ifdef __GNUC__
+#ifdef __APPLE__
+#include <unistd.h>
+#else
 #include <sys/sysinfo.h>
+#endif
 #endif
 
 #ifdef WIN32
@@ -29,6 +33,8 @@ namespace crnlib
       SYSTEM_INFO g_system_info;
       GetSystemInfo(&g_system_info);
       g_number_of_processors = math::maximum<uint>(1U, g_system_info.dwNumberOfProcessors);
+#elif defined(__APPLE__)
+       g_number_of_processors = math::maximum<int>(1, sysconf(_SC_NPROCESSORS_ONLN));
 #elif defined(__GNUC__)
       g_number_of_processors = math::maximum<int>(1, get_nprocs());
 #else
@@ -38,8 +44,14 @@ namespace crnlib
 
    crn_thread_id_t crn_get_current_thread_id()
    {
+#ifdef __APPLE__
+       __uint64_t thread_id = 0;
+       pthread_threadid_np(pthread_self(), &thread_id);
+       return thread_id;
+#else
       // FIXME: Not portable
       return static_cast<crn_thread_id_t>(pthread_self());
+#endif
    }
 
    void crn_sleep(unsigned int milliseconds)
@@ -172,10 +184,14 @@ namespace crnlib
       }
       else
       {
+#ifdef __APPLE__
+         status = sem_wait(&m_sem);
+#else
          struct timespec interval;
          interval.tv_sec = milliseconds / 1000;
          interval.tv_nsec = (milliseconds % 1000) * 1000000L;
          status = sem_timedwait(&m_sem, &interval);
+#endif
       }
 
       if (status)
@@ -192,31 +208,45 @@ namespace crnlib
 
    spinlock::spinlock()
    {
+#ifdef __APPLE__
+       m_spinlock = OS_SPINLOCK_INIT;
+#else
       if (pthread_spin_init(&m_spinlock, 0))
       {
          CRNLIB_FAIL("spinlock: pthread_spin_init() failed");
       }
+#endif
    }
 
    spinlock::~spinlock()
    {
+#ifndef __APPLE__
       pthread_spin_destroy(&m_spinlock);
+#endif
    }
 
    void spinlock::lock()
    {
+#ifdef __APPLE__
+       OSSpinLockLock(&m_spinlock);
+#else
       if (pthread_spin_lock(&m_spinlock))
       {
          CRNLIB_FAIL("spinlock: pthread_spin_lock() failed");
       }
+#endif
    }
 
    void spinlock::unlock()
    {
+#ifdef __APPLE__
+       OSSpinLockUnlock(&m_spinlock);
+#else
       if (pthread_spin_unlock(&m_spinlock))
       {
          CRNLIB_FAIL("spinlock: pthread_spin_unlock() failed");
       }
+#endif
    }
 
    task_pool::task_pool() :
