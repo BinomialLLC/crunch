@@ -14,6 +14,34 @@
 
 #include "crn_rg_etc1.h"
 
+
+inline bool crn_comp_params::check() const
+{
+    if ( (m_file_type > cCRNFileTypeDDS) ||
+        (((int)m_quality_level < (int)cCRNMinQualityLevel) || ((int)m_quality_level > (int)cCRNMaxQualityLevel)) ||
+        (m_dxt1a_alpha_threshold > 255) ||
+        ((m_faces != 1) && (m_faces != 6)) ||
+        ((m_width < 1) || (m_width > cCRNMaxLevelResolution)) ||
+        ((m_height < 1) || (m_height > cCRNMaxLevelResolution)) ||
+        ((m_levels < 1) || (m_levels > cCRNMaxLevels)) ||
+        ((m_format < cCRNFmtDXT1) || (m_format >= cCRNFmtTotal)) ||
+        ((m_crn_color_endpoint_palette_size) && ((m_crn_color_endpoint_palette_size < cCRNMinPaletteSize) || (m_crn_color_endpoint_palette_size > cCRNMaxPaletteSize))) ||
+        ((m_crn_color_selector_palette_size) && ((m_crn_color_selector_palette_size < cCRNMinPaletteSize) || (m_crn_color_selector_palette_size > cCRNMaxPaletteSize))) ||
+        ((m_crn_alpha_endpoint_palette_size) && ((m_crn_alpha_endpoint_palette_size < cCRNMinPaletteSize) || (m_crn_alpha_endpoint_palette_size > cCRNMaxPaletteSize))) ||
+        ((m_crn_alpha_selector_palette_size) && ((m_crn_alpha_selector_palette_size < cCRNMinPaletteSize) || (m_crn_alpha_selector_palette_size > cCRNMaxPaletteSize))) ||
+        (m_alpha_component > 3) ||
+        (m_num_helper_threads > cCRNMaxHelperThreads) ||
+        (m_dxt_quality > cCRNDXTQualityUber) ||
+        (m_dxt_compressor_type >= cCRNTotalDXTCompressors) )
+    {
+        return false;
+    }
+    return true;
+}
+
+inline bool crn_mipmap_params::check() const { return true; }
+
+
 namespace crnlib
 {
    static void* realloc_func(void* p, size_t size, size_t* pActual_size, bool movable, void* pUser_data)

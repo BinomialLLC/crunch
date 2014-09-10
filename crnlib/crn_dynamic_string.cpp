@@ -533,10 +533,10 @@ namespace crnlib
       return *this;
    }
 
-#ifdef CRNLIB_BUILD_DEBUG
    void dynamic_string::check() const
    {
-      if (!m_pStr)
+ #ifdef CRNLIB_BUILD_DEBUG
+     if (!m_pStr)
       {
          CRNLIB_ASSERT(!m_buf_size && !m_len);
       }
@@ -550,8 +550,8 @@ namespace crnlib
          CRNLIB_ASSERT(strlen(m_pStr) == m_len);
 #endif
       }
-   }
 #endif
+   }
 
    bool dynamic_string::ensure_buf(uint len, bool preserve_contents)
    {

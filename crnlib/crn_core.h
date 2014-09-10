@@ -82,7 +82,11 @@
 
    #define CRNLIB_RESTRICT
 
+#ifdef __APPLE__
+   #define CRNLIB_FORCE_INLINE inline __attribute__((__always_inline__))
+#else
    #define CRNLIB_FORCE_INLINE inline __attribute__((__always_inline__,__gnu_inline__))
+#endif
 
    #define CRNLIB_INT64_FORMAT_SPECIFIER "%lli"
    #define CRNLIB_UINT64_FORMAT_SPECIFIER "%llu"
