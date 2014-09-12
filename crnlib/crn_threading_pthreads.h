@@ -78,7 +78,12 @@ namespace crnlib
       bool wait(uint32 milliseconds = cUINT32_MAX);
 
    private:
+#ifdef __APPLE__
+      std::string m_name;
+      sem_t *m_sem;
+#else
       sem_t m_sem;
+#endif
    };
 
    class spinlock
