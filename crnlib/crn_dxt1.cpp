@@ -112,9 +112,9 @@ namespace crnlib
          uint weight = m_unique_colors[i].m_weight;
          total_weight += weight;
 
-         tot_r += m_unique_colors[i].m_color.r * weight;
-         tot_g += m_unique_colors[i].m_color.g * weight;
-         tot_b += m_unique_colors[i].m_color.b * weight;
+         tot_r += m_unique_colors[i].m_color.r * static_cast<uint64>(weight);
+         tot_g += m_unique_colors[i].m_color.g * static_cast<uint64>(weight);
+         tot_b += m_unique_colors[i].m_color.b * static_cast<uint64>(weight);
       }
 
       const uint half_total_weight = total_weight >> 1;
@@ -494,7 +494,7 @@ namespace crnlib
          ll[2] = (ll[0]*2+ll[1])/3;
          ll[3] = (ll[0]+ll[1]*2)/3;
 
-         uint error_to_beat = 0;
+         uint64 error_to_beat = 0;
          uint min_color_weight = 0;
          uint max_color_weight = 0;
          for (uint i = 0; i < m_unique_colors.size(); i++)
@@ -503,7 +503,7 @@ namespace crnlib
             uint w = m_unique_colors[i].m_weight;
 
             int delta = ll[m_best_solution.m_selectors[i]] - c;
-            error_to_beat += (int)w * (delta * delta);
+            error_to_beat += static_cast<int64>(w) * (delta * delta);
 
             if (c == min_color[comp_index])
                min_color_weight += w;
@@ -561,11 +561,11 @@ namespace crnlib
                   tl[2] = (tl[0]*2+tl[1])/3;
                   tl[3] = (tl[0]+tl[1]*2)/3;
 
-                  uint trial_error = 0;
+                  uint64 trial_error = 0;
                   for (uint i = 0; i < m_unique_colors.size(); i++)
                   {
                      int delta = tl[m_best_solution.m_selectors[i]] - m_unique_colors[i].m_color[comp_index];
-                     trial_error += m_unique_colors[i].m_weight * (delta * delta);
+                     trial_error += static_cast<int64>(m_unique_colors[i].m_weight) * (delta * delta);
                      if (trial_error >= error_to_beat)
                         break;
                   }
@@ -599,7 +599,7 @@ namespace crnlib
                         for (uint i = 0; i < m_unique_colors.size(); i++)
                         {
                            int delta = tl[m_best_solution.m_selectors[i]] - m_unique_colors[i].m_color[comp_index];
-                           error_to_beat += m_unique_colors[i].m_weight * (delta * delta);
+                           error_to_beat += static_cast<int64>(m_unique_colors[i].m_weight) * (delta * delta);
                         }
 
                      } // better
@@ -1582,7 +1582,7 @@ namespace crnlib
                   err = color_distance(true, c, colors[3], false);
                   if (err < best_error) { best_error = err; best_color_index = 3; }
 
-                  trial_error += best_error * m_unique_colors[unique_color_index].m_weight;
+                  trial_error += best_error * static_cast<uint64>(m_unique_colors[unique_color_index].m_weight);
                   if (trial_error >= solution.m_error)
                      break;
 
@@ -1607,7 +1607,7 @@ namespace crnlib
                   err = color_distance(false, c, colors[3], false);
                   if (err < best_error) { best_error = err; best_color_index = 3; }
 
-                  trial_error += best_error * m_unique_colors[unique_color_index].m_weight;
+                  trial_error += best_error * static_cast<uint64>(m_unique_colors[unique_color_index].m_weight);
                   if (trial_error >= solution.m_error)
                      break;
 
@@ -1634,7 +1634,7 @@ namespace crnlib
                   err = color_distance(true, c, colors[2], false);
                   if (err < best_error) { best_error = err; best_color_index = 2; }
 
-                  trial_error += best_error * m_unique_colors[unique_color_index].m_weight;
+                  trial_error += best_error * static_cast<uint64>(m_unique_colors[unique_color_index].m_weight);
                   if (trial_error >= solution.m_error)
                      break;
 
@@ -1656,7 +1656,7 @@ namespace crnlib
                   err = color_distance(false, c, colors[2], false);
                   if (err < best_error) { best_error = err; best_color_index = 2; }
 
-                  trial_error += best_error * m_unique_colors[unique_color_index].m_weight;
+                  trial_error += best_error * static_cast<uint64>(m_unique_colors[unique_color_index].m_weight);
                   if (trial_error >= solution.m_error)
                      break;
 
@@ -1781,7 +1781,7 @@ namespace crnlib
 
                uint best_error = color_distance(m_perceptual, c, colors[best_color_index], false);
 
-               trial_error += best_error * m_unique_colors[unique_color_index].m_weight;
+               trial_error += best_error * static_cast<uint64>(m_unique_colors[unique_color_index].m_weight);
                if (trial_error >= solution.m_error)
                   break;
 
@@ -1814,7 +1814,7 @@ namespace crnlib
 
                uint best_error = color_distance(m_perceptual, c, colors[best_color_index], false);
 
-               trial_error += best_error * m_unique_colors[unique_color_index].m_weight;
+               trial_error += best_error * static_cast<uint64>(m_unique_colors[unique_color_index].m_weight);
                if (trial_error >= solution.m_error)
                   break;
 
