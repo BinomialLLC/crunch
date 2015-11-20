@@ -1,5 +1,5 @@
 crunch/crnlib v1.04 - Advanced DXTn texture compression library
-Copyright (C) 2010-2012 Rich Geldreich and Tenacious Software LLC
+Copyright (C) 2010-2016 Rich Geldreich and Tenacious Software LLC
 
 For bugs or support contact Rich Geldreich <richgel99@gmail.com>.
 
@@ -12,14 +12,17 @@ written by Igor Pavlov (LZMA), RYG (crn_ryg_dxt*), and Sean Barrett (stb_image.c
 If you use this software in a product, an acknowledgment in the product 
 documentation would be highly appreciated but is not required.
 
+Note: crunch originally used to live on Google Code:
+https://code.google.com/p/crunch/
+
+
 New for v1.04 [11/24/12]: KTX file format, basic ETC1 support, DDS format fixes, simple makefile
 ------------------------------------------------
 
 Lots of higher level changes to get crnlib into a state where I can carry it forward to
 support other file and texture compression formats. No major codec-level changes. 
 I've regression tested the codec writing .CRN and RDO .DDS files at various bitrates.
-Everything seems OK, but with all the changes I made to support KTX and other formats like ETC1 
-I'm still worried about bugs.
+Everything seems OK, but with all the changes I made to support KTX and other formats like ETC1.
 
 New for v1.03 [4/26/12]: crnlib more portable, Linux Port
 ------------------------------------------------
