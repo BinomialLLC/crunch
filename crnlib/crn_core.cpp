@@ -8,7 +8,7 @@
 
 namespace crnlib
 {
-   const char *g_copyright_str = "Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC";
+   const char *g_copyright_str = "Copyright (c) 2010-2016 Binomial LLC";
    const char *g_sig_str = "C8cfRlaorj0wLtnMSxrBJxTC85rho2L9hUZKHcBL";
 
 } // namespace crnlib
