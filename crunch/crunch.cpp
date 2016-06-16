@@ -176,7 +176,7 @@ public:
          console::printf("-%s", pixel_format_helpers::get_pixel_format_string(fmt));
       }
 
-      console::printf("\nFor bugs, support, or feedback: richgel99@gmail.com");
+      console::printf("\nFor bugs, support, or feedback: info@binomial.info");
    }
 
    bool convert(const char* pCommand_line)
@@ -1253,8 +1253,8 @@ static bool check_for_option(int argc, char *argv[], const char *pOption)
 
 static void print_title()
 {
-   console::printf("crunch: Advanced DXTn Texture Compressor - http://code.google.com/p/crunch");
-   console::printf("Copyright (c) 2010-2012 Rich Geldreich and Tenacious Software LLC");
+   console::printf("crunch: Advanced DXTn Texture Compressor - https://github.com/richgel999/crunch");
+   console::printf("Copyright (c) 2010-2016 Binomial LLC");
    console::printf("crnlib version v%u.%02u %s Built %s, %s", CRNLIB_VERSION / 100U, CRNLIB_VERSION % 100U, crnlib_is_x64() ? "x64" : "x86", __DATE__, __TIME__);
    console::printf("");
 }

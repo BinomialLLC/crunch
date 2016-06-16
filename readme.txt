@@ -1,7 +1,7 @@
 crunch/crnlib v1.04 - Advanced DXTn texture compression library
-Copyright (C) 2010-2016 Rich Geldreich and Tenacious Software LLC
+Copyright (C) 2010-2016 Binomial LLC
 
-For bugs or support contact Rich Geldreich <richgel99@gmail.com>.
+For bugs or support contact Binomial <info@binomial.info>.
 
 This software uses the ZLIB license, which is located in license.txt.
 http://opensource.org/licenses/Zlib
