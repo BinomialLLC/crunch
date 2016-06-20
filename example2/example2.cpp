@@ -24,7 +24,7 @@ using namespace crnlib;
 static int print_usage()
 {
    printf("Description: Transcodes .CRN to .DDS files using crn_decomp.h.\n");
-   printf("Copyright (c) 2010-2016 Binomial LLC\n");
+   printf("Copyright (c) 2010-2016 Richard Geldreich, Jr. and Binomial LLC\n");
    printf("Usage: example2 [source_file] [options]\n");
    printf("\nOptions:\n");
    printf("-out filename - Force output filename.\n");

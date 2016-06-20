@@ -33,7 +33,7 @@ const int cDefaultCRNQualityLevel = 128;
 static int print_usage()
 {
    printf("Description: Simple crnlib API example program.\n");
-   printf("Copyright (c) 2010-2016 Binomial LLC\n");
+   printf("Copyright (c) 2010-2016 Richard Geldreich, Jr. and Binomial LLC\n");
    printf("Usage: example1 [mode: i/c/d] [source_file] [options]\n");
    printf("\nModes:\n");
    printf("c: Compress to .DDS or .CRN using the crn_compress() func. in crnlib.h\n");
