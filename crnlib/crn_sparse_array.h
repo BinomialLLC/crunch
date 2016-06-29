@@ -355,7 +355,7 @@ namespace crnlib
 
       inline T* alloc_group(bool nofail = false)
       {
-         T* p = static_cast<T*>(alloc_space(N * sizeof(T)));
+         T* p = static_cast<T*>(sparse_array_traits<T, Log2N>::alloc_space(N * sizeof(T)));
 
          if (!p)
          {
@@ -365,7 +365,7 @@ namespace crnlib
             CRNLIB_FAIL("Out of memory");
          }
 
-         construct_group(p);
+         sparse_array_traits<T, Log2N>::construct_group(p);
 
          m_num_active_groups++;
 
@@ -379,20 +379,20 @@ namespace crnlib
             CRNLIB_ASSERT(m_num_active_groups);
             m_num_active_groups--;
 
-            destruct_group(p);
+            sparse_array_traits<T, Log2N>::destruct_group(p);
 
-            free_space(p);
+            sparse_array_traits<T, Log2N>::free_space(p);
          }
       }
 
       inline void init_default()
       {
-         construct_element(reinterpret_cast<T*>(m_default));
+         sparse_array_traits<T, Log2N>::construct_element(reinterpret_cast<T*>(m_default));
       }
 
       inline void deinit_default()
       {
-         destruct_element(reinterpret_cast<T*>(m_default));
+         sparse_array_traits<T, Log2N>::destruct_element(reinterpret_cast<T*>(m_default));
       }
    };
 
