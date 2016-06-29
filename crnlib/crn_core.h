@@ -47,7 +47,7 @@
 
    #define CRNLIB_USE_UNALIGNED_INT_LOADS 1
    #define CRNLIB_RESTRICT __restrict
-   #define CRNLIB_FORCE_INLINE __forceinline
+   #define CRNLIB_FORCE_INLINE static __forceinline
 
    #if defined(_MSC_VER) || defined(__MINGW32__) || defined(__MINGW64__)
       #define CRNLIB_USE_MSVC_INTRINSICS 1
@@ -82,7 +82,7 @@
 
    #define CRNLIB_RESTRICT
 
-   #define CRNLIB_FORCE_INLINE inline __attribute__((__always_inline__,__gnu_inline__))
+   #define CRNLIB_FORCE_INLINE static inline __attribute__((__always_inline__,__gnu_inline__))
 
    #define CRNLIB_INT64_FORMAT_SPECIFIER "%lli"
    #define CRNLIB_UINT64_FORMAT_SPECIFIER "%llu"
@@ -113,7 +113,7 @@
    #define CRNLIB_USE_WIN32_ATOMIC_FUNCTIONS 0
 
    #define CRNLIB_RESTRICT
-   #define CRNLIB_FORCE_INLINE inline
+   #define CRNLIB_FORCE_INLINE static inline
 
    #define CRNLIB_INT64_FORMAT_SPECIFIER "%I64i"
    #define CRNLIB_UINT64_FORMAT_SPECIFIER "%I64u"
