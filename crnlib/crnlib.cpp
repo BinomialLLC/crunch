@@ -172,7 +172,7 @@ void *crn_compress(const crn_comp_params &comp_params, crn_uint32 &compressed_si
    if (pActual_bitrate) *pActual_bitrate = 0.0f;
 
    if (!comp_params.check())
-      return false;
+      return NULL;
 
    crnlib::vector<uint8> crn_file_data;
    if (!create_compressed_texture(comp_params, crn_file_data, pActual_quality_level, pActual_bitrate))
@@ -189,7 +189,7 @@ void *crn_compress(const crn_comp_params &comp_params, const crn_mipmap_params &
    if (pActual_bitrate) *pActual_bitrate = 0.0f;
 
    if ((!comp_params.check()) || (!mip_params.check()))
-      return false;
+      return NULL;
 
    crnlib::vector<uint8> crn_file_data;
    if (!create_compressed_texture(comp_params, mip_params, crn_file_data, pActual_quality_level, pActual_bitrate))
