@@ -74,7 +74,7 @@ Recommended Software
 AMD's Compressonator tool is recommended to view the .DDS files created by
 the crunch tool and the included example projects:
 
-http://developer.amd.com/gpu/compressonator/pages/default.aspx
+https://github.com/GPUOpen-Tools/Compressonator
 
 Note: Some of the swizzled DXTn .DDS output formats (such as DXT5_xGBR)
 read/written by the crunch tool or examples deviate from the DX9 DDS
