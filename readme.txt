@@ -308,3 +308,12 @@ hasn't been tuned for max. quality yet.
 supported when writing to .DDS, not .KTX. Also, only plain block by block
 compression is supported when writing to ETC1, and .CRN does not support ETC1.
 
+Compile to Javascript with Emscripten
+-------------------------------------
+
+Download and install Emscripten:
+    http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html
+
+From the root directory, run:
+    emcc -O3 emscripten/crn.cpp -I./inc -s EXPORTED_FUNCTIONS="['_malloc', '_free', '_crn_get_width', '_crn_get_height', '_crn_get_levels', '_crn_get_dxt_format', '_crn_get_bytes_per_block', '_crn_get_uncompressed_size', '_crn_decompress']" -s NO_EXIT_RUNTIME=1 -s NO_FILESYSTEM=1 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s ALLOW_MEMORY_GROWTH=1 --memory-init-file 0 -o crunch.js
+
