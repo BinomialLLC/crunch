@@ -1305,7 +1305,7 @@ namespace crnlib
          *pActualComps = 0;
 
          if ((req_comps < 1) || (req_comps > 4))
-            return false;
+            return NULL;
 
          mipmapped_texture tex;
 
