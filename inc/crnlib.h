@@ -421,6 +421,7 @@ struct crn_mipmap_params
       // Default "blurriness" factor of .9 actually sharpens the output a little.
       m_blurriness = .9f;
       m_renormalize = false;
+      m_rtopmip = false;
       m_tiled = false;
       m_max_levels = cCRNMaxLevels;
       m_min_mip_size = 1;
@@ -451,6 +452,7 @@ struct crn_mipmap_params
       CRNLIB_COMP(m_gamma);
       CRNLIB_COMP(m_blurriness);
       CRNLIB_COMP(m_renormalize);
+      CRNLIB_COMP(m_rtopmip);
       CRNLIB_COMP(m_tiled);
       CRNLIB_COMP(m_max_levels);
       CRNLIB_COMP(m_min_mip_size);
@@ -481,6 +483,7 @@ struct crn_mipmap_params
    crn_uint32     m_min_mip_size;
 
    crn_bool       m_renormalize;
+   crn_bool       m_rtopmip;
    crn_bool       m_tiled;
 
    crn_scale_mode m_scale_mode;
