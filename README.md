@@ -3,8 +3,8 @@ Copyright (C) 2010-2017 Richard Geldreich, Jr. and Binomial LLC http://binomial.
 
 For bugs or support contact Binomial <info@binomial.info>.
 
-Please note that cruch is unsupported software. We've created a new version,
-which has first-class support for LZ optimized RDO texture compression, much 
+Please note that cruch is unsupported software. **Basis** is the commercial successor 
+to crunch, which has first-class support for LZ optimized RDO texture compression, much 
 faster compression, and more GPU formats. More info is on our website 
 here: http://www.binomial.info/
 
