@@ -292,7 +292,7 @@ effectively given to alpha.
 (DXT3 is supported by crnlib's when compressing to regular DXTn DDS
 files.) You'll get DXT5 files if you request DXT3. However, DXT3 is
 supported by the regular DXTn block compressor. (DXT3's 4bpp fixed alpha
-sucks verses DXT5 alpha blocks, so I don't see this as a bug deal.)
+sucks verses DXT5 alpha blocks, so I don't see this as a big deal.)
 
 * The DXT5_CCXY format uses a simple YCoCg encoding that is workable but
 hasn't been tuned for max. quality yet.
