@@ -2427,7 +2427,7 @@ namespace crnlib
          image_u8 tmp_img;
          image_u8* pSrc_image = pSrc->get_unpacked_image(tmp_img, cUnpackFlagUncook | cUnpackFlagUnflip);
 
-         const mip_level* pDst = get_level(face_index, 0);
+         const mip_level* pDst = cubemap.get_level(face_index, 0);
          image_u8* pDst_image = pDst->get_image();
          CRNLIB_ASSERT(pDst_image);
 
@@ -2453,6 +2453,68 @@ namespace crnlib
 
       CRNLIB_ASSERT(check());
 
+      return true;
+   }
+   
+   bool mipmapped_texture::cubemap_to_vertical_cross()
+   {
+      if (get_num_faces() != 6)
+         return false;
+      
+      const uint face_width = get_width();
+      
+      if(face_width != get_height())
+         return false;
+      
+      bool alpha_is_valid = has_alpha();
+      
+      mipmapped_texture cross;
+      
+      pixel_format fmt = alpha_is_valid ? PIXEL_FMT_A8R8G8B8 : PIXEL_FMT_R8G8B8;
+      
+      cross.init(face_width * 3, face_width * 4, 1, 1, fmt, m_name.get_ptr(), cDefaultOrientationFlags);
+      
+      const mip_level* pDst = cross.get_level(0, 0);
+      image_u8* pDst_image = pDst->get_image();
+      CRNLIB_ASSERT(pDst_image);
+         
+      for (uint y = 0; y < cross.get_height(); y++)
+      {
+         for (uint x = 0; x < cross.get_width(); x++)
+         {
+            color_quad_u8& c = (*pDst_image)(x, y);
+            
+            c = color_quad_u8(0, 0, 0, 0);
+         }
+      }
+      
+      for (uint face_index = 0; face_index < 6; face_index++)
+      {
+         const mip_level* pSrc = get_level(face_index, 0);
+
+         image_u8 tmp_img;
+         image_u8* pSrc_image = pSrc->get_unpacked_image(tmp_img, cUnpackFlagUncook | cUnpackFlagUnflip);
+         
+         const bool flipped = (face_index == 5);
+         const uint x_ofs = g_vertical_cross_image_offsets[face_index][0] * face_width;
+         const uint y_ofs = g_vertical_cross_image_offsets[face_index][1] * face_width;
+
+         for (uint y = 0; y < face_width; y++)
+         {
+            for (uint x = 0; x < face_width; x++)
+            {
+               const color_quad_u8& c = (flipped ? (*pSrc_image)(face_width - 1 - x, face_width - 1 - y) :
+                                          (*pSrc_image)(x, y));
+               
+               (*pDst_image)(x_ofs + x, y_ofs + y) = c;
+            }
+         }
+      }
+      
+      swap(cross);
+      
+      CRNLIB_ASSERT(check());
+      
       return true;
    }
 
