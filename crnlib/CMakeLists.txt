@@ -102,6 +102,12 @@ set(IMAGE_FILES
     crn_threaded_resampler.cpp
 )
 
+set(INC_FILES
+    ${CMAKE_SOURCE_DIR}/inc/crn_decomp.h
+    ${CMAKE_SOURCE_DIR}/inc/crnlib.h
+    ${CMAKE_SOURCE_DIR}/inc/dds_defs.h
+)
+
 set(LZMA_FILES
     lzma_7zBuf.h
     lzma_7zBuf.cpp
@@ -229,6 +235,7 @@ add_library(crnlib STATIC
     ${CRN_FILES}
     ${FILE_FILES}
     ${IMAGE_FILES}
+    ${INC_FILES}
     ${LZMA_FILES}
     ${MATH_FILES}
     ${STREAM_FILES}
@@ -248,6 +255,8 @@ add_library(crnlib STATIC
     crn_platform.cpp
     crn_types.h
     crn_winhdr.h
+
+    ${CMAKE_SOURCE_DIR}/inc
 )
 
 target_compile_options(crnlib
@@ -261,7 +270,16 @@ target_include_directories(crnlib
         ${CMAKE_SOURCE_DIR}/inc
 )
 
-install(TARGETS crnlib DESTINATION lib)
+set_target_properties(crnlib
+    PROPERTIES
+        PUBLIC_HEADER "${INC_FILES}"
+)
+
+install(TARGETS crnlib
+    ARCHIVE DESTINATION lib
+    PUBLIC_HEADER DESTINATION includes
+    LIBRARY DESTINATION lib
+)
 
 source_group("Source Files\\api"                  FILES ${API_FILES})
 source_group("Source Files\\comp"                 FILES ${COMP_FILES})
@@ -270,6 +288,7 @@ source_group("Source Files\\containers"           FILES ${CONTAINER_FILES})
 source_group("Source Files\\crn"                  FILES ${CRN_FILES})
 source_group("Source Files\\file"                 FILES ${FILE_FILES})
 source_group("Source Files\\image"                FILES ${IMAGE_FILES})
+source_group("Source Files\\inc"                  FILES ${INC_FILES})
 source_group("Source Files\\lzmalib"              FILES ${LZMA_FILES})
 source_group("Source Files\\math"                 FILES ${MATH_FILES})
 source_group("Source Files\\stream"               FILES ${STREAM_FILES})
