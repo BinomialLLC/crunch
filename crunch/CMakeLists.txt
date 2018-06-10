@@ -21,3 +21,5 @@ target_include_directories(crunch
 target_link_libraries(crunch
     crnlib
 )
+
+install(TARGETS crunch DESTINATION bin)

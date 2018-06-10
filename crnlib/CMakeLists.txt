@@ -261,6 +261,8 @@ target_include_directories(crnlib
         ${CMAKE_SOURCE_DIR}/inc
 )
 
+install(TARGETS crnlib DESTINATION lib)
+
 source_group("Source Files\\api"                  FILES ${API_FILES})
 source_group("Source Files\\comp"                 FILES ${COMP_FILES})
 source_group("Source Files\\console"              FILES ${CONSOLE_FILES})
