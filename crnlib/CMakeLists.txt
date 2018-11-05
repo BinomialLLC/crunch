@@ -77,3 +77,9 @@ add_library(crnlib STATIC
 	lzma_LzmaLib.cpp
 	lzma_Threads.cpp
 )
+
+target_include_directories(crnlib
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+install(TARGETS crnlib DESTINATION lib)
