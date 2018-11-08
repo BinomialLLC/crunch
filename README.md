@@ -11,8 +11,8 @@ to crunch, which has first-class support for LZ optimized RDO texture compressio
 faster compression, and more GPU formats. More info is on our website 
 here: http://www.binomial.info/
 
-This software uses the ZLIB license, which is located in license.txt.
-http://opensource.org/licenses/Zlib
+This software uses a modified ZLIB license, which is located in license.txt. This license is the same as zlib 
+except attribution is required either in the product's documentation or credits.
 
 Portions of this software make use of public domain code originally
 written by Igor Pavlov (LZMA), RYG (crn_ryg_dxt*), and Sean Barrett (stb_image.c).
