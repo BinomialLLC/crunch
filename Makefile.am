@@ -15,6 +15,8 @@ AM_CPPFLAGS = -fomit-frame-pointer \
 						-fno-math-errno \
 						-I./
 
+EXTRA_DIST = README.md CHANGELOG.md license.txt
+
 # lib
 lib_LTLIBRARIES = libcrnlib.la
 libcrnlib_la_LDFLAGS = -no-defined -version-info 0:1:0 \
@@ -55,7 +57,7 @@ libcrnlib_la_SOURCES = crnlib/crn_arealist.cpp \
 											 crnlib/crn_miniz.cpp \
 											 crnlib/crn_mipmapped_texture.cpp \
 											 crnlib/crn_pixel_format.cpp \
-											 crnlib/crn_platformcpp \
+											 crnlib/crn_platform.cpp \
 											 crnlib/crn_prefix_coding.cpp \
 											 crnlib/crn_qdxt1.cpp \
 											 crnlib/crn_qdxt5.cpp \
