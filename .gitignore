@@ -43,3 +43,4 @@ config.h.*
 /test/tests.log
 /test/tests.trs
 /Makefile
+crunchcli
