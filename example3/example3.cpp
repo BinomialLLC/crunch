@@ -29,7 +29,7 @@ const uint cDXTBlockSize = 4;
 static int print_usage()
 {
    printf("Description: Simple .DDS DXTn block compression using crnlib.\n");
-   printf("Copyright (c) 2010-2016 Binomial LLC\n");
+   printf("Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.\n");
    printf("Usage: example3 [source_file] [options]\n");
    printf("\n");
    printf("Note: This simple example is not multithreaded, so it's not going to be\n");

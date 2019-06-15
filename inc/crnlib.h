@@ -1,5 +1,5 @@
 // File: crnlib.h - Advanced DXTn texture compression library.
-// Copyright (c) 2010-2016 Richard Geldreich, Jr. and Binomial LLC
+// Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.
 // See copyright notice and license at the end of this file.
 //
 // This header file contains the public crnlib declarations for DXTn,
