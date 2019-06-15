@@ -619,7 +619,7 @@ bool crn_decompress_block(const void *pSrc_block, crn_uint32 *pDst_pixels, crn_f
 // crnlib uses the ZLIB license:
 // http://opensource.org/licenses/Zlib
 //
-// Copyright (c) 2010-2016 Richard Geldreich, Jr. and Binomial LLC
+// Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.
 //
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages

@@ -1,7 +1,7 @@
 crunch/crnlib uses a modified ZLIB license. Specifically, it's the same as zlib except that 
 public credits for using the library are *required*.
 
-Copyright (c) 2010-2016 Richard Geldreich, Jr., Tenacious Software, and Binomial LLC
+Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -17,7 +17,7 @@ claim that you wrote the original software.
 2. If you use this software in a product, this acknowledgment in the product 
 documentation or credits is required:
 
-"Crunch Library Copyright (c) 2010-2016 Richard Geldreich, Jr., Tenacious Software, and Binomial LLC"
+"Crunch Library Copyright (c) 2010-2016 Richard Geldreich, Jr."
 
 3. Altered source versions must be plainly marked as such, and must not be
 misrepresented as being the original software.

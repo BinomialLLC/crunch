@@ -1,8 +1,6 @@
 crunch/crnlib v1.04 - Advanced DXTn texture compression library
-Copyright (C) 2010-2017 Richard Geldreich, Jr., Tenacious Software, and Binomial LLC http://binomial.info 
-
-Note: Crunch was originally released with a copyright of "Richard Geldreich, Jr. and Tenacious Software LLC". 
-Tenacious Software LLC as an entity no longer exists.
+Copyright (C) 2010-2017 Richard Geldreich, Jr. All rights reserved.
+http://binomial.info 
 
 For bugs or support contact Binomial <info@binomial.info>.
 
