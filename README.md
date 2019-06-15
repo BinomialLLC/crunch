@@ -1,4 +1,5 @@
 crunch/crnlib v1.04 - Advanced DXTn texture compression library
+
 Copyright (C) 2010-2017 Richard Geldreich, Jr. All rights reserved.
 
 For bugs or support contact Binomial: <info@binomial.info>.
