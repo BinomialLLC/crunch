@@ -1,7 +1,7 @@
 crunch/crnlib v1.04 - Advanced DXTn texture compression library
 Copyright (C) 2010-2017 Richard Geldreich, Jr. All rights reserved.
 
-For bugs or support contact Binomial <info@binomial.info>.
+For bugs or support contact Binomial: <info@binomial.info>.
 
 Please note that crunch is unsupported software. **Basis** is the new commercial successor 
 to crunch, which has first-class support for LZ optimized RDO texture compression, much 
