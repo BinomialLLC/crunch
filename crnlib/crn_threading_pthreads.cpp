@@ -12,7 +12,11 @@
 #endif
 
 #ifdef __GNUC__
+#ifdef __APPLE__
+#include <unistd.h>
+#else
 #include <sys/sysinfo.h>
+#endif
 #endif
 
 #ifdef WIN32
@@ -29,6 +33,8 @@ namespace crnlib
       SYSTEM_INFO g_system_info;
       GetSystemInfo(&g_system_info);
       g_number_of_processors = math::maximum<uint>(1U, g_system_info.dwNumberOfProcessors);
+#elif defined(__APPLE__)
+       g_number_of_processors = math::maximum<int>(1, sysconf(_SC_NPROCESSORS_ONLN));
 #elif defined(__GNUC__)
       g_number_of_processors = math::maximum<int>(1, get_nprocs());
 #else
@@ -38,8 +44,14 @@ namespace crnlib
 
    crn_thread_id_t crn_get_current_thread_id()
    {
+#ifdef __APPLE__
+       __uint64_t thread_id = 0;
+       pthread_threadid_np(pthread_self(), &thread_id);
+       return thread_id;
+#else
       // FIXME: Not portable
       return static_cast<crn_thread_id_t>(pthread_self());
+#endif
    }
 
    void crn_sleep(unsigned int milliseconds)
@@ -106,17 +118,31 @@ namespace crnlib
 
    semaphore::semaphore(long initialCount, long maximumCount, const char* pName)
    {
-      maximumCount, pName;
       CRNLIB_ASSERT(maximumCount >= initialCount);
+#ifdef __APPLE__
+      m_name = (pName != NULL ? pName : "crnlib");
+      m_sem = sem_open(m_name.c_str(), O_CREAT, S_IRWXU, initialCount);
+					   
+      if(m_sem == SEM_FAILED)
+      {
+         CRNLIB_FAIL("semaphore: sem_open() failed");
+      }
+#else
+      maximumCount, pName;
       if (sem_init(&m_sem, 0, initialCount))
       {
          CRNLIB_FAIL("semaphore: sem_init() failed");
       }
+#endif
    }
 
    semaphore::~semaphore()
    {
+#ifdef __APPLE__
+      sem_unlink(m_name.c_str());
+#else
       sem_destroy(&m_sem);
+#endif
    }
 
    void semaphore::release(long releaseCount)
@@ -132,7 +158,11 @@ namespace crnlib
 #else
       while (releaseCount > 0)
       {
+#ifdef __APPLE__
+         status = sem_post(m_sem);
+#else
          status = sem_post(&m_sem);
+#endif
          if (status)
             break;
          releaseCount--;
@@ -157,7 +187,11 @@ namespace crnlib
 #else
       while (releaseCount > 0)
       {
+#ifdef __APPLE__
+         sem_post(m_sem);
+#else
          sem_post(&m_sem);
+#endif
          releaseCount--;
       }
 #endif
@@ -168,22 +202,37 @@ namespace crnlib
       int status;
       if (milliseconds == cUINT32_MAX)
       {
+#ifdef __APPLE__
+         status = sem_wait(m_sem);
+#else
          status = sem_wait(&m_sem);
+#endif
       }
       else
       {
+#ifdef __APPLE__
+         status = sem_trywait(m_sem);
+#else
          struct timespec interval;
          interval.tv_sec = milliseconds / 1000;
          interval.tv_nsec = (milliseconds % 1000) * 1000000L;
          status = sem_timedwait(&m_sem, &interval);
+#endif
       }
 
       if (status)
       {
+#ifdef __APPLE__
+         if(errno != EAGAIN)
+		 {
+            CRNLIB_FAIL("semaphore: sem_wait() or sem_trywait() failed");
+		 }
+#else
          if (errno != ETIMEDOUT)
          {
             CRNLIB_FAIL("semaphore: sem_wait() or sem_timedwait() failed");
          }
+#endif
          return false;
       }
 
@@ -192,31 +241,45 @@ namespace crnlib
 
    spinlock::spinlock()
    {
+#ifdef __APPLE__
+       m_spinlock = OS_SPINLOCK_INIT;
+#else
       if (pthread_spin_init(&m_spinlock, 0))
       {
          CRNLIB_FAIL("spinlock: pthread_spin_init() failed");
       }
+#endif
    }
 
    spinlock::~spinlock()
    {
+#ifndef __APPLE__
       pthread_spin_destroy(&m_spinlock);
+#endif
    }
 
    void spinlock::lock()
    {
+#ifdef __APPLE__
+       OSSpinLockLock(&m_spinlock);
+#else
       if (pthread_spin_lock(&m_spinlock))
       {
          CRNLIB_FAIL("spinlock: pthread_spin_lock() failed");
       }
+#endif
    }
 
    void spinlock::unlock()
    {
+#ifdef __APPLE__
+       OSSpinLockUnlock(&m_spinlock);
+#else
       if (pthread_spin_unlock(&m_spinlock))
       {
          CRNLIB_FAIL("spinlock: pthread_spin_unlock() failed");
       }
+#endif
    }
 
    task_pool::task_pool() :

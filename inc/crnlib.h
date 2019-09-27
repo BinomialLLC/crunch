@@ -274,29 +274,7 @@ struct crn_comp_params
    }
 
    // Returns true if the input parameters are reasonable.
-   inline bool check() const
-   {
-      if ( (m_file_type > cCRNFileTypeDDS) ||
-         (((int)m_quality_level < (int)cCRNMinQualityLevel) || ((int)m_quality_level > (int)cCRNMaxQualityLevel)) ||
-         (m_dxt1a_alpha_threshold > 255) ||
-         ((m_faces != 1) && (m_faces != 6)) ||
-         ((m_width < 1) || (m_width > cCRNMaxLevelResolution)) ||
-         ((m_height < 1) || (m_height > cCRNMaxLevelResolution)) ||
-         ((m_levels < 1) || (m_levels > cCRNMaxLevels)) ||
-         ((m_format < cCRNFmtDXT1) || (m_format >= cCRNFmtTotal)) ||
-         ((m_crn_color_endpoint_palette_size) && ((m_crn_color_endpoint_palette_size < cCRNMinPaletteSize) || (m_crn_color_endpoint_palette_size > cCRNMaxPaletteSize))) ||
-         ((m_crn_color_selector_palette_size) && ((m_crn_color_selector_palette_size < cCRNMinPaletteSize) || (m_crn_color_selector_palette_size > cCRNMaxPaletteSize))) ||
-         ((m_crn_alpha_endpoint_palette_size) && ((m_crn_alpha_endpoint_palette_size < cCRNMinPaletteSize) || (m_crn_alpha_endpoint_palette_size > cCRNMaxPaletteSize))) ||
-         ((m_crn_alpha_selector_palette_size) && ((m_crn_alpha_selector_palette_size < cCRNMinPaletteSize) || (m_crn_alpha_selector_palette_size > cCRNMaxPaletteSize))) ||
-         (m_alpha_component > 3) ||
-         (m_num_helper_threads > cCRNMaxHelperThreads) ||
-         (m_dxt_quality > cCRNDXTQualityUber) ||
-         (m_dxt_compressor_type >= cCRNTotalDXTCompressors) )
-      {
-         return false;
-      }
-      return true;
-   }
+   bool check() const;
 
    // Helper to set/get flags from m_flags member.
    inline bool get_flag(crn_comp_flags flag) const { return (m_flags & flag) != 0; }
@@ -439,7 +417,7 @@ struct crn_mipmap_params
       m_clamp_height = 0;
    }
 
-   inline bool check() const { return true; }
+   bool check() const;
 
    inline bool operator== (const crn_mipmap_params& rhs) const
    {

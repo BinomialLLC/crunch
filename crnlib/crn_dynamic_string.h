@@ -135,11 +135,7 @@ namespace crnlib
       uint16      m_len;
       char*       m_pStr;
 
-#ifdef CRNLIB_BUILD_DEBUG
       void check() const;
-#else
-      inline void check() const { }
-#endif
 
       bool expand_buf(uint new_buf_size, bool preserve_contents);
 
