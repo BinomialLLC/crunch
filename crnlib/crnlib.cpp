@@ -405,7 +405,6 @@ bool crn_decompress_block(const void *pSrc_block, crn_uint32 *pDst_pixels_u32, c
             pDst_pixels[i] = colors[s];
             pDst_pixels[i].a = static_cast<uint8>(values[a]);
          }
-		 break;
       }
 
       case cCRNFmtDXN_XY:
