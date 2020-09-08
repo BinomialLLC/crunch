@@ -784,8 +784,8 @@ private:
       }
       else if (m_params.has_key("relrescale"))
       {
-         float w = m_params.get_value_as_float("relrescale", 0, 1, 1, 256, 0);
-         float h = m_params.get_value_as_float("relrescale", 0, 1, 1, 256, 1);
+         float w = m_params.get_value_as_float("relrescale", 0, 1, 0, 256, 0);
+         float h = m_params.get_value_as_float("relrescale", 0, 1, 0, 256, 1);
 
          mipmap_params.m_scale_mode = cCRNSMRelative;
          mipmap_params.m_scale_x = w;
