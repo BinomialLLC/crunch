@@ -1,5 +1,5 @@
 // File: crnlib.h - Advanced DXTn texture compression library.
-// Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.
+// Copyright (c) 2010-2016 Richard Geldreich, Jr. and Binomial LLC
 // See copyright notice and license at the end of this file.
 //
 // This header file contains the public crnlib declarations for DXTn,
@@ -616,30 +616,27 @@ bool crn_decompress_block(const void *pSrc_block, crn_uint32 *pDst_pixels, crn_f
 
 //------------------------------------------------------------------------------
 //
-// crunch/crnlib uses a modified ZLIB license. Specifically, it's the same as zlib except that 
-// public credits for using the library are *required*.
-// 
-// Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.
+// crnlib uses the ZLIB license:
+// http://opensource.org/licenses/Zlib
+//
+// Copyright (c) 2010-2016 Richard Geldreich, Jr. and Binomial LLC
 //
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
 // arising from the use of this software.
-// 
+//
 // Permission is granted to anyone to use this software for any purpose,
 // including commercial applications, and to alter it and redistribute it
 // freely, subject to the following restrictions:
-// 
+//
 // 1. The origin of this software must not be misrepresented; you must not
-// claim that you wrote the original software. 
-// 
-// 2. If you use this software in a product, this acknowledgment in the product 
-// documentation or credits is required:
-// 
-// "Crunch Library Copyright (c) 2010-2016 Richard Geldreich, Jr."
-// 
-// 3. Altered source versions must be plainly marked as such, and must not be
+// claim that you wrote the original software. If you use this software
+// in a product, an acknowledgment in the product documentation would be
+// appreciated but is not required.
+//
+// 2. Altered source versions must be plainly marked as such, and must not be
 // misrepresented as being the original software.
-// 
-// 4. This notice may not be removed or altered from any source distribution.
+//
+// 3. This notice may not be removed or altered from any source distribution.
 //
 //------------------------------------------------------------------------------

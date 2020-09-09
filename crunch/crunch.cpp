@@ -784,8 +784,8 @@ private:
       }
       else if (m_params.has_key("relrescale"))
       {
-         float w = m_params.get_value_as_float("relrescale", 0, 1, 1, 256, 0);
-         float h = m_params.get_value_as_float("relrescale", 0, 1, 1, 256, 1);
+         float w = m_params.get_value_as_float("relrescale", 0, 1, 0, 256, 0);
+         float h = m_params.get_value_as_float("relrescale", 0, 1, 0, 256, 1);
 
          mipmap_params.m_scale_mode = cCRNSMRelative;
          mipmap_params.m_scale_x = w;
@@ -1254,7 +1254,7 @@ static bool check_for_option(int argc, char *argv[], const char *pOption)
 static void print_title()
 {
    console::printf("crunch: Advanced DXTn Texture Compressor - https://github.com/BinomialLLC/crunch");
-   console::printf("Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.");
+   console::printf("Copyright (c) 2010-2016 Richard Geldreich, Jr. and Binomial LLC");
    console::printf("crnlib version v%u.%02u %s Built %s, %s", CRNLIB_VERSION / 100U, CRNLIB_VERSION % 100U, crnlib_is_x64() ? "x64" : "x86", __DATE__, __TIME__);
    console::printf("");
 }
