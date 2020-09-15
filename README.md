@@ -1,7 +1,6 @@
 crunch/crnlib v1.04 - Advanced DXTn texture compression library
-Public Domain - Please see license.txt.
 
-Please note that crunch is unsupported software. 
+Public Domain - Please see license.txt. 
 
 Portions of this software make use of public domain code originally
 written by Igor Pavlov (LZMA), RYG (crn_ryg_dxt*), and Sean Barrett (stb_image.c).
