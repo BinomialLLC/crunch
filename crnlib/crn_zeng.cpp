@@ -1,5 +1,5 @@
 // File: crn_zeng.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 // Modified Zeng's technique for codebook/palette reordering
 // Evaluation of some reordering techniques for image VQ index compression, António R. C. Paiva , O J. Pinho
 // http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.88.7221 

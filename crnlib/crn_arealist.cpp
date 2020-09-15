@@ -1,5 +1,5 @@
 // File: crn_arealist.cpp - 2D shape algebra (currently unused)
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 // Ported from the PowerView DOS image viewer, a product I wrote back in 1993. Not currently used in the open source release of crnlib.
 #include "crn_core.h"
 #include "crn_arealist.h"

@@ -1,5 +1,5 @@
 // File: crn_threading_pthreads.h
-// See Copyright Notice and license at the end of include/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #pragma once
 
 #if CRNLIB_USE_PTHREADS_API

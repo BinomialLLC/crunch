@@ -1,5 +1,5 @@
 // File: corpus_gen.cpp - Block compression corpus generator.
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 //
 // Example command line:
 // -gentest [-deep] [-blockpercentage .035] [-width 4096] [-height 4096] -in c:\temp\*.jpg [-in c:\temp\*.jpeg] [-in @blah.txt]

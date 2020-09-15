@@ -1,5 +1,5 @@
 // File: crn_assert.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include "crn_core.h"
 #if CRNLIB_USE_WIN32_API
 #include "crn_winhdr.h"

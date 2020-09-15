@@ -1,5 +1,5 @@
 // File: crn_freeimage_image_utils.h
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 // Note: This header file requires FreeImage/FreeImagePlus.
 
 #include "crn_image_utils.h"

@@ -1,6 +1,6 @@
 // File: example1.cpp - Simple command line tool that uses the crnlib lib and the crn_decomp.h header file library 
 // to compress, transcode/unpack, and inspect CRN/DDS textures.
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -33,7 +33,6 @@ const int cDefaultCRNQualityLevel = 128;
 static int print_usage()
 {
    printf("Description: Simple crnlib API example program.\n");
-   printf("Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.\n");
    printf("Usage: example1 [mode: i/c/d] [source_file] [options]\n");
    printf("\nModes:\n");
    printf("c: Compress to .DDS or .CRN using the crn_compress() func. in crnlib.h\n");

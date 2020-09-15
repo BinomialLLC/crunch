@@ -1,5 +1,5 @@
 // File: crn_rand.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 // See:
 // http://www.ciphersbyritter.com/NEWS4/RANDC.HTM
 // http://burtleburtle.net/bob/rand/smallprng.html

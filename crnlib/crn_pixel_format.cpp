@@ -1,5 +1,5 @@
 // File: crn_pixel_format.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include "crn_core.h"
 #include "crn_pixel_format.h"
 #include "crn_image.h"

@@ -1,5 +1,5 @@
 // File: crn_dxt_fast.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 // Parts of this module are derived from RYG's excellent public domain DXTx compressor.
 #include "crn_core.h"
 #include "crn_dxt_fast.h"

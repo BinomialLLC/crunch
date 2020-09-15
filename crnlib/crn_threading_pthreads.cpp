@@ -1,5 +1,5 @@
 // File: crn_threading_pthreads.cpp
-// See Copyright Notice and license at the end of include/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include "crn_core.h"
 #include "crn_threading_pthreads.h"
 #include "crn_timer.h"

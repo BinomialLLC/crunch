@@ -1,5 +1,5 @@
 // File: crn_math.h
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #pragma once
 
 #if defined(_M_IX86) && defined(_MSC_VER)

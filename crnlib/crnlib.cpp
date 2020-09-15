@@ -1,5 +1,5 @@
 // File: crnlib.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include "crn_core.h"
 #include "../inc/crnlib.h"
 #include "crn_comp.h"

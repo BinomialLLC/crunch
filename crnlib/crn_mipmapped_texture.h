@@ -1,5 +1,5 @@
 // File: crn_mipmapped_texture.h
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #pragma once
 #include "crn_dxt_image.h"
 #include "../inc/dds_defs.h"

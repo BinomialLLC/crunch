@@ -1,5 +1,5 @@
 // File: crn_mem.h
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #pragma once
 
 #ifndef CRNLIB_MIN_ALLOC_ALIGNMENT

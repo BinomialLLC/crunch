@@ -1,5 +1,5 @@
 // File: crn_assert.h
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #pragma once
 
 const unsigned int CRNLIB_FAIL_EXCEPTION_CODE = 256U;

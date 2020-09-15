@@ -1,5 +1,5 @@
 // File: crn_dds_texture.cpp - Actually supports both .DDS and .KTX. Probably will rename this eventually.
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include "crn_core.h"
 #include "crn_mipmapped_texture.h"
 #include "crn_cfile_stream.h"

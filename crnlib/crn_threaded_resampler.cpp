@@ -1,5 +1,5 @@
 // File: crn_threaded_resampler.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include "crn_core.h"
 #include "crn_threaded_resampler.h"
 #include "crn_resample_filters.h"

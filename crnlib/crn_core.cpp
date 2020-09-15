@@ -1,5 +1,5 @@
 // File: crn_core.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include "crn_core.h"
 
 #if CRNLIB_USE_WIN32_API
@@ -8,7 +8,7 @@
 
 namespace crnlib
 {
-   const char *g_copyright_str = "Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.";
+   const char *g_copyright_str = "This is Public Domain Software, please see license.txt.";
    const char *g_sig_str = "C8cfRlaorj0wLtnMSxrBJxTC85rho2L9hUZKHcBL";
 
 } // namespace crnlib

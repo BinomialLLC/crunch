@@ -1,5 +1,5 @@
 // File: crn_dxt1.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 //
 // Notes:
 // This class is not optimized for performance on small blocks, unlike typical DXT1 compressors. It's optimized for scalability and quality:

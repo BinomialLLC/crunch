@@ -1,5 +1,5 @@
 // File: crn_hash_map.h
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 //
 // Notes:
 // stl-like hash map/hash set, with predictable performance across platforms/compilers/C run times/etc.

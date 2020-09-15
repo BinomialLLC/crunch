@@ -1,5 +1,5 @@
 // File: crn_win32_threading.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include "crn_core.h"
 #include "crn_threading_win32.h"
 #include "crn_winhdr.h"

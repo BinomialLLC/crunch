@@ -1,5 +1,5 @@
 // File: crn_image_utils.h
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #pragma once
 #include "crn_image.h"
 #include "crn_data_stream_serializer.h"

@@ -5,7 +5,7 @@
 // This is the basic functionality a game engine would need to employ at runtime to utilize 
 // .CRN textures (excluding writing the output DDS file - instead you would provide the DXTn
 // bits directly to OpenGL/D3D).
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -24,7 +24,6 @@ using namespace crnlib;
 static int print_usage()
 {
    printf("Description: Transcodes .CRN to .DDS files using crn_decomp.h.\n");
-   printf("Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.\n");
    printf("Usage: example2 [source_file] [options]\n");
    printf("\nOptions:\n");
    printf("-out filename - Force output filename.\n");

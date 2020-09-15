@@ -1,5 +1,5 @@
 // File: crn_threading_null.h
-// See Copyright Notice and license at the end of include/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #pragma once
 
 #include "crn_atomics.h"

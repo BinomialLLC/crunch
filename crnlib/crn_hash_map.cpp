@@ -1,5 +1,5 @@
 // File: crn_hash_map.cpp
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include "crn_core.h"
 #include "crn_hash_map.h"
 #include "crn_rand.h"

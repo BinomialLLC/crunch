@@ -3,7 +3,7 @@
 // so it's not going to be fast. 
 // Also note that this sample only demonstrates traditional/vanilla 4x4 DXTn block compression (not CRN).
 
-// See Copyright Notice and license at the end of inc/crnlib.h
+// This software is in the public domain. Please see license.txt.
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -29,7 +29,6 @@ const uint cDXTBlockSize = 4;
 static int print_usage()
 {
    printf("Description: Simple .DDS DXTn block compression using crnlib.\n");
-   printf("Copyright (c) 2010-2016 Richard Geldreich, Jr. All rights reserved.\n");
    printf("Usage: example3 [source_file] [options]\n");
    printf("\n");
    printf("Note: This simple example is not multithreaded, so it's not going to be\n");

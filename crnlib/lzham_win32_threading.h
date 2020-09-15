@@ -1,5 +1,5 @@
 // File: lzham_task_pool_win32.h
-// See Copyright Notice and license at the end of include/lzham.h
+// This software is in the public domain. Please see license.txt.
 #pragma once
 
 #if LZHAM_USE_WIN32_API
