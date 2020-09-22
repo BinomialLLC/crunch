@@ -299,3 +299,14 @@ From the root directory, run:
 ```c
     emcc -O3 emscripten/crn.cpp -I./inc -s EXPORTED_FUNCTIONS="['_malloc', '_free', '_crn_get_width', '_crn_get_height', '_crn_get_levels', '_crn_get_dxt_format', '_crn_get_bytes_per_block', '_crn_get_uncompressed_size', '_crn_decompress']" -s NO_EXIT_RUNTIME=1 -s NO_FILESYSTEM=1 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s ALLOW_MEMORY_GROWTH=1 --memory-init-file 0 -o crunch.js
 ```
+
+## Build on Linux/macOS
+
+For convenient instead of directly using `crnlib/Makefile` (in which we left it intact for reference and just in case of direct use although not complete solution) to build `crunch` tool, you can execute the following sequence of commands on Linux/macOS to build `crunch` tool as well as static/shared libraries along with header files to be installed on your system.
+
+* `./autogen.sh`
+* `./configure`
+* `make -j4` or `make`
+* `sudo make install`
+
+Thus you can integrate crunch with your own engine/project dynamically, or statically. Note that due to the way autotools behave, we generate the binary tool namely `crunchcli` instead of `crunch` to satisfy the build process (as there is crunch directory inside). So instead of executing `crunch ....` you do `crunchcli ...` instead. But you can rename it freely.

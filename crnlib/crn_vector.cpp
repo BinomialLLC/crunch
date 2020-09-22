@@ -22,8 +22,9 @@ namespace crnlib
          return true;
 
       size_t new_capacity = min_new_capacity;
-      if ((grow_hint) && (!math::is_power_of_2(new_capacity)))
-         new_capacity = math::next_pow2(new_capacity);
+      // FIXED: workaround casting to uint64 to avoid ambigous function call
+      if ((grow_hint) && (!math::is_power_of_2((uint64)new_capacity)))
+         new_capacity = math::next_pow2((uint64)new_capacity);
 
       CRNLIB_ASSERT(new_capacity && (new_capacity > m_capacity));
 
