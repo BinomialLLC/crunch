@@ -53,6 +53,7 @@ namespace crnlib
 
       m_lo_cells.reserve(128);
       m_hi_cells.reserve(128);
+      m_num_prev_results = 0;
    }
 
    void dxt1_endpoint_optimizer::clear()
