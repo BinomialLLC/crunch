@@ -34,7 +34,8 @@ extern "C" {
   unsigned int crn_get_dxt_format(void *src, unsigned int src_size);
   unsigned int crn_get_bytes_per_block(void *src, unsigned int src_size);
   unsigned int crn_get_uncompressed_size(void *p, unsigned int size, unsigned int level);
-  void crn_decompress(void *src, unsigned int src_size, void *dst, unsigned int dst_size, unsigned int firstLevel, unsigned int levelCount);
+  // Returns false if any of the functions used internally fail.
+  bool crn_decompress(void *src, unsigned int src_size, void *dst, unsigned int dst_size, unsigned int firstLevel, unsigned int levelCount);
 }
 
 unsigned int crn_get_width(void *src, unsigned int src_size) {
@@ -79,7 +80,7 @@ unsigned int crn_get_uncompressed_size(void *src, unsigned int src_size, unsigne
   return total_face_size;
 }
 
-void crn_decompress(void *src, unsigned int src_size, void *dst, unsigned int dst_size, unsigned int firstLevel, unsigned int levelCount) {
+bool crn_decompress(void *src, unsigned int src_size, void *dst, unsigned int dst_size, unsigned int firstLevel, unsigned int levelCount) {
   crnd::crn_texture_info tex_info;
   crnd::crnd_get_texture_info(static_cast<crn_uint8*>(src), src_size, &tex_info);
 
@@ -93,18 +94,30 @@ void crn_decompress(void *src, unsigned int src_size, void *dst, unsigned int ds
   crnd::crnd_unpack_context pContext =
       crnd::crnd_unpack_begin(static_cast<crn_uint8*>(src), src_size);
 
+  if (!pContext)
+    return false;
+
   for (int i = firstLevel; i < firstLevel + levelCount; ++i) {
     crn_uint32 blocks_x = (width + 3) >> 2;
     crn_uint32 blocks_y = (height + 3) >> 2;
     crn_uint32 row_pitch = blocks_x * bytes_per_block;
     crn_uint32 total_level_size = row_pitch * blocks_y;
 
-    crnd::crnd_unpack_level(pContext, pDecomp_images, total_level_size, row_pitch, i);
+    if(!crnd::crnd_unpack_level(pContext, pDecomp_images, total_level_size, row_pitch, i)) {
+      // Free memory before returning.
+      // The condition is for clarity on how errors are handled.
+      if (!crnd::crnd_unpack_end(pContext))
+        return false;
+      return false;
+    }
     pDecomp_images[0] = (char*)pDecomp_images[0] + total_level_size;
 
     width = width >> 1;
     height = height >> 1;
   }
 
-  crnd::crnd_unpack_end(pContext);
+  if (!crnd::crnd_unpack_end(pContext))
+    return false;
+
+  return true;
 }
