@@ -219,6 +219,7 @@ namespace crnlib
             m_wrapping(false),
             m_srgb(false),
             m_renormalize(false),
+            m_rtopmip(false),
             m_filter_scale(.9f),
             m_gamma(1.75f),    // or 2.2f
             m_multithreaded(true)
@@ -229,6 +230,7 @@ namespace crnlib
          bool        m_wrapping;
          bool        m_srgb;
          bool        m_renormalize;
+         bool        m_rtopmip;
          float       m_filter_scale;
          float       m_gamma;
          bool        m_multithreaded;

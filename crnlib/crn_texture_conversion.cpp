@@ -402,6 +402,7 @@ namespace crnlib
          console::debug("Gamma filtering: %u, Gamma: %2.2f", mipmap_params.m_gamma_filtering, mipmap_params.m_gamma);
          console::debug("     Blurriness: %2.2f", mipmap_params.m_blurriness);
          console::debug("    Renormalize: %u", mipmap_params.m_renormalize);
+         console::debug("Renorm. top mip: %u", mipmap_params.m_rtopmip);
          console::debug("          Tiled: %u", mipmap_params.m_tiled);
          console::debug("     Max Levels: %u", mipmap_params.m_max_levels);
          console::debug(" Min level size: %u", mipmap_params.m_min_mip_size);

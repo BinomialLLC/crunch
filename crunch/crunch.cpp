@@ -146,6 +146,7 @@ public:
       console::printf("-blurriness # - Scale filter kernel, >1=blur, <1=sharpen, .01-8, default=.9");
       console::printf("-wrap - Assume texture is tiled when filtering, default=clamping");
       console::printf("-renormalize - Renormalize filtered normal map texels, default=disabled");
+      console::printf("-rtopmip - Renormalize on the top mip-level too, default=disabled");
       console::printf("-maxmips # - Limit number of generated texture mipmap levels, 1-16, default=16");
       console::printf("-minmipsize # - Smallest allowable mipmap resolution, default=1");
 
@@ -216,6 +217,7 @@ public:
          { "blurriness", 1, false },
          { "wrap", 0, false },
          { "renormalize", 0, false },
+         { "rtopmip", 0, false },
          { "noprogress", 0, false },
          { "paramdebug", 0, false },
          { "debug", 0, false },
@@ -763,6 +765,7 @@ private:
       mip_params.m_blurriness = m_params.get_value_as_float("blurriness", 0, mip_params.m_blurriness, .01f, 8.0f);
 
       mip_params.m_renormalize = m_params.get_value_as_bool("renormalize", 0, mip_params.m_renormalize != 0);
+      mip_params.m_rtopmip = m_params.get_value_as_bool("rtopmip", 0, mip_params.m_rtopmip != 0);
       mip_params.m_tiled = m_params.get_value_as_bool("wrap");
 
       mip_params.m_max_levels = m_params.get_value_as_int("maxmips", 0, cCRNMaxLevels, 1, cCRNMaxLevels);
