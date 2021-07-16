@@ -1,4 +1,4 @@
-COMPILE_OPTIONS = -O3 -fomit-frame-pointer -ffast-math -fno-math-errno -g -fno-strict-aliasing -Wall -Wno-unused-value -Wno-unused -march=core2
+COMPILE_OPTIONS = -O3 -fomit-frame-pointer -ffast-math -fno-math-errno -g -fno-strict-aliasing -Wall -Wno-unused-value -Wno-unused -march=core2 ${CXXFLAGS}
 LINKER_OPTIONS = -lpthread -g
 
 OBJECTS = \
@@ -78,19 +78,22 @@ OBJECTS = \
   lzma_LzmaLib.o
 
 all: crunch
+fuzz: crunch_fuzz
 
 %.o: %.cpp
-	g++ $< -o $@ -c $(COMPILE_OPTIONS)
+	$(CXX) $< -o $@ -c $(COMPILE_OPTIONS)
 
 crunch.o: ../crunch/crunch.cpp
-	g++ $< -o $@ -c -I../inc -I../crnlib $(COMPILE_OPTIONS)
+	$(CXX) $< -o $@ -c -I../inc -I../crnlib $(COMPILE_OPTIONS)
 
 corpus_gen.o: ../crunch/corpus_gen.cpp
-	g++ $< -o $@ -c -I../inc -I../crnlib $(COMPILE_OPTIONS)
+	$(CXX) $< -o $@ -c -I../inc -I../crnlib $(COMPILE_OPTIONS)
 
 corpus_test.o: ../crunch/corpus_test.cpp
-	g++ $< -o $@ -c -I../inc -I../crnlib $(COMPILE_OPTIONS)
+	$(CXX) $< -o $@ -c -I../inc -I../crnlib $(COMPILE_OPTIONS)
 
 crunch: $(OBJECTS) crunch.o corpus_gen.o corpus_test.o
-	g++ $(OBJECTS) crunch.o corpus_gen.o corpus_test.o -o crunch $(LINKER_OPTIONS)
+	$(CXX) $(OBJECTS) crunch.o corpus_gen.o corpus_test.o -o crunch $(LINKER_OPTIONS)
 
+crunch_fuzz: $(OBJECTS)
+	$(CXX) ${CXXFLAGS} ${LIB_FUZZING_ENGINE} -I../inc -I../crnlib crunch_fuzz.cpp -o $@ $(OBJECTS)
