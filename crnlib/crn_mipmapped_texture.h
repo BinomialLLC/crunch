@@ -255,6 +255,8 @@ namespace crnlib
 
       bool vertical_cross_to_cubemap();
 
+      bool cubemap_to_vertical_cross();
+
       // Low-level clustered DXT (QDXT) compression
       struct qdxt_state
       {
