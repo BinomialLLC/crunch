@@ -24,7 +24,7 @@ add_library(crn_lzhmalib OBJECT
 "lzma_LzFind.cpp"
 "lzma_LzFind.h"
 
-"lzma_LzFindMt.cpp"
+"$<$<PLATFORM_ID:Windows>:lzma_LzFindMt.cpp>"
 "lzma_LzFindMt.h"
 
 "lzma_LzmaDec.cpp"
@@ -33,8 +33,8 @@ add_library(crn_lzhmalib OBJECT
 "lzma_LzmaEnc.h"
 "lzma_LzmaLib.cpp"
 "lzma_LzmaLib.h"
-"lzma_Threads.cpp"
-"lzma_Threads.h"
+"$<$<PLATFORM_ID:Windows>:lzma_Threads.cpp>"
+"$<$<PLATFORM_ID:Windows>:lzma_Threads.h>"
 
 # Misc lzma headers:
 "lzma_7zVersion.h"
@@ -178,7 +178,7 @@ add_library(crnlib STATIC
 "crn_threading_null.h"
 "crn_threading_pthreads.cpp"
 "crn_threading_pthreads.h"
-"crn_threading_win32.cpp"
+"$<$<PLATFORM_ID:Windows>:crn_threading_win32.cpp>"
 "crn_threading_win32.h"
 
 "crn_timer.cpp"
