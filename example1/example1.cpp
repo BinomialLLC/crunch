@@ -24,7 +24,7 @@
 // windows.h is only needed here for GetSystemInfo().
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
-#include "windows.h"
+#include <windows.h>
 
 using namespace crnlib;
 
