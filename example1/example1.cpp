@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
          }
          else
          {
-            uint f;
+            crn_uint32 f;
             for (f = 0; f < cCRNFmtTotal; f++)
             {
                if (!_stricmp(argv[i], crn_get_format_string(static_cast<crn_format>(f))))
