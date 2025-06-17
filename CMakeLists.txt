@@ -25,14 +25,15 @@ if(CRUNCH_BUILD_CRUNCH_EXECUTABLE)
 	add_subdirectory("crunch")
 endif()
 
-if(CRUNCH_BUILD_CRUNCH_EXAMPLES)
-	#crn Example1
+#TODO: Test examples on other platforms
+if(CRUNCH_BUILD_CRUNCH_EXAMPLES AND WIN32)
+	#crunch Example1
 	add_subdirectory("example1")
 
-	# Crn Example2:
+	#crunch Example2:
 	add_subdirectory("example2")
 
-	# Crn Example3:
+	#crunch Example3:
 	add_subdirectory("example3")
 endif()
 # TODO: Add tests and install targets if needed.
