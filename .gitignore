@@ -1,2 +1,7 @@
 *.o
 crnlib/crunch
+
+# Visual studio 2022 Build artifacts
+# for Cmake.
+/out/
+/.vs
